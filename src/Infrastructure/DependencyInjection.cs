@@ -1,10 +1,14 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using Application.Abstractions.Authentication;
 using Application.Abstractions.Data;
+using Application.Abstractions.Interfaces;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization;
 using Infrastructure.Database;
 using Infrastructure.DomainEvents;
+using Infrastructure.Repositories;
+using Infrastructure.Services;
 using Infrastructure.Time;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -99,4 +103,19 @@ public static class DependencyInjection
 
         return services;
     }
+
+
+    public static IServiceCollection AddInfrastructure2(this IServiceCollection services, IConfiguration cfg)
+    {
+        services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(cfg.GetConnectionString("DefaultConnection")));
+        services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IEmailService, EmailService>();
+        services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
+        services.AddSingleton<ICacheService, RedisCacheService>();
+        services.AddSignalR();
+        return services;
+    }
+
+
 }

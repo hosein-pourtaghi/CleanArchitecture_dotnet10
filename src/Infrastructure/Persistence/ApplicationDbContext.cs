@@ -5,7 +5,7 @@ using Infrastructure.DomainEvents;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
-namespace Infrastructure.Database;
+namespace Infrastructure.Persistence;
 
 public sealed class ApplicationDbContext(
     DbContextOptions<ApplicationDbContext> options,

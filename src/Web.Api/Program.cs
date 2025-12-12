@@ -1,5 +1,7 @@
 using System.Reflection;
 using Application;
+using Application.Mappings;
+using FluentValidation;
 using HealthChecks.UI.Client;
 using Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -11,14 +13,24 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configuration(context.Configuration));
 
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGenWithAuth();
+
 
 builder.Services
     .AddApplication()
     .AddPresentation()
     .AddInfrastructure(builder.Configuration);
 
+// automapper & validators
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+builder.Services.AddValidatorsFromAssembly(typeof(Application.Mappings.AutoMapperProfile).Assembly);
+
 builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
+
+
+
 
 WebApplication app = builder.Build();
 
@@ -49,10 +61,16 @@ app.UseAuthorization();
 // REMARK: If you want to use Controllers, you'll need this.
 app.MapControllers();
 
+//app.MapHub<Infrastructure.Services.NotificationHub>("/hubs/notifications");
+
 await app.RunAsync();
+
+
 
 // REMARK: Required for functional and integration tests to work.
 namespace Web.Api
 {
     public partial class Program;
 }
+
+
