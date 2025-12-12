@@ -1,17 +1,16 @@
-using Microsoft.AspNetCore.Http;
-using System.IO;
 using System.Text;
-using System.Threading.Tasks;
+using Domain.Users;
 using Infrastructure.Persistence;
-using Domain.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace Infrastructure.Services;
+
 public class AuditMiddleware
 {
     private readonly RequestDelegate _next;
     public AuditMiddleware(RequestDelegate next) => _next = next;
 
-    public async Task InvokeAsync(HttpContext context, AppDbContext db)
+    public async Task InvokeAsync(HttpContext context, ApplicationDbContext db)
     {
         // read request info (non-destructive)
         var path = context.Request.Path.Value ?? string.Empty;

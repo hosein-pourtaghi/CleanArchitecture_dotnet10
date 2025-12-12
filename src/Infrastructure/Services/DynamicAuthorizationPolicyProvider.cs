@@ -1,8 +1,9 @@
-using Application.Interfaces;
+using Application.Abstractions.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services;
+
 public class DynamicAuthorizationPolicyProvider : IAuthorizationPolicyProvider
 {
     private readonly DefaultAuthorizationPolicyProvider _fallback;
@@ -43,6 +44,7 @@ public class DynamicHandler : AuthorizationHandler<DynamicRequirement>
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, DynamicRequirement requirement)
     {
         var ok = await _repo.EvaluatePolicyAsync(requirement.PolicyName, context.User);
-        if (ok) context.Succeed(requirement);
+        if (ok)
+            context.Succeed(requirement);
     }
 }

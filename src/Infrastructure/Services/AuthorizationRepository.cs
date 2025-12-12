@@ -1,5 +1,8 @@
-using Application.Interfaces;
+using Application.Abstractions.Interfaces;
+using Microsoft.Extensions.Configuration;
+
 namespace Infrastructure.Services;
+
 public class AuthorizationRepository : IAuthorizationRepository
 {
     private readonly IConfiguration _cfg;
