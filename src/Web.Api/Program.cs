@@ -29,6 +29,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerWithUi();
 
     app.ApplyMigrations();
+    app.UseDeveloperExceptionPage();
 }
 
 app.MapHealthChecks("health", new HealthCheckOptions
