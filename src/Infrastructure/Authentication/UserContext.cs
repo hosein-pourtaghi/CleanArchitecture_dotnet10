@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace Infrastructure.Authentication;
 
-internal sealed class UserContext : IUserContext
+public sealed class UserContext : IUserContext
 {
-    private sealed class UserContextUnavailableException : Exception
+    public sealed class UserContextUnavailableException : Exception
     {
         public UserContextUnavailableException() : base("User context is unavailable")
         {
@@ -24,5 +24,5 @@ internal sealed class UserContext : IUserContext
             .HttpContext?
             .User
             .GetUserId() ??
-        throw new UserContextUnavailableException();
+        Guid.Empty; //throw new UserContextUnavailableException();
 }
