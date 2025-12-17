@@ -44,7 +44,7 @@ public static class DependencyInjection
 
     private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
-        string? connectionString = configuration.GetConnectionString("Database");
+        string? connectionString = configuration["ConnectionString"];
 
         services.AddDbContext<ApplicationDbContext>(
             options => options
@@ -61,7 +61,7 @@ public static class DependencyInjection
     {
         services
             .AddHealthChecks()
-            .AddNpgSql(configuration.GetConnectionString("Database")!);
+            .AddNpgSql(configuration["ConnectionString"]!);
 
         return services;
     }
