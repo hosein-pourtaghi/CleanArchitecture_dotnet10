@@ -14,11 +14,11 @@ public class AuthorizationRepository : IAuthorizationRepository
         // policyName format: Dynamic:RequireClaim:claimType:claimValue
         if (policyName.StartsWith("Dynamic:RequireClaim:", StringComparison.OrdinalIgnoreCase))
         {
-            var parts = policyName.Split(':');
+            string[] parts = policyName.Split(':');
             if (parts.Length >= 4)
             {
-                var type = parts[2];
-                var val = parts[3];
+                string type = parts[2];
+                string val = parts[3];
                 return Task.FromResult(user.HasClaim(c => c.Type == type && c.Value == val));
             }
         }

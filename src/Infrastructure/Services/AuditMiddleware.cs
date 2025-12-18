@@ -13,9 +13,9 @@ public class AuditMiddleware
     public async Task InvokeAsync(HttpContext context, ApplicationDbContext db)
     {
         // read request info (non-destructive)
-        var path = context.Request.Path.Value ?? string.Empty;
-        var method = context.Request.Method;
-        var qs = context.Request.QueryString.Value ?? string.Empty;
+        string path = context.Request.Path.Value ?? string.Empty;
+        string method = context.Request.Method;
+        string qs = context.Request.QueryString.Value ?? string.Empty;
         string body = string.Empty;
 
         if (context.Request.ContentLength > 0 && context.Request.Body.CanSeek == false)

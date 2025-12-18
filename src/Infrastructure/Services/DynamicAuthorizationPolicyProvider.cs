@@ -21,7 +21,7 @@ public class DynamicAuthorizationPolicyProvider : IAuthorizationPolicyProvider
         if (policyName.StartsWith("Dynamic:", StringComparison.OrdinalIgnoreCase))
         {
             // create policy that uses a requirement which will be evaluated by handler
-            var p = new AuthorizationPolicyBuilder().AddRequirements(new DynamicRequirement(policyName)).Build();
+            AuthorizationPolicy p = new AuthorizationPolicyBuilder().AddRequirements(new DynamicRequirement(policyName)).Build();
             return Task.FromResult<AuthorizationPolicy?>(p);
         }
         return _fallback.GetPolicyAsync(policyName);
@@ -43,8 +43,11 @@ public class DynamicHandler : AuthorizationHandler<DynamicRequirement>
     public DynamicHandler(IAuthorizationRepository repo) => _repo = repo;
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, DynamicRequirement requirement)
     {
-        var ok = await _repo.EvaluatePolicyAsync(requirement.PolicyName, context.User);
+        bool ok = await _repo.EvaluatePolicyAsync(requirement.PolicyName, context.User);
         if (ok)
+        {
             context.Succeed(requirement);
+        }
+            
     }
 }
