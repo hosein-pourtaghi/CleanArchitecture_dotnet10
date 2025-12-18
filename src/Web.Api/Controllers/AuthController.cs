@@ -14,14 +14,14 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
     {
-        var token = await _auth.RegisterAsync(dto);
+        string token = await _auth.RegisterAsync(dto);
         return Ok(new { token });
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
-        var token = await _auth.LoginAsync(dto);
+        string token = await _auth.LoginAsync(dto);
         return Ok(new { token });
     }
 }

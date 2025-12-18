@@ -1,6 +1,6 @@
 using System.Reflection;
 using Application;
-using Application.Mappings;
+using Application.Common.Mappings;
 using FluentValidation;
 using HealthChecks.UI.Client;
 using Infrastructure;
@@ -25,11 +25,9 @@ builder.Services
 
 // automapper & validators
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
-builder.Services.AddValidatorsFromAssembly(typeof(Application.Mappings.AutoMapperProfile).Assembly);
+builder.Services.AddValidatorsFromAssembly(typeof(Application.Common.Mappings.AutoMapperProfile).Assembly);
 
 builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
-
-
 
 
 WebApplication app = builder.Build();
@@ -67,11 +65,8 @@ app.MapControllers();
 await app.RunAsync();
 
 
-
 // REMARK: Required for functional and integration tests to work.
 namespace Web.Api
 {
     public partial class Program;
 }
-
-

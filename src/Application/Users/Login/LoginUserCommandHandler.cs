@@ -12,12 +12,13 @@ internal sealed class LoginUserCommandHandler(
     IPasswordHasher passwordHasher,
     ITokenProvider tokenProvider) : ICommandHandler<LoginUserCommand, string>
 {
-    public async Task<Result<string>> Handle(LoginUserCommand command, CancellationToken cancellationToken)
+    public async    Task<Result<string>> Handle(LoginUserCommand command, CancellationToken cancellationToken)
     {
         User? user = await context.Users
-            .AsNoTracking()
+            .AsNoTracking()  
             .SingleOrDefaultAsync(u => u.Email == command.Email, cancellationToken);
-
+    
+        
         if (user is null)
         {
             return Result.Failure<string>(UserErrors.NotFoundByEmail);

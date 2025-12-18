@@ -5,11 +5,10 @@ using Application.Abstractions.Data;
 using Application.Abstractions.Interfaces;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization;
-using Infrastructure.Database;
 using Infrastructure.DomainEvents;
+using Infrastructure.Persistence;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
-using Infrastructure.Time;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -35,8 +34,6 @@ public static class DependencyInjection
 
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
-        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
-
         services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
 
         return services;
@@ -46,11 +43,10 @@ public static class DependencyInjection
     {
         string? connectionString = configuration["ConnectionString"];
 
-        services.AddDbContext<ApplicationDbContext>(
-            options => options
-                .UseNpgsql(connectionString, npgsqlOptions =>
-                    npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default))
-                .UseSnakeCaseNamingConvention());
+        services.AddDbContext<ApplicationDbContext>(options => options
+            .UseNpgsql(connectionString, npgsqlOptions =>
+                npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default))
+            .UseSnakeCaseNamingConvention());
 
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
@@ -107,15 +103,15 @@ public static class DependencyInjection
 
     public static IServiceCollection AddInfrastructure2(this IServiceCollection services, IConfiguration cfg)
     {
-        services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(cfg.GetConnectionString("DefaultConnection")));
-        services.AddScoped<IProductRepository, ProductRepository>();
-        services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddDbContext<ApplicationDbContext>(opt =>
+            opt.UseSqlServer(cfg.GetConnectionString("DefaultConnection")
+            ));
+        // services.AddScoped<IProductRepository, ProductRepository>();
+        // services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
         services.AddSingleton<ICacheService, RedisCacheService>();
         services.AddSignalR();
         return services;
     }
-
-
 }
