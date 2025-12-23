@@ -9,8 +9,7 @@ using SharedKernel;
 namespace Application.Todos.Copy;
 
 internal sealed class CopyTodoCommandHandler(
-    IApplicationDbContext context,
-    IDateTimeProvider dateTimeProvider,
+    IApplicationDbContext context, 
     IUserContext userContext)
     : ICommandHandler<CopyTodoCommand, Guid>
 {
@@ -45,7 +44,7 @@ internal sealed class CopyTodoCommandHandler(
             DueDate = existingTodo.DueDate,
             Labels = existingTodo.Labels.ToList(), // Create a new list to avoid reference issues
             IsCompleted = false, // Reset completion status for the copy
-            CreatedAt = dateTimeProvider.UtcNow
+            CreatedAt = DateTime.UtcNow
         };
 
         copiedTodoItem.Raise(new TodoItemCreatedDomainEvent(copiedTodoItem.Id));

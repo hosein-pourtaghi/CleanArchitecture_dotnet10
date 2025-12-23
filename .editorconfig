@@ -421,4 +421,5 @@ dotnet_analyzer_diagnostic.severity = none
 # Default severity for analyzer diagnostics with category 'Globalization'
 dotnet_analyzer_diagnostic.category-Globalization.severity = none
 
-dotnet_diagnostic.IDE0007.severity = hint
+dotnet_diagnostic.ide0007.severity = suggestion
+

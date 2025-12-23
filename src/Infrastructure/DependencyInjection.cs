@@ -109,7 +109,7 @@ public static class DependencyInjection
         // services.AddScoped<IProductRepository, ProductRepository>();
         // services.AddScoped<IOrderRepository, OrderRepository>();
         // services.AddScoped<IEmailService, EmailService>();
-        services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
+        // services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
         services.AddSingleton<ICacheService, RedisCacheService>();
         services.AddSignalR();
         return services;

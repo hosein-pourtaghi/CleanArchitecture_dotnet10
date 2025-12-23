@@ -9,8 +9,7 @@ using SharedKernel;
 namespace Application.Todos.Create;
 
 internal sealed class CreateTodoCommandHandler(
-    IApplicationDbContext context,
-    IDateTimeProvider dateTimeProvider,
+    IApplicationDbContext context, 
     IUserContext userContext)
     : ICommandHandler<CreateTodoCommand, Guid>
 {
@@ -37,7 +36,7 @@ internal sealed class CreateTodoCommandHandler(
             DueDate = command.DueDate,
             Labels = command.Labels,
             IsCompleted = false,
-            CreatedAt = dateTimeProvider.UtcNow
+            CreatedAt = DateTime.UtcNow
         };
 
         todoItem.Raise(new TodoItemCreatedDomainEvent(todoItem.Id));

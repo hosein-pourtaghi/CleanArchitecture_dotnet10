@@ -8,8 +8,7 @@ using SharedKernel;
 namespace Application.Todos.Complete;
 
 internal sealed class CompleteTodoCommandHandler(
-    IApplicationDbContext context,
-    IDateTimeProvider dateTimeProvider,
+    IApplicationDbContext context, 
     IUserContext userContext)
     : ICommandHandler<CompleteTodoCommand>
 {
@@ -29,7 +28,7 @@ internal sealed class CompleteTodoCommandHandler(
         }
 
         todoItem.IsCompleted = true;
-        todoItem.CompletedAt = dateTimeProvider.UtcNow;
+        todoItem.CompletedAt = DateTime.UtcNow;
 
         todoItem.Raise(new TodoItemCompletedDomainEvent(todoItem.Id));
 
