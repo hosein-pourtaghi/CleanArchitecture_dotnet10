@@ -5,11 +5,15 @@ using FluentValidation;
 using HealthChecks.UI.Client;
 using Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using Web.Api;
 using Web.Api.Extensions;
+using Web.Api.Middleware;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configuration(context.Configuration));
 
@@ -47,6 +51,9 @@ app.MapHealthChecks("health", new HealthCheckOptions
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 });
 
+// Add OpenTelemetry logging middleware before other logging middleware
+app.UseMiddleware<OpenTelemetryLoggingMiddleware>();
+
 app.UseRequestContextLogging();
 
 app.UseSerilogRequestLogging();
@@ -61,8 +68,19 @@ app.UseAuthorization();
 app.MapControllers();
 
 //app.MapHub<Infrastructure.Services.NotificationHub>("/hubs/notifications");
-
-await app.RunAsync();
+try
+{
+    Log.Information("Starting web host");
+    await app.RunAsync();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Host terminated unexpectedly");
+}
+finally
+{
+    await Log.CloseAndFlushAsync();
+}
 
 
 // REMARK: Required for functional and integration tests to work.

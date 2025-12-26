@@ -1,4 +1,5 @@
 ﻿using Web.Api.Infrastructure;
+using Web.Api.Telemetry;
 
 namespace Web.Api;
 
@@ -12,8 +13,12 @@ public static class DependencyInjection
         // REMARK: If you want to use Controllers, you'll need this.
         services.AddControllers();
 
-        services.AddExceptionHandler<GlobalExceptionHandler>();
+        // Register the new OpenTelemetry-enabled exception handler
+        services.AddExceptionHandler<OpenTelemetryExceptionHandler>();
         services.AddProblemDetails();
+
+        // Register ActivitySource for dependency injection if needed
+        services.AddSingleton(TelemetryActivitySource.Instance);
 
         return services;
     }
