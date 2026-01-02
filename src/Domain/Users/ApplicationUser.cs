@@ -1,11 +1,13 @@
+using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Users;
 
-public class ApplicationUser //: IdentityUser
+public class ApplicationUser : IdentityUser<Guid>
 {
     // Add domain-specific properties here (e.g., DisplayName)
-    public long Id { get; set; }
-    public string DisplayName { get; set; } = string.Empty;
-    public string UserName { get; set; }  
-    public string Email { get; set; }  
+    public string DisplayName { get; set; } = string.Empty; 
+    public string FirstName { get; set; } 
+    public string LastName { get; set; } 
+   
+  
 }

@@ -1,25 +1,27 @@
 ﻿using Application.Abstractions.Data;
-using Domain.Todos;
 using Domain.Users;
 using Domain.Customers;
 using Infrastructure.DomainEvents;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using SharedKernel;
+using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.Persistence;
 
 public sealed class ApplicationDbContext(
     DbContextOptions<ApplicationDbContext> options,
     IDomainEventsDispatcher domainEventsDispatcher)
-    : DbContext(options), IApplicationDbContext
+    : IdentityDbContext<ApplicationUser,IdentityRole<Guid>,Guid>(options), IApplicationDbContext
 {
-    public DbSet<User> Users { get; set; }
+    DbSet<ApplicationUser> IApplicationDbContext.Users => Set<ApplicationUser>();
 
-    public DbSet<TodoItem> TodoItems { get; set; }
     public DbSet<Customer> Customers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
         modelBuilder.HasDefaultSchema(Schemas.Default);

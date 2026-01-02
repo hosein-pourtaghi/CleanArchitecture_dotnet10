@@ -11,13 +11,22 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
         Exception exception,
         CancellationToken cancellationToken)
     {
-        logger.LogError(exception, "Unhandled exception occurred");
+        var correlationId = httpContext.TraceIdentifier;
+        
+        logger.LogError(
+            exception,
+            "Unhandled exception occurred. CorrelationId: {CorrelationId}",
+            correlationId);
 
         var problemDetails = new ProblemDetails
         {
             Status = StatusCodes.Status500InternalServerError,
             Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.1",
-            Title = "Server failure"
+            Title = "Server failure",
+            Extensions = new Dictionary<string, object?>
+            {
+                { "correlation-id", correlationId }
+            }
         };
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;

@@ -58,7 +58,7 @@ public class AuthService : IAuthService
         string issuer = _cfg["Jwt:Issuer"] ?? "store";
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString(CultureInfo.InvariantCulture)),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new Claim("displayName", user.DisplayName ?? string.Empty)
         };
