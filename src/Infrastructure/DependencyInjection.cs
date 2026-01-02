@@ -54,7 +54,7 @@ public static class DependencyInjection
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
         return services;
-    }
+    } 
 
     private static IServiceCollection AddHealthChecks(this IServiceCollection services, IConfiguration configuration)
     {
@@ -112,17 +112,5 @@ public static class DependencyInjection
     }
 
 
-    public static IServiceCollection AddInfrastructure2(this IServiceCollection services, IConfiguration cfg)
-    {
-        services.AddDbContext<ApplicationDbContext>(opt =>
-            opt.UseSqlServer(cfg.GetConnectionString("DefaultConnection")
-            ));
-        // services.AddScoped<IProductRepository, ProductRepository>();
-        // services.AddScoped<IOrderRepository, OrderRepository>();
-        // services.AddScoped<IEmailService, EmailService>();
-        // services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
-        services.AddSingleton<ICacheService, RedisCacheService>();
-        services.AddSignalR();
-        return services;
-    }
+   
 }
