@@ -12,7 +12,7 @@ namespace Infrastructure.Persistence;
 public sealed class ApplicationDbContext(
     DbContextOptions<ApplicationDbContext> options,
     IDomainEventsDispatcher domainEventsDispatcher)
-    : IdentityDbContext<ApplicationUser,IdentityRole<Guid>,Guid>(options), IApplicationDbContext
+    : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>(options), IApplicationDbContext
 {
     DbSet<ApplicationUser> IApplicationDbContext.Users => Set<ApplicationUser>();
 

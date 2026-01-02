@@ -23,7 +23,7 @@ public class AuthService : IAuthService
 
     public async Task<string> RegisterAsync(RegisterDto dto)
     {
-        var user = new ApplicationUser { UserName = dto.Email, Email = dto.Email, DisplayName = dto.DisplayName };
+        var user = new ApplicationUser { UserName = dto.Email, Email = dto.Email, FirstName = dto.FirstName, LastName = dto.LastName };
         IdentityResult res = await _um.CreateAsync(user, dto.Password);
         if (!res.Succeeded)
         {
