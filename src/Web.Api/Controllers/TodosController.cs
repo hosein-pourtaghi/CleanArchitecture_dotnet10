@@ -9,6 +9,7 @@ using Domain.Todos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SharedKernel;
+using Web.Api.Extensions;
 using Web.Api.Infrastructure;
 using GetTodoResponse = Application.Todos.Get.TodoResponse;
 using GetByIdTodoResponse = Application.Todos.GetById.TodoResponse;
