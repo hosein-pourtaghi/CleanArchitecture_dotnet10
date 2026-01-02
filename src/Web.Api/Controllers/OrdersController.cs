@@ -10,7 +10,9 @@ namespace Web.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]/[action]")]
+#pragma warning disable CS9113 // Parameter is unread.
 public class OrdersController(ILogger<OrdersController> logger) : ControllerBase
+#pragma warning restore CS9113 // Parameter is unread.
 {
     //private readonly IOrderRepository _orders;
     //private readonly IMessagePublisher _publisher;

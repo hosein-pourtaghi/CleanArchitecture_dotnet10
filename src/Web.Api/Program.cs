@@ -31,12 +31,13 @@ builder.Services
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 builder.Services.AddValidatorsFromAssembly(typeof(Application.Common.Mappings.AutoMapperProfile).Assembly);
 
-builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
-
 
 WebApplication app = builder.Build();
 
-app.MapEndpoints();
+app.MapHealthChecks("health", new HealthCheckOptions
+{
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
 
 if (app.Environment.IsDevelopment())
 {
@@ -45,11 +46,6 @@ if (app.Environment.IsDevelopment())
     app.ApplyMigrations();
     app.UseDeveloperExceptionPage();
 }
-
-app.MapHealthChecks("health", new HealthCheckOptions
-{
-    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-});
 
 // Add OpenTelemetry logging middleware before other logging middleware
 app.UseMiddleware<OpenTelemetryLoggingMiddleware>();
@@ -64,7 +60,6 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-// REMARK: If you want to use Controllers, you'll need this.
 app.MapControllers();
 
 //app.MapHub<Infrastructure.Services.NotificationHub>("/hubs/notifications");
