@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions.Data;
 using Domain.Todos;
 using Domain.Users;
+using Domain.Customers;
 using Infrastructure.DomainEvents;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
@@ -15,12 +16,15 @@ public sealed class ApplicationDbContext(
     public DbSet<User> Users { get; set; }
 
     public DbSet<TodoItem> TodoItems { get; set; }
+    public DbSet<Customer> Customers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
         modelBuilder.HasDefaultSchema(Schemas.Default);
+
+        // optional: additional configuration can be placed here
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
