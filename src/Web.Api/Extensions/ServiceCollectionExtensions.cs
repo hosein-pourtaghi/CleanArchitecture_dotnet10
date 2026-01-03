@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-//using Microsoft.OpenApi.Models;
 
 namespace Web.Api.Extensions;
 
@@ -7,41 +6,47 @@ internal static class ServiceCollectionExtensions
 {
     internal static IServiceCollection AddSwaggerGenWithAuth(this IServiceCollection services)
     {
-        services.AddSwaggerGen(static o =>
+        services.AddSwaggerGen(options =>
         {
-            o.CustomSchemaIds(id => id.FullName!.Replace('+', '-'));
+            options.CustomSchemaIds(id => id.FullName!.Replace('+', '-'));
 
-            // Temporarily commented out
-            //var securityScheme = new OpenApiSecurityScheme
-            //{
-            //    Name = "JWT Authentication",
-            //    Description = "Enter your JWT token in this field",
-            //    In = ParameterLocation.Header,
-            //    Type = SecuritySchemeType.Http,
-            //    Scheme = JwtBearerDefaults.AuthenticationScheme,
-            //    BearerFormat = "JWT"
-            //};
+            // Add API documentation
+            options.SwaggerDoc("v1", new()
+            {
+                Title = "CleanArchitecture API",
+                Version = "v1.0",
+                Description = "Comprehensive REST API for Customer Management System with JWT Authentication. " +
+                              "This API provides secure endpoints for managing customers with role-based access control.",
+                Contact = new()
+                {
+                    Name = "API Support",
+                    Email = "support@cleanarchitecture.local",
+                    Url = new Uri("https://github.com/yourusername/CleanArchitecture_dotnet10")
+                },
+                License = new()
+                {
+                    Name = "MIT",
+                    Url = new Uri("https://opensource.org/licenses/MIT")
+                },
+                TermsOfService = new Uri("https://example.com/terms")
+            });
 
-            //o.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, securityScheme);
+            // Include XML documentation comments
+            var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            if (File.Exists(xmlPath))
+            {
+                options.IncludeXmlComments(xmlPath);
+            }
 
-            //var securityRequirement = new OpenApiSecurityRequirement
-            //{
-            //    {
-            //        new OpenApiSecurityScheme
-            //        {
-            //            Reference = new OpenApiReference
-            //            {
-            //                Type = ReferenceType.SecurityScheme,
-            //                Id = JwtBearerDefaults.AuthenticationScheme
-            //            }
-            //        },
-            //        []
-            //    }
-            //};
+            // Document all endpoints
+            options.DocInclusionPredicate((_, _) => true);
 
-            //o.AddSecurityRequirement(securityRequirement);
+            // Sort endpoints by route
+            options.OrderActionsBy(api => api.RelativePath);
         });
 
         return services;
     }
 }
+
