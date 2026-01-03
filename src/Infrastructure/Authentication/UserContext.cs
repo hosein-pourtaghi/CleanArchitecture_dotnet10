@@ -23,6 +23,5 @@ public sealed class UserContext : IUserContext
         _httpContextAccessor
             .HttpContext?
             .User
-            .GetUserId() ??
-        Guid.Empty; //throw new UserContextUnavailableException();
+            .GetUserId() ?? Guid.Empty;         //throw new UserContextUnavailableException();
 }
