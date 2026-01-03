@@ -15,8 +15,7 @@ internal static class ServiceCollectionExtensions
             {
                 Title = "CleanArchitecture API",
                 Version = "v1.0",
-                Description = "Comprehensive REST API for Customer Management System with JWT Authentication. " +
-                              "This API provides secure endpoints for managing customers with role-based access control.",
+                Description = "Comprehensive REST API for Customer Management System with JWT Authentication.",
                 Contact = new()
                 {
                     Name = "API Support",

@@ -33,6 +33,11 @@ public static class ApplicationBuilderExtensions
             options.DisplayRequestDuration();
             options.EnableTryItOutByDefault();
             options.EnableFilter();
+            
+            // Custom HTML for Authorization header
+            options.InjectStylesheet("data:text/css;charset=utf-8,  " +
+                ".topbar-wrapper { display: flex !important; } " +
+                ".topbar { padding: 10px !important; }");
         });
 
         return app;
