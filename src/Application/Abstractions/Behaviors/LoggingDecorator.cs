@@ -36,37 +36,7 @@ internal static class LoggingDecorator
             return result;
         }
     }
-
-    internal sealed class CommandBaseHandler<TCommand>(
-        ICommandHandler<TCommand> innerHandler,
-        ILogger<CommandBaseHandler<TCommand>> logger)
-        : ICommandHandler<TCommand>
-        where TCommand : ICommand
-    {
-        public async Task<Result> Handle(TCommand command, CancellationToken cancellationToken)
-        {
-            string commandName = typeof(TCommand).Name;
-
-            logger.LogInformation("Processing command {Command}", commandName);
-
-            Result result = await innerHandler.Handle(command, cancellationToken);
-
-            if (result.IsSuccess)
-            {
-                logger.LogInformation("Completed command {Command}", commandName);
-            }
-            else
-            {
-                using (LogContext.PushProperty("Error", result.Error, true))
-                {
-                    logger.LogError("Completed command {Command} with error", commandName);
-                }
-            }
-
-            return result;
-        }
-    }
-
+ 
     internal sealed class QueryHandler<TQuery, TResponse>(
         IQueryHandler<TQuery, TResponse> innerHandler,
         ILogger<QueryHandler<TQuery, TResponse>> logger)
