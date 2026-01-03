@@ -16,14 +16,14 @@ public static class ApplicationBuilderExtensions
         // Enable Swagger middleware
         app.UseSwagger(options =>
         {
-            options.RouteTemplate = "api-docs/{documentName}/swagger.json";
+            options.RouteTemplate = "swagger/{documentName}/swagger.json";
         });
 
         // Enable Swagger UI
         app.UseSwaggerUI(options =>
         {
-            options.SwaggerEndpoint("/api-docs/v1/swagger.json", "CleanArchitecture API v1");
-            options.RoutePrefix = "api-docs";
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "CleanArchitecture API v1");
+            options.RoutePrefix = "swagger";
             
             // Swagger UI configuration
             options.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
