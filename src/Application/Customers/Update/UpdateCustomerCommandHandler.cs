@@ -1,10 +1,15 @@
 using Application.Abstractions.Data;
 using Application.Abstractions.Messaging;
+using Domain.Customers;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
 namespace Application.Customers.Update;
 
+/// <summary>
+/// Handles customer updates.
+/// Validates customer exists, ensures email uniqueness, updates entity, and publishes domain event.
+/// </summary>
 internal sealed class UpdateCustomerCommandHandler(IApplicationDbContext context)
     : ICommandHandler<UpdateCustomerCommand>
 {
@@ -13,24 +18,35 @@ internal sealed class UpdateCustomerCommandHandler(IApplicationDbContext context
         var customer = await context.Customers.SingleOrDefaultAsync(c => c.Id == command.Id, cancellationToken);
         if (customer is null)
         {
-            return Result.Failure(Error.NotFound("Customers.NotFound", $"Customer with Id '{command.Id}' was not found"));
+            return Result.Failure(CustomerErrors.NotFound(command.Id));
         }
 
-        // email uniqueness check if changed
+        // Validate email uniqueness if email is being changed
         if (!string.Equals(customer.Email, command.Email, StringComparison.OrdinalIgnoreCase))
         {
-            bool emailExists = await context.Customers.AnyAsync(c => c.Email == command.Email && c.Id != command.Id, cancellationToken);
+            bool emailExists = await context.Customers.AnyAsync(
+                c => c.Email == command.Email && c.Id != command.Id,
+                cancellationToken);
             if (emailExists)
             {
-                return Result.Failure(Error.Conflict("Customers.EmailExists", $"Customer with email '{command.Email}' already exists."));
+                return Result.Failure(CustomerErrors.EmailAlreadyExists(command.Email));
             }
         }
 
+        // Update entity with new values
         customer.Name = command.Name;
         customer.Email = command.Email;
         customer.Phone = command.Phone;
         customer.Address = command.Address;
         customer.UpdatedAt = DateTime.UtcNow;
+
+        // Publish comprehensive domain event with all updated data for auditing and message bus
+        customer.Raise(new CustomerUpdatedDomainEvent(
+            customerId: customer.Id,
+            name: customer.Name,
+            email: customer.Email,
+            phone: customer.Phone,
+            address: customer.Address));
 
         await context.SaveChangesAsync(cancellationToken);
 

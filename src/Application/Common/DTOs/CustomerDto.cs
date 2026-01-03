@@ -1,9 +1,5 @@
-namespace Application.Customers.DTOs;
+namespace Application.Common.DTOs;
 
-/// <summary>
-/// Data Transfer Object for Customer.
-/// Used for API responses and query results.
-/// </summary>
 public sealed class CustomerDto
 {
     public Guid Id { get; set; }

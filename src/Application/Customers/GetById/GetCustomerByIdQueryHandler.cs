@@ -1,36 +1,35 @@
 using Application.Abstractions.Data;
 using Application.Abstractions.Messaging;
 using Application.Customers.DTOs;
+using AutoMapper;
+using Domain.Customers;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
 namespace Application.Customers.GetById;
 
-internal sealed class GetCustomerByIdQueryHandler(IApplicationDbContext context)
+/// <summary>
+/// Handles fetching a single customer by ID.
+/// Uses AutoMapper for efficient entity-to-DTO mapping and AsNoTracking for read-only queries.
+/// </summary>
+internal sealed class GetCustomerByIdQueryHandler(
+    IApplicationDbContext context,
+    IMapper mapper)
     : IQueryHandler<GetCustomerByIdQuery, CustomerDto>
 {
     public async Task<Result<CustomerDto>> Handle(GetCustomerByIdQuery query, CancellationToken cancellationToken)
     {
         var customer = await context.Customers
             .AsNoTracking()
-            .Where(c => c.Id == query.Id)
-            .Select(c => new CustomerDto
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Email = c.Email,
-                Phone = c.Phone,
-                Address = c.Address,
-                CreatedAt = c.CreatedAt,
-                UpdatedAt = c.UpdatedAt
-            })
-            .SingleOrDefaultAsync(cancellationToken);
+            .SingleOrDefaultAsync(c => c.Id == query.Id, cancellationToken);
 
         if (customer is null)
         {
-            return Result.Failure<CustomerDto>(Error.NotFound("Customers.NotFound", $"Customer with Id '{query.Id}' was not found"));
+            return Result.Failure<CustomerDto>(CustomerErrors.NotFound(query.Id));
         }
 
-        return customer;
+        var customerDto = mapper.Map<CustomerDto>(customer);
+
+        return customerDto;
     }
 }
