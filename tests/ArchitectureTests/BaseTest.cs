@@ -2,7 +2,7 @@
 using Application.Abstractions.Messaging;
 using Domain.Users; 
 using Infrastructure.Persistence;
-using Web.Api;
+using WebApi;
 
 namespace ArchitectureTests;
 

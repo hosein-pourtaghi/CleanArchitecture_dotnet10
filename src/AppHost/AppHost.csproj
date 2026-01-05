@@ -4,7 +4,6 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <IsAspireHost>true</IsAspireHost>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,5 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ProjectSetup.ServiceDefaults\ProjectSetup.ServiceDefaults.csproj" />
+    <ProjectReference Include="../WebApi/WebApi.csproj" AspireProjectMetadataTypeName="WebApi" />
   </ItemGroup>
 </Project>

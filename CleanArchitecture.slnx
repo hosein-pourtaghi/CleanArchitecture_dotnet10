@@ -11,7 +11,7 @@
     <Project Path="src/Infrastructure/Infrastructure.csproj" />
     <Project Path="src/ProjectSetup.ServiceDefaults/ProjectSetup.ServiceDefaults.csproj" />
     <Project Path="src/SharedKernel/SharedKernel.csproj" />
-    <Project Path="src/Web.Api/Web.Api.csproj" />
+    <Project Path="src/WebApi/WebApi.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/ArchitectureTests/ArchitectureTests.csproj" />
