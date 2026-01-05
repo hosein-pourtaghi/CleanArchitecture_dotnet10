@@ -19,6 +19,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using SharedKernel;
+using Serilog;
 
 namespace Infrastructure;
 
@@ -58,9 +59,9 @@ public static class DependencyInjection
                 options.User.RequireUniqueEmail = true;
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders(); 
+            .AddDefaultTokenProviders();
         return services;
-    } 
+    }
 
     private static IServiceCollection AddHealthChecks(this IServiceCollection services, IConfiguration configuration)
     {
@@ -75,18 +76,48 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-    
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(o =>
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(o =>
             {
                 o.RequireHttpsMetadata = false;
+
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!)),
+
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+
+
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
                     ValidIssuer = configuration["Jwt:Issuer"],
                     ValidAudience = configuration["Jwt:Audience"],
                     ClockSkew = TimeSpan.Zero
+                };
+
+                o.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = ctx =>
+                    {
+                        Console.WriteLine("JWT FAILED:");
+                        Console.WriteLine(ctx.Exception.ToString());
+                        Log.Error("JWT FAILED:");
+                        Log.Error("JWT FAILED Exeption:", ctx.Exception.ToString());
+                        return Task.CompletedTask;
+                    },
+                    OnChallenge = ctx =>
+                    {
+                        Console.WriteLine("JWT CHALLENGE");
+                        Log.Error("JWT CHALLENGE");
+                        return Task.CompletedTask;
+                    }
                 };
             });
 
@@ -112,5 +143,5 @@ public static class DependencyInjection
     }
 
 
-   
+
 }

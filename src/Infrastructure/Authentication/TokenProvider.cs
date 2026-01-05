@@ -12,7 +12,7 @@ internal sealed class TokenProvider(IConfiguration configuration) : ITokenProvid
 {
     public string Create(ApplicationUser user)
     {
-        string secretKey = configuration["Jwt:Secret"]!;
+        string secretKey = configuration["Jwt:Key"]!;
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

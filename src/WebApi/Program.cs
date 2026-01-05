@@ -55,6 +55,8 @@ app.UseSerilogRequestLogging();
 
 app.UseExceptionHandler();
 
+app.UseRouting();
+
 app.UseAuthentication();
 
 app.UseAuthorization();

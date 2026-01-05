@@ -56,6 +56,7 @@ public class AuthService : IAuthService
     {
         string key = _cfg["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key missing");
         string issuer = _cfg["Jwt:Issuer"] ?? "store";
+        string audience = _cfg["Jwt:Audience"] ?? "store";
         var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
@@ -68,7 +69,7 @@ public class AuthService : IAuthService
 
         byte[] keyBytes = Encoding.UTF8.GetBytes(key);
         var creds = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256);
-        var token = new JwtSecurityToken(issuer, issuer, claims, expires: DateTime.UtcNow.AddDays(7), signingCredentials: creds);
+        var token = new JwtSecurityToken(issuer, audience, claims, expires: DateTime.UtcNow.AddDays(7), signingCredentials: creds);
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
