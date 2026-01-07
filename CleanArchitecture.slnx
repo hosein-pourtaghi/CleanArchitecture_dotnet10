@@ -5,13 +5,17 @@
     <File Path="Directory.Packages.props" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/AppHost/AppHost.csproj" />
+    <Project Path="src/AppHost/AppHost.csproj">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
     <Project Path="src/Application/Application.csproj" />
     <Project Path="src/Domain/Domain.csproj" />
     <Project Path="src/Infrastructure/Infrastructure.csproj" />
     <Project Path="src/ProjectSetup.ServiceDefaults/ProjectSetup.ServiceDefaults.csproj" />
     <Project Path="src/SharedKernel/SharedKernel.csproj" />
-    <Project Path="src/WebApi/WebApi.csproj" />
+    <Project Path="src/WebApi/WebApi.csproj">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/ArchitectureTests/ArchitectureTests.csproj" />
