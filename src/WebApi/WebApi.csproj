@@ -25,6 +25,9 @@
     <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Serilog.Sinks.Seq" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
+	  <PackageReference Include="Aspire.Hosting" />
+	  <PackageReference Include="Aspire.Hosting.AppHost" />
+
   </ItemGroup>
 
   <ItemGroup>
