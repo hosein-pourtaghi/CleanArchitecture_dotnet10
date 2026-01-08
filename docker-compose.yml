@@ -1,7 +1,7 @@
 services:
   web-api:
     image: ${DOCKER_REGISTRY-}webapi
-    container_name: web-api
+    container_name: webapi
     build:
       context: .
       dockerfile: src/WebApi/Dockerfile
