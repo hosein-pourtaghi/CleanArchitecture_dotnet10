@@ -16,7 +16,7 @@ namespace WebApi.Controllers;
 /// Provides full CRUD operations with comprehensive documentation and error handling.
 /// All endpoints require JWT authentication.
 /// </summary>
-[Route("api/customers")]
+[Route("api/[controller]/[action]")] 
 [ApiController]
 [Authorize]
 [Tags("Customers")]

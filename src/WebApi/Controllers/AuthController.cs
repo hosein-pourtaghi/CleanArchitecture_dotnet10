@@ -13,7 +13,7 @@ namespace WebApi.Controllers;
 /// Provides JWT token-based authentication with comprehensive documentation and error handling.
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/[controller]/[action]")]
 [Tags("Authentication")]
 [Produces("application/json")]
 [Consumes("application/json")]
@@ -56,7 +56,7 @@ public class AuthController(IAuthService auth, ILogger<AuthController> logger) :
     /// <response code="400">Invalid input - validation error</response>
     /// <response code="409">Email already exists</response>
     /// <response code="500">Internal server error</response>
-    [HttpPost("register")]
+    [HttpPost]
     [AllowAnonymous]
     [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
@@ -159,7 +159,7 @@ public class AuthController(IAuthService auth, ILogger<AuthController> logger) :
     /// <response code="401">Invalid email or password</response>
     /// <response code="404">User not found</response>
     /// <response code="500">Internal server error</response>
-    [HttpPost("login")]
+    [HttpPost]
     [AllowAnonymous]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status401Unauthorized)]

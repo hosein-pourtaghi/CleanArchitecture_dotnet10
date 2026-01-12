@@ -36,7 +36,25 @@ public static class DependencyInjection
                Type = SecuritySchemeType.Http,
                Scheme = "Bearer"
            });
-  
+
+           //options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+           //{     
+           //    {              
+           //        new OpenApiSecurityScheme            
+           //        {
+           //            Scheme = "oauth2",
+           //            Name = "Bearer",
+           //            In = ParameterLocation.Header,
+           //            Type = SecuritySchemeType.OAuth2, 
+           //            //Reference = new OpenApiReference
+           //            //{
+           //            //    Type = ReferenceType.SecurityScheme,
+           //            //    Id = "Bearer"
+           //            //},
+           //        },                   
+           //        new List<string>()
+           //    }
+           //});
 
            // Include XML documentation comments
            var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
