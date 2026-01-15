@@ -1,6 +1,6 @@
 using Application.Abstractions.Data;
 using Application.Abstractions.Messaging;
-using Application.Customers.DTOs;
+using Application.Common.DTOs;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;

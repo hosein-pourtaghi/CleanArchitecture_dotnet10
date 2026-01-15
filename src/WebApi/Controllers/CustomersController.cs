@@ -1,13 +1,13 @@
 using Application.Abstractions.Messaging;
+using Application.Common.DTOs;
+using Application.Customers.Copy;
 using Application.Customers.Create;
 using Application.Customers.Delete;
-using Application.Customers.DTOs;
 using Application.Customers.Get;
 using Application.Customers.GetById;
 using Application.Customers.Update;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SharedKernel;
 
 namespace WebApi.Controllers;
 
@@ -16,7 +16,7 @@ namespace WebApi.Controllers;
 /// Provides full CRUD operations with comprehensive documentation and error handling.
 /// All endpoints require JWT authentication.
 /// </summary>
-[Route("api/[controller]/[action]")] 
+[Route("api/[controller]/[action]")]
 [ApiController]
 [Authorize]
 [Tags("Customers")]
@@ -24,6 +24,7 @@ namespace WebApi.Controllers;
 [Consumes("application/json")]
 public class CustomersController(
     ICommandHandler<CreateCustomerCommand, Guid> createCommandHandler,
+    ICommandHandler<CopyCustomerCommand, bool> copyCommandHandler,
     IQueryHandler<GetCustomersQuery, List<CustomerDto>> getCustomersQueryHandler,
     IQueryHandler<GetCustomerByIdQuery, CustomerDto> getCustomerByIdQueryHandler,
     ICommandHandler<UpdateCustomerCommand> updateCommandHandler,
@@ -153,7 +154,7 @@ public class CustomersController(
             request.Address);
 
         var result = await createCommandHandler.Handle(command, cancellationToken);
-        
+
         if (result.IsFailure)
         {
             return HandleResult<Guid>(result);
@@ -265,7 +266,37 @@ public class CustomersController(
         var result = await deleteCommandHandler.Handle(new DeleteCustomerCommand(id), cancellationToken);
         return HandleResult(result);
     }
+
+
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Copy(
+          [FromBody] CopyCustomerRequest request,
+          CancellationToken cancellationToken)
+    {
+        var command = new CopyCustomerCommand(
+            request.Name,
+            request.Email,
+            request.Phone,
+            request.Address);
+
+        var result = await copyCommandHandler.Handle(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return HandleResult<bool>(result);
+        }
+
+        return CreatedAtAction(nameof(GetById), new { id = result.Value }, new { id = result.Value });
+    }
+
 }
+
+
+
 
 /// <summary>
 /// Request model for creating a new customer.
@@ -277,6 +308,25 @@ public class CustomersController(
 /// - Proper encoding for special characters
 /// </remarks>
 public sealed class CreateCustomerRequest
+{
+    /// <summary>Customer's full name (required). Must be 1-200 characters.</summary>
+    /// <example>John Doe</example>
+    public required string Name { get; set; }
+
+    /// <summary>Customer's email address (required). Must be unique and valid email format.</summary>
+    /// <example>john.doe@example.com</example>
+    public required string Email { get; set; }
+
+    /// <summary>Customer's phone number (optional). Maximum 20 characters.</summary>
+    /// <example>+1-555-0123</example>
+    public string? Phone { get; set; }
+
+    /// <summary>Customer's physical address (optional). Maximum 500 characters.</summary>
+    /// <example>123 Main Street, Anytown, ST 12345</example>
+    public string? Address { get; set; }
+}
+
+public sealed class CopyCustomerRequest
 {
     /// <summary>Customer's full name (required). Must be 1-200 characters.</summary>
     /// <example>John Doe</example>

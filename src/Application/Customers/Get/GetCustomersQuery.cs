@@ -1,5 +1,5 @@
 using Application.Abstractions.Messaging;
-using Application.Customers.DTOs;
+using Application.Common.DTOs;
 
 namespace Application.Customers.Get;
 

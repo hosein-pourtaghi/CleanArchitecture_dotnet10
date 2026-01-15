@@ -63,10 +63,6 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_customers");
 
-                    b.HasIndex("Email")
-                        .IsUnique()
-                        .HasDatabaseName("ix_customers_email");
-
                     b.ToTable("Customers", "dbo");
                 });
 
