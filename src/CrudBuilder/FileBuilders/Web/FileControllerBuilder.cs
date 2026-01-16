@@ -43,8 +43,7 @@ namespace WebApi.Controllers;
 [ApiController]
 [Authorize] 
 public class {MyPath.EntityName}sController(
-    ICommandHandler<Create{MyPath.EntityName}Command, Guid> createCommandHandler,
-    ICommandHandler<Copy{MyPath.EntityName}Command, bool> copyCommandHandler,
+    ICommandHandler<Create{MyPath.EntityName}Command, Guid> createCommandHandler, 
     IQueryHandler<Get{MyPath.EntityName}sQuery, List<{MyPath.EntityName}Dto>> get{MyPath.EntityName}sQueryHandler,
     IQueryHandler<Get{MyPath.EntityName}ByIdQuery, {MyPath.EntityName}Dto> get{MyPath.EntityName}ByIdQueryHandler,
     ICommandHandler<Update{MyPath.EntityName}Command> updateCommandHandler,
@@ -131,33 +130,7 @@ public class {MyPath.EntityName}sController(
     {{
         var result = await deleteCommandHandler.Handle(new Delete{MyPath.EntityName}Command(id), cancellationToken);
         return HandleResult(result);
-    }}
-
-
-    [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Copy(
-          [FromBody] Copy{MyPath.EntityName}Request request,
-          CancellationToken cancellationToken)
-    {{
-        var command = new Copy{MyPath.EntityName}Command(
-            request.Name,
-            request.Email,
-            request.Phone,
-            request.Address);
-
-        var result = await copyCommandHandler.Handle(command, cancellationToken);
-
-        if (result.IsFailure)
-        {{
-            return HandleResult<bool>(result);
-        }}
-
-        return CreatedAtAction(nameof(GetById), new {{ id = result.Value }}, new {{ id = result.Value }});
-    }}
+    }} 
 
 }}
 
