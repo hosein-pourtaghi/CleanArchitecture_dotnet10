@@ -19,6 +19,10 @@ FileApplicationBuilder.ApplicationBuilder();
 FileConfigurationBuilder.CreateConfiguration();
 FileControllerBuilder.CreateController();
 
+Console.WriteLine("");
+Console.WriteLine($"All Files are Generated Successfully");
+Console.ReadLine();
+
 
 //Console.WriteLine("Hello, World!");
 
