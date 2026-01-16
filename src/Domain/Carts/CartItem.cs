@@ -28,6 +28,7 @@ public class CartItem : Entity
     public decimal TaxPrice { get; set; } = 0;
     public string? TransactionId { get; set; }
     public string CouponCode { get; set; }
+    public Guid ProductId{ get; set; }
 
 
     #region Navigations

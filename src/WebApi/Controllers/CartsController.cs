@@ -24,7 +24,7 @@ namespace WebApi.Controllers;
 public class CartsController(
     ICommandHandler<CreateCartCommand, Guid> createCommandHandler,
     ICommandHandler<CopyCartCommand, bool> copyCommandHandler,
-    IQueryHandler<GetCartsQuery, List<CartDto>> getCartsQueryHandler,
+    IQueryHandler<GetAllCartQuery, List<CartDto>> getAllCartQueryHandler,
     IQueryHandler<GetCartByIdQuery, CartDto> getCartByIdQueryHandler,
     ICommandHandler<UpdateCartCommand> updateCommandHandler
     //,
@@ -55,9 +55,9 @@ public class CartsController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [Produces("application/json")]
-    public async Task<IActionResult> GetCarts(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllCart(CancellationToken cancellationToken)
     {
-        var result = await getCartsQueryHandler.Handle(new GetCartsQuery(), cancellationToken);
+        var result = await getAllCartQueryHandler.Handle(new GetAllCartQuery(), cancellationToken);
         return HandleResult(result);
     }
 
@@ -149,10 +149,14 @@ public class CartsController(
         CancellationToken cancellationToken)
     {
         var command = new CreateCartCommand(
-            request.Name,
-            request.Email,
-            request.Phone,
-            request.Address);
+            CustomerId: request.CustomerId,
+            Currency: request.Currency,
+            TransactionId: request.TransactionId,
+            PaymentType: request.PaymentType,
+            Code: request.Code,
+            PurchaseDate: request.PurchaseDate,
+            CartItems: request.CartItems
+            );
 
         var result = await createCommandHandler.Handle(command, cancellationToken);
 
@@ -217,11 +221,15 @@ public class CartsController(
         CancellationToken cancellationToken)
     {
         var command = new UpdateCartCommand(
-            id,
-            request.Name,
-            request.Email,
-            request.Phone,
-            request.Address);
+            Id: request.Id,
+            CustomerId: request.CustomerId,
+            Currency: request.Currency,
+            TransactionId: request.TransactionId,
+            PaymentType: request.PaymentType,
+            Code: request.Code,
+            PurchaseDate: request.PurchaseDate,
+            CartItems: request.CartItems
+            );
 
         var result = await updateCommandHandler.Handle(command, cancellationToken);
         return HandleResult(result);
@@ -274,10 +282,10 @@ public class CartsController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Copy( 
+    public async Task<IActionResult> Copy(
           CancellationToken cancellationToken)
     {
-        var command = new CopyCartCommand( );
+        var command = new CopyCartCommand();
 
         var result = await copyCommandHandler.Handle(command, cancellationToken);
 
@@ -305,23 +313,15 @@ public class CartsController(
 /// </remarks>
 public sealed class CreateCartRequest
 {
-    /// <summary>Cart's full name (required). Must be 1-200 characters.</summary>
-    /// <example>John Doe</example>
-    public required string Name { get; set; }
-
-    /// <summary>Cart's email address (required). Must be unique and valid email format.</summary>
-    /// <example>john.doe@example.com</example>
-    public required string Email { get; set; }
-
-    /// <summary>Cart's phone number (optional). Maximum 20 characters.</summary>
-    /// <example>+1-555-0123</example>
-    public string? Phone { get; set; }
-
-    /// <summary>Cart's physical address (optional). Maximum 500 characters.</summary>
-    /// <example>123 Main Street, Anytown, ST 12345</example>
-    public string? Address { get; set; }
+    public Guid CustomerId { get; set; }
+    public string Currency { get; set; }
+    public string? TransactionId { get; set; }
+    public string? PaymentType { get; set; }
+    public string? Code { get; set; }
+    public DateTime PurchaseDate { get; set; }
+    public List<CartItemDto> CartItems { get; set; }
 }
- 
+
 
 /// <summary>
 /// Request model for updating an existing cart.
@@ -331,19 +331,12 @@ public sealed class CreateCartRequest
 /// </remarks>
 public sealed class UpdateCartRequest
 {
-    /// <summary>Cart's full name (required). Must be 1-200 characters.</summary>
-    /// <example>Jane Doe</example>
-    public required string Name { get; set; }
-
-    /// <summary>Cart's email address (required). Must be valid email format.</summary>
-    /// <example>jane.doe@example.com</example>
-    public required string Email { get; set; }
-
-    /// <summary>Cart's phone number (optional). Maximum 20 characters.</summary>
-    /// <example>+1-555-0456</example>
-    public string? Phone { get; set; }
-
-    /// <summary>Cart's physical address (optional). Maximum 500 characters.</summary>
-    /// <example>456 Oak Avenue, Somewhere, ST 54321</example>
-    public string? Address { get; set; }
+    public Guid Id { get; set; }
+    public Guid CustomerId { get; set; }
+    public string Currency { get; set; }
+    public string? TransactionId { get; set; }
+    public string? PaymentType { get; set; }
+    public string? Code { get; set; }
+    public DateTime PurchaseDate { get; set; }
+    public List<CartItemDto> CartItems { get; set; }
 }
