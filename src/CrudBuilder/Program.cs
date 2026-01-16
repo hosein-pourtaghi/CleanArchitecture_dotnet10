@@ -4,6 +4,7 @@
 using CrudBuilder;
 using CrudBuilder.FileBuilders.Application;
 using CrudBuilder.FileBuilders.Persistance;
+using CrudBuilder.FileBuilders.Web;
 
 //var aa =new EntityReader();
 //    aa.CreateClassFromType();
@@ -24,6 +25,7 @@ EntityName = String.IsNullOrEmpty(EntityName) ? "MyEntity" : EntityName;
 MyPath.EntityName = EntityName;
 FileApplicationBuilder.ApplicationBuilder();
 FileConfigurationBuilder.CreateConfiguration();
+FileControllerBuilder.CreateController();
 
 
 //Console.WriteLine("Hello, World!");
