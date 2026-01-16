@@ -27,15 +27,14 @@ internal static class FileControllerBuilder
     {
         var str =
 @$"using Application.Abstractions.Messaging;
-using Application.Common.DTOs;
-using Application.{MyPath.EntityName}s.Copy;
+using Application.Common.DTOs; 
 using Application.{MyPath.EntityName}s.Create;
 using Application.{MyPath.EntityName}s.Delete;
-using Application.{MyPath.EntityName}s.Get;
+using Application.{MyPath.EntityName}s.GetAll;
 using Application.{MyPath.EntityName}s.GetById;
 using Application.{MyPath.EntityName}s.Update;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc; 
 
 namespace WebApi.Controllers;
  
@@ -83,10 +82,8 @@ public class {MyPath.EntityName}sController(
         CancellationToken cancellationToken)
     {{
         var command = new Create{MyPath.EntityName}Command(
-            request.Name,
-            request.Email,
-            request.Phone,
-            request.Address);
+            
+        );
 
         var result = await createCommandHandler.Handle(command, cancellationToken);
 
@@ -110,11 +107,8 @@ public class {MyPath.EntityName}sController(
         CancellationToken cancellationToken)
     {{
         var command = new Update{MyPath.EntityName}Command(
-            id,
-            request.Name,
-            request.Email,
-            request.Phone,
-            request.Address);
+                
+        );
 
         var result = await updateCommandHandler.Handle(command, cancellationToken);
         return HandleResult(result);
