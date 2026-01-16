@@ -10,19 +10,11 @@ using CrudBuilder.FileBuilders.Web;
 //    aa.CreateClassFromType();
 
 Console.WriteLine($"this is your base path : {MyPath.AbsoluteBasePath}");
-Console.WriteLine($"to continue press ENTRT");
-var enter = Console.ReadLine();
-
-if (!string.IsNullOrWhiteSpace(enter))
-{
-    return;
-}
-
 
 Console.WriteLine($"Enter EntityName");
-var EntityName = Console.ReadLine()  ;
-EntityName = String.IsNullOrEmpty(EntityName) ? "MyEntity" : EntityName;
-MyPath.EntityName = EntityName;
+var EntityName = Console.ReadLine();
+MyPath.EntityName = String.IsNullOrEmpty(EntityName) ? "MyEntity" : EntityName;
+
 FileApplicationBuilder.ApplicationBuilder();
 FileConfigurationBuilder.CreateConfiguration();
 FileControllerBuilder.CreateController();
