@@ -4,14 +4,14 @@ namespace CrudBuilder.FileBuilders.Application;
 internal static class GetAllBuilder
 {
     #region GetAll
-    internal static void GetAllCommandBuilder(string EntityName)
+    internal static void GetAllCommandBuilder()
     {
         Console.WriteLine($"Starting {nameof(GetAllCommandBuilder)}");
 
-        var createPath = $"{BuilderPath.ApplicationPath}{EntityName}s\\GetAll";
+        var createPath = $"{MyPath.ApplicationPath}{MyPath.EntityName}s\\GetAll";
         var dir = Directory.CreateDirectory(createPath);
-        using var file = File.OpenWrite($"{createPath}\\GetAll{EntityName}Command.cs");
-        var ss = GetAllCommandFileBuilder(EntityName);
+        using var file = File.OpenWrite($"{createPath}\\GetAll{MyPath.EntityName}Command.cs");
+        var ss = GetAllCommandFileBuilder();
         var byt = System.Text.Encoding.UTF8.GetBytes(ss.ToString());
         if (byt != null)
         {
@@ -23,14 +23,14 @@ internal static class GetAllBuilder
         Console.WriteLine($"{nameof(GetAllCommandBuilder)} Done");
     }
 
-    internal static void GetAllCommandHandlerBuilder(string EntityName)
+    internal static void GetAllCommandHandlerBuilder()
     {
         Console.WriteLine($"Starting {nameof(GetAllCommandHandlerBuilder)}");
 
-        var createPath = $"{BuilderPath.ApplicationPath}{EntityName}s\\GetAll";
+        var createPath = $"{MyPath.ApplicationPath}{MyPath.EntityName}s\\GetAll";
         var dir = Directory.CreateDirectory(createPath);
-        using var file = File.OpenWrite($"{createPath}\\GetAll{EntityName}CommandHandler.cs");
-        var ss = GetAllCommandHandlerFileBuilder(EntityName);
+        using var file = File.OpenWrite($"{createPath}\\GetAll{MyPath.EntityName}CommandHandler.cs");
+        var ss = GetAllCommandHandlerFileBuilder();
         var byt = System.Text.Encoding.UTF8.GetBytes(ss.ToString());
         if (byt != null)
         {
@@ -42,22 +42,22 @@ internal static class GetAllBuilder
         Console.WriteLine($"{nameof(GetAllCommandHandlerBuilder)} Done");
     }
 
-    internal static string GetAllCommandFileBuilder(string EntityName)
+    internal static string GetAllCommandFileBuilder()
     {
         var str =
 @$"
 using Application.Abstractions.Messaging;
 using Application.Common.DTOs;
 
-namespace  Application.{EntityName}s.GetAll;
+namespace  Application.{MyPath.EntityName}s.GetAll;
  
-public sealed record GetAll{EntityName}Query() : IQuery<List<{EntityName}Dto>>;
+public sealed record GetAll{MyPath.EntityName}Query() : IQuery<List<{MyPath.EntityName}Dto>>;
 
 ";
 
         return str;
     }
-    internal static string GetAllCommandHandlerFileBuilder(string EntityName)
+    internal static string GetAllCommandHandlerFileBuilder()
     {
         var str =
 @$"using Application.Abstractions.Data;
@@ -67,22 +67,22 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
-namespace Application.{EntityName}s.GetAll;
+namespace Application.{MyPath.EntityName}s.GetAll;
  
-internal sealed class GetAll{EntityName}sQueryHandler(
+internal sealed class GetAll{MyPath.EntityName}sQueryHandler(
     IApplicationDbContext context,
     IMapper mapper)
-    : IQueryHandler<GetAll{EntityName}sQuery, List<{EntityName}Dto>>
+    : IQueryHandler<GetAll{MyPath.EntityName}sQuery, List<{MyPath.EntityName}Dto>>
 {{
-    public async Task<Result<List<{EntityName}Dto>>> Handle(GetAll{EntityName}Query query, CancellationToken cancellationToken)
+    public async Task<Result<List<{MyPath.EntityName}Dto>>> Handle(GetAll{MyPath.EntityName}Query query, CancellationToken cancellationToken)
     {{
-        var {EntityName.ToLower(CultureInfo.CurrentCulture)}s = await context.{EntityName}s
+        var {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}s = await context.{MyPath.EntityName}s
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
-        var {EntityName.ToLower(CultureInfo.CurrentCulture)}Dtos = mapper.Map<List<{EntityName}Dto>>({EntityName.ToLower(CultureInfo.CurrentCulture)}s);
+        var {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}Dtos = mapper.Map<List<{MyPath.EntityName}Dto>>({MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}s);
 
-        return {EntityName.ToLower(CultureInfo.CurrentCulture)}Dtos;
+        return {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}Dtos;
     }}
 }}
 

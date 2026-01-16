@@ -4,14 +4,14 @@ namespace CrudBuilder.FileBuilders.Application;
 internal static class GetByIdBuilder
 {
     #region GetById
-    internal static void GetByIdCommandBuilder(string EntityName)
+    internal static void GetByIdCommandBuilder()
     {
         Console.WriteLine($"Starting {nameof(GetByIdCommandBuilder)}");
 
-        var createPath = $"{BuilderPath.ApplicationPath}{EntityName}s\\GetById";
+        var createPath = $"{MyPath.ApplicationPath}{MyPath.EntityName}s\\GetById";
         var dir = Directory.CreateDirectory(createPath);
-        using var file = File.OpenWrite($"{createPath}\\GetById{EntityName}Command.cs");
-        var ss = GetByIdCommandFileBuilder(EntityName);
+        using var file = File.OpenWrite($"{createPath}\\GetById{MyPath.EntityName}Command.cs");
+        var ss = GetByIdCommandFileBuilder();
         var byt = System.Text.Encoding.UTF8.GetBytes(ss.ToString());
         if (byt != null)
         {
@@ -23,14 +23,14 @@ internal static class GetByIdBuilder
         Console.WriteLine($"{nameof(GetByIdCommandBuilder)} Done");
     }
 
-    internal static void GetByIdCommandHandlerBuilder(string EntityName)
+    internal static void GetByIdCommandHandlerBuilder()
     {
         Console.WriteLine($"Starting {nameof(GetByIdCommandHandlerBuilder)}");
 
-        var createPath = $"{BuilderPath.ApplicationPath}{EntityName}s\\GetById";
+        var createPath = $"{MyPath.ApplicationPath}{MyPath.EntityName}s\\GetById";
         var dir = Directory.CreateDirectory(createPath);
-        using var file = File.OpenWrite($"{createPath}\\GetById{EntityName}CommandHandler.cs");
-        var ss = GetByIdCommandFileBuilder(EntityName);
+        using var file = File.OpenWrite($"{createPath}\\GetById{MyPath.EntityName}CommandHandler.cs");
+        var ss = GetByIdCommandFileBuilder();
         var byt = System.Text.Encoding.UTF8.GetBytes(ss.ToString());
         if (byt != null)
         {
@@ -42,7 +42,7 @@ internal static class GetByIdBuilder
         Console.WriteLine($"{nameof(GetByIdCommandHandlerBuilder)} Done");
     }
 
-    internal static string GetByIdCommandFileBuilder(string EntityName)
+    internal static string GetByIdCommandFileBuilder()
     {
         var str =
 @$"
@@ -50,31 +50,31 @@ using Application.Abstractions.Data;
 using Application.Abstractions.Messaging;
 using Application.Common.DTOs;
 using AutoMapper;
-using Domain.{EntityName}s;
+using Domain.{MyPath.EntityName}s;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
-namespace Application.{EntityName}s.GetById;
+namespace Application.{MyPath.EntityName}s.GetById;
  
-internal sealed class GetGetById{EntityName}QueryHandler(
+internal sealed class GetGetById{MyPath.EntityName}QueryHandler(
     IApplicationDbContext context,
     IMapper mapper)
-    : IQueryHandler<GetGetById{EntityName}Query, {EntityName}Dto>
+    : IQueryHandler<GetGetById{MyPath.EntityName}Query, {MyPath.EntityName}Dto>
 {{
-    public async Task<Result<{EntityName}Dto>> Handle(GetGetById{EntityName}Query query, CancellationToken cancellationToken)
+    public async Task<Result<{MyPath.EntityName}Dto>> Handle(GetGetById{MyPath.EntityName}Query query, CancellationToken cancellationToken)
     {{
-        var {EntityName.ToLower(CultureInfo.CurrentCulture)} = await context.{EntityName}s
+        var {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)} = await context.{MyPath.EntityName}s
             .AsNoTracking()
             .SingleOrDefaultAsync(c => c.Id == query.Id, cancellationToken);
 
-        if ({EntityName.ToLower(CultureInfo.CurrentCulture)} is null)
+        if ({MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)} is null)
         {{
-            return Result.Failure<{EntityName}Dto>({EntityName}Errors.NotFound(query.Id));
+            return Result.Failure<{MyPath.EntityName}Dto>({MyPath.EntityName}Errors.NotFound(query.Id));
         }}
 
-        var {EntityName.ToLower(CultureInfo.CurrentCulture)}Dto = mapper.Map<{EntityName}Dto>({EntityName.ToLower(CultureInfo.CurrentCulture)});
+        var {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}Dto = mapper.Map<{MyPath.EntityName}Dto>({MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)});
 
-        return {EntityName.ToLower(CultureInfo.CurrentCulture)}Dto;
+        return {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}Dto;
     }}
 }}
 

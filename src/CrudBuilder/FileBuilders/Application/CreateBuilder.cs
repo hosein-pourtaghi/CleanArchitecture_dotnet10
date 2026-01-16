@@ -4,14 +4,14 @@ namespace CrudBuilder.FileBuilders.Application;
 internal static class CreateBuilder
 {
     #region Create
-    internal static void CreateCommandBuilder(string EntityName)
+    internal static void CreateCommandBuilder()
     {
         Console.WriteLine($"Starting {nameof(CreateCommandBuilder)}");
 
-        var createPath = $"{BuilderPath.ApplicationPath}{EntityName}s\\Create";
+        var createPath = $"{MyPath.ApplicationPath}{MyPath.EntityName}s\\Create";
         var dir = Directory.CreateDirectory(createPath);
-        using var file = File.OpenWrite($"{createPath}\\Create{EntityName}Command.cs");
-        var ss = CreateCommandFileBuilder(EntityName);
+        using var file = File.OpenWrite($"{createPath}\\Create{MyPath.EntityName}Command.cs");
+        var ss = CreateCommandFileBuilder();
         var byt = System.Text.Encoding.UTF8.GetBytes(ss.ToString());
         if (byt != null)
         {
@@ -22,14 +22,14 @@ internal static class CreateBuilder
 
         Console.WriteLine($"{nameof(CreateCommandBuilder)} Done");
     }
-    internal static void CreateCommandHandlerBuilder(string EntityName)
+    internal static void CreateCommandHandlerBuilder()
     {
         Console.WriteLine($"Starting {nameof(CreateCommandHandlerBuilder)}");
 
-        var createPath = $"{BuilderPath.ApplicationPath}{EntityName}s\\Create";
+        var createPath = $"{MyPath.ApplicationPath}{MyPath.EntityName}s\\Create";
         var dir = Directory.CreateDirectory(createPath);
-        using var file = File.OpenWrite($"{createPath}\\Create{EntityName}CommandHandler.cs");
-        var ss = CreateCommandHandlerFileBuilder(EntityName);
+        using var file = File.OpenWrite($"{createPath}\\Create{MyPath.EntityName}CommandHandler.cs");
+        var ss = CreateCommandHandlerFileBuilder();
         var byt = System.Text.Encoding.UTF8.GetBytes(ss.ToString());
         if (byt != null)
         {
@@ -41,58 +41,58 @@ internal static class CreateBuilder
         Console.WriteLine($"{nameof(CreateCommandHandlerBuilder)} Done");
     }
 
-    internal static string CreateCommandFileBuilder(string EntityName)
+    internal static string CreateCommandFileBuilder()
     {
         var str =
 @$"
 using Application.Abstractions.Messaging;
 using Application.Common.DTOs;
 
-namespace  Application.{EntityName}s.Create;
+namespace  Application.{MyPath.EntityName}s.Create;
 
-public sealed record Create{EntityName}Command(
+public sealed record Create{MyPath.EntityName}Command(
     ) : ICommand<Guid>; 
 ";
 
         return str;
     }
-    internal static string CreateCommandHandlerFileBuilder(string EntityName)
+    internal static string CreateCommandHandlerFileBuilder()
     {
         var str =
 @$"
 using Application.Abstractions.Data;
 using Application.Abstractions.Messaging;
 using AutoMapper;
-using Domain.{EntityName}s;
+using Domain.{MyPath.EntityName}s;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
-namespace Application.{EntityName}s.Create;
+namespace Application.{MyPath.EntityName}s.Create;
 
-internal sealed class Create{EntityName}CommandHandler(
+internal sealed class Create{MyPath.EntityName}CommandHandler(
     IApplicationDbContext context,
     IMapper mapper)
-    : ICommandHandler<Create{EntityName}Command, Guid>
+    : ICommandHandler<Create{MyPath.EntityName}Command, Guid>
 {{
-    public async Task<Result<Guid>> Handle(Create{EntityName}Command command, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(Create{MyPath.EntityName}Command command, CancellationToken cancellationToken)
     {{ 
-        // Create {EntityName.ToLower(CultureInfo.CurrentCulture)} entity
-        var {EntityName.ToLower(CultureInfo.CurrentCulture)} = mapper.Map<{EntityName}>(command); 
+        // Create {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)} entity
+        var {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)} = mapper.Map<{MyPath.EntityName}>(command); 
 
 
         // Publish comprehensive domain event for audit logging and async operations (message bus)
-        //{EntityName.ToLower(CultureInfo.CurrentCulture)}.Raise(new {EntityName}CreatedDomainEvent(
-        //    {EntityName.ToLower(CultureInfo.CurrentCulture)}Id: {EntityName.ToLower(CultureInfo.CurrentCulture)}.Id,
-        //    name: {EntityName.ToLower(CultureInfo.CurrentCulture)}.Name,
-        //    email: {EntityName.ToLower(CultureInfo.CurrentCulture)}.Email,
-        //    phone: {EntityName.ToLower(CultureInfo.CurrentCulture)}.Phone,
-        //    address: {EntityName.ToLower(CultureInfo.CurrentCulture)}.Address));
+        //{MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}.Raise(new {MyPath.EntityName}CreatedDomainEvent(
+        //    {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}Id: {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}.Id,
+        //    name: {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}.Name,
+        //    email: {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}.Email,
+        //    phone: {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}.Phone,
+        //    address: {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}.Address));
 
         // Persist to database
-        context.{EntityName}s.Add({EntityName.ToLower(CultureInfo.CurrentCulture)});
+        context.{MyPath.EntityName}s.Add({MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)});
         await context.SaveChangesAsync(cancellationToken);
 
-        return {EntityName.ToLower(CultureInfo.CurrentCulture)}.Id;
+        return {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}.Id;
     }}
 }}
 

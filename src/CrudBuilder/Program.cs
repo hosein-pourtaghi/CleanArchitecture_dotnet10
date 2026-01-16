@@ -3,9 +3,12 @@
 
 using CrudBuilder;
 using CrudBuilder.FileBuilders.Application;
+using CrudBuilder.FileBuilders.Persistance;
 
+//var aa =new EntityReader();
+//    aa.CreateClassFromType();
 
-Console.WriteLine($"this is your base path : {BuilderPath.AbsoluteBasePath}");
+Console.WriteLine($"this is your base path : {MyPath.AbsoluteBasePath}");
 Console.WriteLine($"to continue press ENTRT");
 var enter = Console.ReadLine();
 
@@ -18,7 +21,9 @@ if (!string.IsNullOrWhiteSpace(enter))
 Console.WriteLine($"Enter EntityName");
 var EntityName = Console.ReadLine()  ;
 EntityName = String.IsNullOrEmpty(EntityName) ? "MyEntity" : EntityName;
-FileApplicationBuilder.ApplicationBuilder(EntityName);
+MyPath.EntityName = EntityName;
+FileApplicationBuilder.ApplicationBuilder();
+FileConfigurationBuilder.CreateConfiguration();
 
 
 //Console.WriteLine("Hello, World!");
