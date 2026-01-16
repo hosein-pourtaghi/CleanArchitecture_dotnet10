@@ -23,6 +23,22 @@ internal static class GetByIdBuilder
         Console.WriteLine($"{nameof(GetByIdQueryBuilder)} Done");
     }
 
+    internal static string GetByIdQueryFileBuilder()
+    {
+        var str =
+@$"
+using Application.Abstractions.Messaging;
+using Application.Common.DTOs;
+
+namespace  Application.{MyPath.EntityName}s.GetById;
+ 
+public sealed record GetById{MyPath.EntityName}Query(Guid Id) : IQuery<{MyPath.EntityName}Dto>;
+
+";
+
+        return str;
+    }
+
     internal static void GetByIdQueryHandlerBuilder()
     {
         Console.WriteLine($"Starting {nameof(GetByIdQueryHandlerBuilder)}");
@@ -30,7 +46,7 @@ internal static class GetByIdBuilder
         var createPath = $"{MyPath.ApplicationPath}{MyPath.EntityName}s\\GetById";
         var dir = Directory.CreateDirectory(createPath);
         using var file = File.OpenWrite($"{createPath}\\GetById{MyPath.EntityName}QueryHandler.cs");
-        var ss = GetByIdQueryFileBuilder();
+        var ss = GetByIdQueryHandlerFileBuilder();
         var byt = System.Text.Encoding.UTF8.GetBytes(ss.ToString());
         if (byt != null)
         {
@@ -42,7 +58,7 @@ internal static class GetByIdBuilder
         Console.WriteLine($"{nameof(GetByIdQueryHandlerBuilder)} Done");
     }
 
-    internal static string GetByIdQueryFileBuilder()
+    internal static string GetByIdQueryHandlerFileBuilder()
     {
         var str =
 @$"
