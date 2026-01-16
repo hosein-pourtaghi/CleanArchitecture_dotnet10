@@ -52,6 +52,7 @@ using Application.Common.DTOs;
 namespace  Application.{MyPath.EntityName}s.Update;
 
 public sealed record Update{MyPath.EntityName}Command(
+        Guid Id
     ) : ICommand<Guid>; 
 ";
 
