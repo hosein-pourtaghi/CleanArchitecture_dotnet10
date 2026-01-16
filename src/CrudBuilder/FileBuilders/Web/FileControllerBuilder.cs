@@ -44,8 +44,8 @@ namespace WebApi.Controllers;
 [Authorize] 
 public class {MyPath.EntityName}sController(
     ICommandHandler<Create{MyPath.EntityName}Command, Guid> createCommandHandler, 
-    IQueryHandler<Get{MyPath.EntityName}sQuery, List<{MyPath.EntityName}Dto>> get{MyPath.EntityName}sQueryHandler,
-    IQueryHandler<Get{MyPath.EntityName}ByIdQuery, {MyPath.EntityName}Dto> get{MyPath.EntityName}ByIdQueryHandler,
+    IQueryHandler<GetAll{MyPath.EntityName}Query, List<{MyPath.EntityName}Dto>> getAll{MyPath.EntityName}QueryHandler,
+    IQueryHandler<GetById{MyPath.EntityName}Query, {MyPath.EntityName}Dto> getById{MyPath.EntityName}QueryHandler,
     ICommandHandler<Update{MyPath.EntityName}Command> updateCommandHandler,
     ICommandHandler<Delete{MyPath.EntityName}Command> deleteCommandHandler) : ApiController
 {{
@@ -55,9 +55,9 @@ public class {MyPath.EntityName}sController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [Produces(""application/json"")]
-    public async Task<IActionResult> Get{MyPath.EntityName}s(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAll{MyPath.EntityName}(CancellationToken cancellationToken)
     {{
-        var result = await get{MyPath.EntityName}sQueryHandler.Handle(new Get{MyPath.EntityName}sQuery(), cancellationToken);
+        var result = await getAll{MyPath.EntityName}QueryHandler.Handle(new GetAll{MyPath.EntityName}Query(), cancellationToken);
         return HandleResult(result);
     }}
  
@@ -69,7 +69,7 @@ public class {MyPath.EntityName}sController(
         [FromRoute] Guid id,
         CancellationToken cancellationToken)
     {{
-        var result = await get{MyPath.EntityName}ByIdQueryHandler.Handle(new Get{MyPath.EntityName}ByIdQuery(id), cancellationToken);
+        var result = await getById{MyPath.EntityName}QueryHandler.Handle(new GetById{MyPath.EntityName}Query(id), cancellationToken);
         return HandleResult(result);
     }}
  
