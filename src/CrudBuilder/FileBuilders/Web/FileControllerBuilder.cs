@@ -8,7 +8,7 @@ internal static class FileControllerBuilder
     {
         Console.WriteLine($"Starting {nameof(CreateController)}");
 
-        var controllerPath = $"{MyPath.PersistancePath}";
+        var controllerPath = $"{MyPath.ControllerPath}";
         var dir = Directory.CreateDirectory(controllerPath);
         using var file = File.OpenWrite($"{controllerPath}\\{MyPath.EntityName}sController.cs");
         var ss = CreateControllerFileBuilder();
@@ -107,7 +107,7 @@ public class {MyPath.EntityName}sController(
         CancellationToken cancellationToken)
     {{
         var command = new Update{MyPath.EntityName}Command(
-                
+            request.Id
         );
 
         var result = await updateCommandHandler.Handle(command, cancellationToken);
@@ -128,78 +128,16 @@ public class {MyPath.EntityName}sController(
 
 }}
 
- 
-
-/// <summary>
-/// Request model for creating a new {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}.
-/// </summary>
-/// <remarks>
-/// All fields follow clean data requirements:
-/// - No HTML/script injection
-/// - SQL injection prevention
-/// - Proper encoding for special characters
-/// </remarks>
+  
 public sealed class Create{MyPath.EntityName}Request
-{{
-    /// <summary>{MyPath.EntityName}'s full name (required). Must be 1-200 characters.</summary>
-    /// <example>John Doe</example>
-    public required string Name {{ get; set; }}
+{{ 
 
-    /// <summary>{MyPath.EntityName}'s email address (required). Must be unique and valid email format.</summary>
-    /// <example>john.doe@example.com</example>
-    public required string Email {{ get; set; }}
-
-    /// <summary>{MyPath.EntityName}'s phone number (optional). Maximum 20 characters.</summary>
-    /// <example>+1-555-0123</example>
-    public string? Phone {{ get; set; }}
-
-    /// <summary>{MyPath.EntityName}'s physical address (optional). Maximum 500 characters.</summary>
-    /// <example>123 Main Street, Anytown, ST 12345</example>
-    public string? Address {{ get; set; }}
 }}
-
-public sealed class Copy{MyPath.EntityName}Request
-{{
-    /// <summary>{MyPath.EntityName}'s full name (required). Must be 1-200 characters.</summary>
-    /// <example>John Doe</example>
-    public required string Name {{ get; set; }}
-
-    /// <summary>{MyPath.EntityName}'s email address (required). Must be unique and valid email format.</summary>
-    /// <example>john.doe@example.com</example>
-    public required string Email {{ get; set; }}
-
-    /// <summary>{MyPath.EntityName}'s phone number (optional). Maximum 20 characters.</summary>
-    /// <example>+1-555-0123</example>
-    public string? Phone {{ get; set; }}
-
-    /// <summary>{MyPath.EntityName}'s physical address (optional). Maximum 500 characters.</summary>
-    /// <example>123 Main Street, Anytown, ST 12345</example>
-    public string? Address {{ get; set; }}
-}}
-
-/// <summary>
-/// Request model for updating an existing {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}.
-/// </summary>
-/// <remarks>
-/// All fields are required when updating. To keep a field unchanged, provide its current value.
-/// </remarks>
+ 
 public sealed class Update{MyPath.EntityName}Request
 {{
-    /// <summary>{MyPath.EntityName}'s full name (required). Must be 1-200 characters.</summary>
-    /// <example>Jane Doe</example>
-    public required string Name {{ get; set; }}
+    public Required Guid Id {{ get; set; }}
 
-    /// <summary>{MyPath.EntityName}'s email address (required). Must be valid email format.</summary>
-    /// <example>jane.doe@example.com</example>
-    public required string Email {{ get; set; }}
-
-    /// <summary>{MyPath.EntityName}'s phone number (optional). Maximum 20 characters.</summary>
-    /// <example>+1-555-0456</example>
-    public string? Phone {{ get; set; }}
-
-    /// <summary>{MyPath.EntityName}'s physical address (optional). Maximum 500 characters.</summary>
-    /// <example>456 Oak Avenue, Somewhere, ST 54321</example>
-    public string? Address {{ get; set; }}
 }}
 
 ";
