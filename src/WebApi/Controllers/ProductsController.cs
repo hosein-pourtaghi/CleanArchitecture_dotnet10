@@ -2,6 +2,7 @@ using Application.Abstractions.Messaging;
 using Application.Common.DTOs; 
 using Application.Products.Create;
 using Application.Products.Delete;
+using Application.Products.Generate;
 using Application.Products.GetAll;
 using Application.Products.GetById;
 using Application.Products.Update;
@@ -18,7 +19,9 @@ public class ProductsController(
     IQueryHandler<GetAllProductQuery, List<ProductDto>> getAllProductQueryHandler,
     IQueryHandler<GetByIdProductQuery, ProductDto> getByIdProductQueryHandler,
     ICommandHandler<UpdateProductCommand> updateCommandHandler,
-    ICommandHandler<DeleteProductCommand> deleteCommandHandler) : ApiController
+    ICommandHandler<DeleteProductCommand> deleteCommandHandler,
+    ICommandHandler<GenerateProductCommand> generateCommandHandler
+    ) : ApiController
 {
     
     [HttpGet]
@@ -96,11 +99,20 @@ public class ProductsController(
     {
         var result = await deleteCommandHandler.Handle(new DeleteProductCommand(id), cancellationToken);
         return HandleResult(result);
-    } 
+    }
+
+
+    [HttpPost] 
+    public async Task<IActionResult> Generate(CancellationToken cancellationToken)
+    {
+        var result = await generateCommandHandler.Handle(new GenerateProductCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
 
 }
 
-  
+
 public sealed class CreateProductRequest
 { 
 
