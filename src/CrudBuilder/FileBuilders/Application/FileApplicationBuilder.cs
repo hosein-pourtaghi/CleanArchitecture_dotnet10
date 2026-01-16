@@ -14,11 +14,11 @@ public static class FileApplicationBuilder
         DeleteBuilder.DeleteCommandBuilder();
         DeleteBuilder.DeleteCommandHandlerBuilder();
 
-        GetAllBuilder.GetAllCommandBuilder();
-        GetAllBuilder.GetAllCommandHandlerBuilder();
+        GetAllBuilder.GetAllQueryBuilder();
+        GetAllBuilder.GetAllQueryHandlerBuilder();
 
-        GetByIdBuilder.GetByIdCommandBuilder();
-        GetByIdBuilder.GetByIdCommandHandlerBuilder();
+        GetByIdBuilder.GetByIdQueryBuilder();
+        GetByIdBuilder.GetByIdQueryHandlerBuilder();
 
         // Mapper Profile 
         MapperBuilder.BuildMapper();
