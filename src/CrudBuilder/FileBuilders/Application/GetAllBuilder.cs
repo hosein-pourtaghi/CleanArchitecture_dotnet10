@@ -4,14 +4,14 @@ namespace CrudBuilder.FileBuilders.Application;
 internal static class GetAllBuilder
 {
     #region GetAll
-    internal static void GetAllCommandBuilder()
+    internal static void GetAllQueryBuilder()
     {
-        Console.WriteLine($"Starting {nameof(GetAllCommandBuilder)}");
+        Console.WriteLine($"Starting {nameof(GetAllQueryBuilder)}");
 
         var createPath = $"{MyPath.ApplicationPath}{MyPath.EntityName}s\\GetAll";
         var dir = Directory.CreateDirectory(createPath);
-        using var file = File.OpenWrite($"{createPath}\\GetAll{MyPath.EntityName}Command.cs");
-        var ss = GetAllCommandFileBuilder();
+        using var file = File.OpenWrite($"{createPath}\\GetAll{MyPath.EntityName}Query.cs");
+        var ss = GetAllQueryFileBuilder();
         var byt = System.Text.Encoding.UTF8.GetBytes(ss.ToString());
         if (byt != null)
         {
@@ -20,17 +20,17 @@ internal static class GetAllBuilder
         file.Close();
         file.Dispose();
 
-        Console.WriteLine($"{nameof(GetAllCommandBuilder)} Done");
+        Console.WriteLine($"{nameof(GetAllQueryBuilder)} Done");
     }
 
-    internal static void GetAllCommandHandlerBuilder()
+    internal static void GetAllQueryHandlerBuilder()
     {
-        Console.WriteLine($"Starting {nameof(GetAllCommandHandlerBuilder)}");
+        Console.WriteLine($"Starting {nameof(GetAllQueryHandlerBuilder)}");
 
         var createPath = $"{MyPath.ApplicationPath}{MyPath.EntityName}s\\GetAll";
         var dir = Directory.CreateDirectory(createPath);
-        using var file = File.OpenWrite($"{createPath}\\GetAll{MyPath.EntityName}CommandHandler.cs");
-        var ss = GetAllCommandHandlerFileBuilder();
+        using var file = File.OpenWrite($"{createPath}\\GetAll{MyPath.EntityName}QueryHandler.cs");
+        var ss = GetAllQueryHandlerFileBuilder();
         var byt = System.Text.Encoding.UTF8.GetBytes(ss.ToString());
         if (byt != null)
         {
@@ -39,10 +39,10 @@ internal static class GetAllBuilder
         file.Close();
         file.Dispose();
 
-        Console.WriteLine($"{nameof(GetAllCommandHandlerBuilder)} Done");
+        Console.WriteLine($"{nameof(GetAllQueryHandlerBuilder)} Done");
     }
 
-    internal static string GetAllCommandFileBuilder()
+    internal static string GetAllQueryFileBuilder()
     {
         var str =
 @$"
@@ -57,7 +57,7 @@ public sealed record GetAll{MyPath.EntityName}Query() : IQuery<List<{MyPath.Enti
 
         return str;
     }
-    internal static string GetAllCommandHandlerFileBuilder()
+    internal static string GetAllQueryHandlerFileBuilder()
     {
         var str =
 @$"using Application.Abstractions.Data;

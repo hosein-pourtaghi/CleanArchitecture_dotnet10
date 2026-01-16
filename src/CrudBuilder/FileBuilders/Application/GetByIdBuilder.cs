@@ -4,14 +4,14 @@ namespace CrudBuilder.FileBuilders.Application;
 internal static class GetByIdBuilder
 {
     #region GetById
-    internal static void GetByIdCommandBuilder()
+    internal static void GetByIdQueryBuilder()
     {
-        Console.WriteLine($"Starting {nameof(GetByIdCommandBuilder)}");
+        Console.WriteLine($"Starting {nameof(GetByIdQueryBuilder)}");
 
         var createPath = $"{MyPath.ApplicationPath}{MyPath.EntityName}s\\GetById";
         var dir = Directory.CreateDirectory(createPath);
-        using var file = File.OpenWrite($"{createPath}\\GetById{MyPath.EntityName}Command.cs");
-        var ss = GetByIdCommandFileBuilder();
+        using var file = File.OpenWrite($"{createPath}\\GetById{MyPath.EntityName}Query.cs");
+        var ss = GetByIdQueryFileBuilder();
         var byt = System.Text.Encoding.UTF8.GetBytes(ss.ToString());
         if (byt != null)
         {
@@ -20,17 +20,17 @@ internal static class GetByIdBuilder
         file.Close();
         file.Dispose();
 
-        Console.WriteLine($"{nameof(GetByIdCommandBuilder)} Done");
+        Console.WriteLine($"{nameof(GetByIdQueryBuilder)} Done");
     }
 
-    internal static void GetByIdCommandHandlerBuilder()
+    internal static void GetByIdQueryHandlerBuilder()
     {
-        Console.WriteLine($"Starting {nameof(GetByIdCommandHandlerBuilder)}");
+        Console.WriteLine($"Starting {nameof(GetByIdQueryHandlerBuilder)}");
 
         var createPath = $"{MyPath.ApplicationPath}{MyPath.EntityName}s\\GetById";
         var dir = Directory.CreateDirectory(createPath);
-        using var file = File.OpenWrite($"{createPath}\\GetById{MyPath.EntityName}CommandHandler.cs");
-        var ss = GetByIdCommandFileBuilder();
+        using var file = File.OpenWrite($"{createPath}\\GetById{MyPath.EntityName}QueryHandler.cs");
+        var ss = GetByIdQueryFileBuilder();
         var byt = System.Text.Encoding.UTF8.GetBytes(ss.ToString());
         if (byt != null)
         {
@@ -39,10 +39,10 @@ internal static class GetByIdBuilder
         file.Close();
         file.Dispose();
 
-        Console.WriteLine($"{nameof(GetByIdCommandHandlerBuilder)} Done");
+        Console.WriteLine($"{nameof(GetByIdQueryHandlerBuilder)} Done");
     }
 
-    internal static string GetByIdCommandFileBuilder()
+    internal static string GetByIdQueryFileBuilder()
     {
         var str =
 @$"
