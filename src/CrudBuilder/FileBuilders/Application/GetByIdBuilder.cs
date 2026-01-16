@@ -56,12 +56,12 @@ using SharedKernel;
 
 namespace Application.{MyPath.EntityName}s.GetById;
  
-internal sealed class GetGetById{MyPath.EntityName}QueryHandler(
+internal sealed class GetById{MyPath.EntityName}QueryHandler(
     IApplicationDbContext context,
     IMapper mapper)
-    : IQueryHandler<GetGetById{MyPath.EntityName}Query, {MyPath.EntityName}Dto>
+    : IQueryHandler<GetById{MyPath.EntityName}Query, {MyPath.EntityName}Dto>
 {{
-    public async Task<Result<{MyPath.EntityName}Dto>> Handle(GetGetById{MyPath.EntityName}Query query, CancellationToken cancellationToken)
+    public async Task<Result<{MyPath.EntityName}Dto>> Handle(GetById{MyPath.EntityName}Query query, CancellationToken cancellationToken)
     {{
         var {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)} = await context.{MyPath.EntityName}s
             .AsNoTracking()
