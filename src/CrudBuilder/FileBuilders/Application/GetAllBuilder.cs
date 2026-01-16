@@ -69,10 +69,10 @@ using SharedKernel;
 
 namespace Application.{MyPath.EntityName}s.GetAll;
  
-internal sealed class GetAll{MyPath.EntityName}sQueryHandler(
+internal sealed class GetAll{MyPath.EntityName}QueryHandler(
     IApplicationDbContext context,
     IMapper mapper)
-    : IQueryHandler<GetAll{MyPath.EntityName}sQuery, List<{MyPath.EntityName}Dto>>
+    : IQueryHandler<GetAll{MyPath.EntityName}Query, List<{MyPath.EntityName}Dto>>
 {{
     public async Task<Result<List<{MyPath.EntityName}Dto>>> Handle(GetAll{MyPath.EntityName}Query query, CancellationToken cancellationToken)
     {{
