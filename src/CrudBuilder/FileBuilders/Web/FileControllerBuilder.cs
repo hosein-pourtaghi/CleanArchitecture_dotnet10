@@ -136,7 +136,7 @@ public sealed class Create{MyPath.EntityName}Request
  
 public sealed class Update{MyPath.EntityName}Request
 {{
-    public Required Guid Id {{ get; set; }}
+    public required Guid Id {{ get; set; }}
 
 }}
 
