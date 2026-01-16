@@ -1,6 +1,6 @@
-namespace Application.Common.DTOs;
+﻿namespace Domain.Products;
 
-public class ProductDto
+public class Product
 {
     public int Id { get; set; }
     public string Number { get; set; }

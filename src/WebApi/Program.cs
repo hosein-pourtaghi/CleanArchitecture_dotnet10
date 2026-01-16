@@ -27,8 +27,8 @@ builder.Services
     .AddInfrastructure(builder.Configuration);
 
 // automapper & validators
-builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
-builder.Services.AddValidatorsFromAssembly(typeof(Application.Common.Mappings.AutoMapperProfile).Assembly);
+builder.Services.AddAutoMapper(typeof(CustomerProfile));
+builder.Services.AddValidatorsFromAssembly(typeof(Application.Common.Mappings.CustomerProfile).Assembly);
 
 
 WebApplication app = builder.Build();

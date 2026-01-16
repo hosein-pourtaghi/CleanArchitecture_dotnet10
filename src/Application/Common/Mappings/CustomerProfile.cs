@@ -9,11 +9,10 @@ namespace Application.Common.Mappings;
 /// AutoMapper profile for all entity-to-DTO mappings across the application.
 /// Centralizes mapping configuration for better maintainability and consistency.
 /// </summary>
-public class AutoMapperProfile : Profile
+public class CustomerProfile : Profile
 {
-    public AutoMapperProfile()
+    public CustomerProfile()
     { 
-        // Customer mappings - Legacy common DTO (backward compatibility)
         CreateMap<Customer, CustomerDto>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))

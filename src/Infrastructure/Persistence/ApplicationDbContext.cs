@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using SharedKernel;
 using Microsoft.AspNetCore.Identity;
+using Domain.Products;
+using Domain.Carts;
 
 namespace Infrastructure.Persistence;
 
@@ -17,6 +19,8 @@ public sealed class ApplicationDbContext(
     DbSet<ApplicationUser> IApplicationDbContext.Users => Set<ApplicationUser>();
 
     public DbSet<Customer> Customers { get; set; }
+    public DbSet<Cart> Carts { get; set; }
+    public DbSet<Product> Products { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
