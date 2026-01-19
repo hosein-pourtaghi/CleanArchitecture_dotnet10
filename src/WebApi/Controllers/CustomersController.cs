@@ -25,10 +25,11 @@ namespace WebApi.Controllers;
 public class CustomersController(
     ICommandHandler<CreateCustomerCommand, Guid> createCommandHandler,
     ICommandHandler<CopyCustomerCommand, bool> copyCommandHandler,
-    IQueryHandler<GetCustomersQuery, List<CustomerDto>> getCustomersQueryHandler,
-    IQueryHandler<GetCustomerByIdQuery, CustomerDto> getCustomerByIdQueryHandler,
     ICommandHandler<UpdateCustomerCommand> updateCommandHandler,
-    ICommandHandler<DeleteCustomerCommand> deleteCommandHandler) : ApiController
+    ICommandHandler<DeleteCustomerCommand> deleteCommandHandler,
+    IQueryHandler<GetCustomerByIdQuery, CustomerDto> getCustomerByIdQueryHandler,
+    IQueryHandler<GetCustomersQuery, List<CustomerDto>> getCustomersQueryHandler
+    ) : ApiController
 {
     /// <summary>
     /// Retrieves all customers.

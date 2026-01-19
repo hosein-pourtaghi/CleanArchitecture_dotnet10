@@ -7,14 +7,19 @@ namespace Application.Products.Generate;
 
 internal sealed class GenerateProductCommandHandler(
     IApplicationDbContext context)
-    : ICommandHandler<GenerateProductCommand, bool>
+    : ICommandHandler<GenerateProductCommand>
 {
-    public async Task<Result<bool>> Handle(GenerateProductCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(GenerateProductCommand command, CancellationToken cancellationToken)
     {
-        List<string> strings = new List<string>() { "one", "two", "three", "four", "five", "six", "seven", "ten", "ten1", "ten2", "ten3", "ten4", "ten5", "ten6", "ten7", "ten8", "ten9", "ten10", "ten11", "ten12", "ten13", "ten14" };
+        List<string> strings = new List<string>() { "one", "two", "three", "four", "five", "six", "seven",
+            "ten", "ten1", "ten2", "ten3", "ten4", "ten5", "ten6", "ten7", "ten8", "ten9", "ten10", "ten11", "ten12",
+            "ten13", "ten14", "one one","two two","three three","four four","five five","six six","seven seven","ten ten",
+            "ten1 ten1","ten2 ten2","ten3 ten3","ten4 ten4","ten5 ten5","ten6 ten6","ten7 ten7","ten8 ten8","ten9 ten9",
+            "ten10 ten10","ten11 ten11","ten12 ten12","ten13 ten13",
+        };
 
         var index = 0;
-        for (int j = 0; j < 20; j++)
+        for (int j = 0; j < 1_000; j++)
         {
             var chunk = 1_000;
             var products = new List<Product>();
@@ -56,11 +61,12 @@ internal sealed class GenerateProductCommandHandler(
 
             }
             context.Products.AddRange(products);
+            products.Clear();
 
             await context.SaveChangesAsync(cancellationToken);
             index += chunk;
         }
-         
+
         // Publish comprehensive domain event for audit logging and async operations (message bus)
         //product.Raise(new ProductGeneratedDomainEvent(
         //    productId: product.Id,
@@ -69,10 +75,8 @@ internal sealed class GenerateProductCommandHandler(
         //    phone: product.Phone,
         //    address: product.Address));
 
-        // Persist to database
-        await context.SaveChangesAsync(cancellationToken);
 
-        return true;
+        return Result.Success();
     }
 
     private static int MyRandom(int max)
@@ -85,11 +89,7 @@ internal sealed class GenerateProductCommandHandler(
         return num;
     }
 
-    public enum Alphabet
-    {
-
-
-    }
+   
 
 }
 

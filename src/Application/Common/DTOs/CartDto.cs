@@ -21,12 +21,13 @@ public sealed class CartDto
     /// invoice code
     /// </summary>
     public string? Code { get; set; }
-    public DateTime PurchaseDate { get; set; } 
+    public DateTime PurchaseDate { get; set; }
+    public int CartItemCount { get =>  CartItems.Count; }  
 
 
 
     #region Navigations 
-    public   List<CartItemDto> CartItems { get; set; } = new();
+    public List<CartItemDto> CartItems { get; set; } = new();
     #endregion
 
 

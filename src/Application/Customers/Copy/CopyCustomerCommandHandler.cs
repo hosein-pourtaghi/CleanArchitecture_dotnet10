@@ -16,9 +16,9 @@ internal sealed class CopyCustomerCommandHandler(IApplicationDbContext context)
     public async Task<Result<bool>> Handle(CopyCustomerCommand command, CancellationToken cancellationToken)
     {
         var index = 0;
-        for (int j = 0; j < 20; j++)
+        for (int j = 0; j < 1_000; j++)
         {
-            var chunk = 10_000;
+            var chunk = 1_000;
             for (int i = index; i < index + chunk; i++)
             {
                 var split = command.Email.Split("@");

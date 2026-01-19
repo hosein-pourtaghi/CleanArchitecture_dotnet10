@@ -1,8 +1,9 @@
 using Application.Abstractions.Messaging;
-using Application.Carts.Copy;
 using Application.Carts.Create;
+using Application.Carts.Generate;
 using Application.Carts.Get;
 using Application.Carts.GetById;
+using Application.Carts.GetCustomerCarts;
 using Application.Carts.Update;
 using Application.Common.DTOs;
 using Microsoft.AspNetCore.Authorization;
@@ -23,12 +24,11 @@ namespace WebApi.Controllers;
 [Consumes("application/json")]
 public class CartsController(
     ICommandHandler<CreateCartCommand, Guid> createCommandHandler,
-    ICommandHandler<CopyCartCommand, bool> copyCommandHandler,
+    ICommandHandler<UpdateCartCommand> updateCommandHandler,
+    ICommandHandler<GenerateCartCommand> generateCommandHandler,
     IQueryHandler<GetAllCartQuery, List<CartDto>> getAllCartQueryHandler,
     IQueryHandler<GetCartByIdQuery, CartDto> getCartByIdQueryHandler,
-    ICommandHandler<UpdateCartCommand> updateCommandHandler
-    //,
-    //ICommandHandler<DeleteCartCommand> deleteCommandHandler
+    IQueryHandler<GetCustomerCartsQuery, List<CartDto>> getCustomerCartsQueryHandler
     ) : ApiController
 {
     /// <summary>
@@ -60,6 +60,19 @@ public class CartsController(
         var result = await getAllCartQueryHandler.Handle(new GetAllCartQuery(), cancellationToken);
         return HandleResult(result);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /// <summary>
     /// Retrieves a specific cart by ID.
@@ -278,23 +291,24 @@ public class CartsController(
 
 
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Copy(
-          CancellationToken cancellationToken)
+    public async Task<IActionResult> Generate(CancellationToken cancellationToken)
     {
-        var command = new CopyCartCommand();
 
-        var result = await copyCommandHandler.Handle(command, cancellationToken);
+        var result = await generateCommandHandler.Handle(new GenerateCartCommand(), cancellationToken);
+        return HandleResult(result);
+    }
 
-        if (result.IsFailure)
-        {
-            return HandleResult<bool>(result);
-        }
-
-        return CreatedAtAction(nameof(GetById), new { id = result.Value }, new { id = result.Value });
+    [HttpGet]
+    [ProducesResponseType(typeof(List<CartDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [Produces("application/json")]
+    public async Task<IActionResult> GetCustomerCarts(Guid customerId,int page,int pageSize ,CancellationToken cancellationToken)
+    {
+        var q = new GetCustomerCartsQuery(customerId: customerId , page: page , pageSize : pageSize);
+      
+        var result = await getCustomerCartsQueryHandler.Handle(q, cancellationToken);
+        return HandleResult(result);
     }
 
 }
