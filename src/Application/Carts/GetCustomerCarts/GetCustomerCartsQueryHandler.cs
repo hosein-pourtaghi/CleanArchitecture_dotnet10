@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Application.Abstractions.Data;
 using Application.Abstractions.Messaging;
 using Application.Common.DTOs;
@@ -19,15 +20,36 @@ internal sealed class GetCustomerCartsQueryHandler(
 {
     public async Task<Result<List<CartDto>>> Handle(GetCustomerCartsQuery query, CancellationToken cancellationToken)
     {
-        var cartDtos = await context.Carts
+        var watch = new Stopwatch();
+        watch.Start();
+        var q1 = context.Carts
             .AsNoTracking()
             .Where(x => x.CustomerId == query.customerId)
-            .Include(x => x.CartItems.Take(3).Where(x => x.Quantity > 200))
+            .Include(x => x.CartItems)
+            .ProjectTo<CartDto>(mapper.ConfigurationProvider)
+            .Skip(query.page * query.pageSize)
+            .Take(query.pageSize);
+        var cartDtos = await q1
+             .ToListAsync(cancellationToken)
+             ;
+        watch.Stop();
+        TimeSpan a = watch.Elapsed;
+
+        watch.Restart();
+        var q2 = context.Carts
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Where(x => x.CustomerId == query.customerId)
+            .Include(x => x.CartItems)
             .ProjectTo<CartDto>(mapper.ConfigurationProvider)
             .Skip(query.page * query.pageSize)
             .Take(query.pageSize)
+            ;
+        var cartSplitDtos = await q2
             .ToListAsync(cancellationToken)
             ;
+        watch.Stop();
+        TimeSpan b = watch.Elapsed;
 
         return cartDtos;
     }

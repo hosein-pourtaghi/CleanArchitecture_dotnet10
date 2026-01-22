@@ -14,7 +14,13 @@ public class CartProfile : Profile
     public CartProfile()
     {
 
-        CreateMap<Cart, CartDto>();
+        CreateMap<Cart, CartDto>()
+            .ForMember(dest => dest.CartItems, opt => opt.MapFrom(s =>
+                s.CartItems
+                    .Where(item => item.OriginalPrice > 20)
+                    .OrderByDescending(item => item.OriginalPrice)
+                    .Take(3)
+            ));
 
         CreateMap<CreateCartCommand, Cart>();
 

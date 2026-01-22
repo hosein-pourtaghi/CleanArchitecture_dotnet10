@@ -1,24 +1,21 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using Application.Abstractions.Authentication;
 using Application.Abstractions.Data;
 using Application.Abstractions.Interfaces;
+using Domain.Users;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization;
 using Infrastructure.DomainEvents;
 using Infrastructure.Persistence;
-using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using SharedKernel;
 using Serilog;
 
 namespace Infrastructure;
@@ -47,10 +44,21 @@ public static class DependencyInjection
     {
         string? connectionString = configuration["ConnectionString"];
 
-        services.AddDbContext<ApplicationDbContext>(options => options
-            .UseNpgsql(connectionString, npgsqlOptions =>
-                npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default))
-            .UseSnakeCaseNamingConvention());
+        //services.AddDbContext<ApplicationDbContext>(options => options
+        //    .UseNpgsql(connectionString, npgsqlOptions =>
+        //        npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default))
+        //    );
+
+        services.AddDbContext<ApplicationDbContext>(
+            options => options
+                .UseSqlServer(connectionString, options =>
+                {
+                    options.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default);
+                    var minutes = (int)TimeSpan.FromMinutes(3).TotalSeconds;
+                    options.CommandTimeout(minutes);
+                    options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(10), null);
+
+                }));
 
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
