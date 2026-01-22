@@ -12,8 +12,6 @@
     <Project Path="src/Infrastructure/Infrastructure.csproj" />
     <Project Path="src/ProjectSetup.ServiceDefaults/ProjectSetup.ServiceDefaults.csproj" />
     <Project Path="src/SharedKernel/SharedKernel.csproj" />
-    <Project Path="src/WebApi/WebApi.csproj">
-      <Build Solution="Debug|*" Project="false" />
-    </Project>
+    <Project Path="src/WebApi/WebApi.csproj" />
   </Folder>
 </Solution>
