@@ -45,8 +45,7 @@ internal sealed class CustomerCreatedDomainEventHandler(
         //     CustomerId = domainEvent.CustomerId,
         //     Name = domainEvent.Name,
         //     Email = domainEvent.Email,
-        //     OccurredAt = domainEvent.OccurredAt,
-        //     CorrelationId = correlationIdProvider.GetCorrelationId()
+        //     OccurredAt = domainEvent.OccurredAt
         // });
 
         // TODO: Trigger side effects

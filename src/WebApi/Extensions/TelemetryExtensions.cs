@@ -1,39 +1,25 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using WebApi.Telemetry;
+using Microsoft.Extensions.Logging;
 
 namespace WebApi.Extensions;
 
-/// <summary>
-/// Extension methods for OpenTelemetry integration in the Web API.
-/// Provides convenience methods for creating spans and logging traces.
-/// </summary>
 public static class TelemetryExtensions
 {
-    /// <summary>
-    /// Starts a span for a specific operation with automatic error handling and timing.
-    /// </summary>
-    public static Activity? StartOperationSpan(this ILogger logger, string operationName, string? correlationId = null)
+    /// ✅ Uses standard Activity.Current.Id (no parameters needed)
+    public static Activity? StartOperationSpan(this ILogger logger, string operationName)
     {
         var activity = TelemetryActivitySource.Instance.StartActivity(operationName);
-
-        if (activity != null && !string.IsNullOrEmpty(correlationId))
-        {
-            activity.SetTag("correlation.id", correlationId);
-        }
-
-        logger.LogDebug("Started operation: {OperationName}, TraceId: {TraceId}", operationName, activity?.Id);
-
+        logger.LogDebug("Started operation: {OperationName}, TraceId: {TraceId}",
+            operationName, activity?.Id);
         return activity;
     }
 
-    /// <summary>
-    /// Logs an operation error with trace context.
-    /// </summary>
+    /// ✅ Uses standard Activity.Current.Id (no correlationId parameter)
     public static void LogOperationError(
         this ILogger logger,
         Exception exception,
-        string operationName,
-        string? correlationId = null)
+        string operationName)
     {
         var activity = Activity.Current;
         if (activity != null)
@@ -42,35 +28,28 @@ public static class TelemetryExtensions
             activity.SetTag("exception.message", exception.Message);
             activity.SetStatus(ActivityStatusCode.Error, exception.Message);
         }
-
         logger.LogError(
             exception,
-            "Operation failed: {OperationName}, CorrelationId: {CorrelationId}, TraceId: {TraceId}",
+            "Operation failed: {OperationName}, TraceId: {TraceId}",
             operationName,
-            correlationId ?? "N/A",
             activity?.Id ?? "N/A");
     }
 
-    /// <summary>
-    /// Logs an operation success with timing information.
-    /// </summary>
+    /// ✅ Uses standard Activity.Current.Id
     public static void LogOperationSuccess(
         this ILogger logger,
         string operationName,
-        long elapsedMs,
-        string? correlationId = null)
+        long elapsedMs)
     {
         var activity = Activity.Current;
         if (activity != null)
         {
             activity.SetTag("operation.duration_ms", elapsedMs);
         }
-
         logger.LogInformation(
-            "Operation completed successfully: {OperationName}, DurationMs: {ElapsedMs}, CorrelationId: {CorrelationId}, TraceId: {TraceId}",
+            "Operation completed successfully: {OperationName}, DurationMs: {ElapsedMs}, TraceId: {TraceId}",
             operationName,
             elapsedMs,
-            correlationId ?? "N/A",
             activity?.Id ?? "N/A");
     }
 }

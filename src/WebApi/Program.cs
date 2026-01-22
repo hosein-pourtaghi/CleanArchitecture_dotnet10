@@ -6,6 +6,8 @@ using HealthChecks.UI.Client;
 using Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
+using OpenTelemetry;
+using OpenTelemetry.Trace;
 using Serilog;
 using WebApi;
 using WebApi.Extensions;
@@ -15,7 +17,33 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configuration(context.Configuration));
+//string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+string? connectionString = builder.Configuration["ConnectionString"];
+// 1. Configure Serilog to write to SQL Server 
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .Enrich.WithProperty("Application", "MyAspireApp")
+    //.WriteTo.MSSqlServer(
+    //    connectionString: connectionString,
+    //    tableName: "AppLogs",
+    //    autoCreateSqlTable: true, // Automatically creates the table on startup
+    //    restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information
+    //)
+    .CreateLogger(); 
+
+builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configuration(context.Configuration)); 
+
+// Keep OpenTelemetry for Traces (Aspire Dashboard)
+builder.Services.AddOpenTelemetry()
+    .UseOtlpExporter()  
+    .WithTracing(tracerProviderBuilder =>
+    {
+        tracerProviderBuilder
+            .AddSource("WebApi.*") // Your app's source
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation();
+    });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer(); 
@@ -49,9 +77,11 @@ if (app.Environment.IsDevelopment())
 // Add OpenTelemetry logging middleware before other logging middleware
 app.UseMiddleware<OpenTelemetryLoggingMiddleware>();
 
-app.UseRequestContextLogging();
 
+// Standard Request Logging (Headers, Path, Status) ***Add this BEFORE other middlewares (like MapControllers)***
 app.UseSerilogRequestLogging();
+
+app.UseRequestContextLogging();
 
 app.UseExceptionHandler();
 
@@ -63,7 +93,12 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+
+
+
 //app.MapHub<Infrastructure.Services.NotificationHub>("/hubs/notifications");
+
+
 try
 {
     Log.Information("Starting web host");

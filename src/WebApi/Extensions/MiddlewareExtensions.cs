@@ -5,8 +5,9 @@ namespace WebApi.Extensions;
 public static class MiddlewareExtensions
 {
     public static IApplicationBuilder UseRequestContextLogging(this IApplicationBuilder app)
-    {
-        app.UseMiddleware<RequestContextLoggingMiddleware>();
+    { 
+        // Custom Body Logging
+        app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
         return app;
     }

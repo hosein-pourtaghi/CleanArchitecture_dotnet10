@@ -24,6 +24,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
     <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Serilog.Sinks.Seq" />
+    <PackageReference Include="Serilog.Sinks.MSSqlServer" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
 	  <PackageReference Include="Aspire.Hosting" />
 	  <PackageReference Include="Aspire.Hosting.AppHost" />
