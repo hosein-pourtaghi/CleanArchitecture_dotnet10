@@ -4,6 +4,7 @@ using Application.Common.Mappings;
 using FluentValidation;
 using HealthChecks.UI.Client;
 using Infrastructure;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using OpenTelemetry;
@@ -93,10 +94,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// signalR notifications 
+//app.MapHub<NotificationHub>("/hubs/notifications");
 
-
-
-//app.MapHub<Infrastructure.Services.NotificationHub>("/hubs/notifications");
+ 
 
 
 try
