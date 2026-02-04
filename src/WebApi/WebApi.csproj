@@ -26,8 +26,8 @@
     <PackageReference Include="Serilog.Sinks.Seq" />
     <PackageReference Include="Serilog.Sinks.MSSqlServer" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
-	  <PackageReference Include="Aspire.Hosting" />
-	  <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting" />
+	<PackageReference Include="Aspire.Hosting.AppHost" />
 
   </ItemGroup>
 

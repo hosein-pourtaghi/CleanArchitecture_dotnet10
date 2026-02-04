@@ -9,6 +9,7 @@ namespace Infrastructure.Services;
 /// </summary>
 public class NotificationHub : Hub
 {
+    
     // Server can call Clients.User(userId).SendAsync("OrderCreated", payload)
     //public async Task SendNotification(string message)
     //{

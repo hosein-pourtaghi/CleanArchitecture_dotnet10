@@ -1,4 +1,5 @@
-using System.Reflection;
+﻿using System.Reflection;
+using System.Threading.Channels;
 using Application;
 using Application.Common.Mappings;
 using FluentValidation;
@@ -97,7 +98,11 @@ app.MapControllers();
 // signalR notifications 
 //app.MapHub<NotificationHub>("/hubs/notifications");
 
- 
+
+
+//// تنظیم Channel (محدود به 100 اعلان)
+//builder.Services.AddSingleton<Channel<Notification>>(sp =>
+//    Channel.CreateBounded<Notification>(100));
 
 
 try

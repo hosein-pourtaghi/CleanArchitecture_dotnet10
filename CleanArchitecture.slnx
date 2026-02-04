@@ -10,6 +10,9 @@
     <Project Path="src/CrudBuilder/CrudBuilder.csproj" Id="ac3447ad-9bda-4e0a-a2a2-3461658a0fae" />
     <Project Path="src/Domain/Domain.csproj" />
     <Project Path="src/Infrastructure/Infrastructure.csproj" />
+    <Project Path="src/NotificationAPI/NotificationAPI.csproj">
+      <BuildDependency Project="src/Infrastructure/Infrastructure.csproj" />
+    </Project>
     <Project Path="src/ProjectSetup.ServiceDefaults/ProjectSetup.ServiceDefaults.csproj" />
     <Project Path="src/SharedKernel/SharedKernel.csproj" />
     <Project Path="src/WebApi/WebApi.csproj" />
