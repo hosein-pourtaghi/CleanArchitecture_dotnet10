@@ -14,15 +14,15 @@ internal sealed class CustomerUpdatedDomainEventHandler(
 {
     public Task Handle(CustomerUpdatedDomainEvent domainEvent, CancellationToken cancellationToken)
     {
-        logger.LogInformation(
-            "Customer updated event: EventId={EventId}, CustomerId={CustomerId}, Name={Name}, Email={Email}, Phone={Phone}, Address={Address}, OccurredAt={OccurredAt}",
-            domainEvent.EventId,
-            domainEvent.CustomerId,
-            domainEvent.Name,
-            domainEvent.Email,
-            domainEvent.Phone,
-            domainEvent.Address,
-            domainEvent.OccurredAt);
+        // logger.LogInformation(
+        //     "Customer updated event: EventId={EventId}, CustomerId={CustomerId}, Name={Name}, Email={Email}, Phone={Phone}, Address={Address}, OccurredAt={OccurredAt}",
+        //     domainEvent.EventId,
+        //     domainEvent.CustomerId,
+        //     domainEvent.Name,
+        //     domainEvent.Email,
+        //     domainEvent.Phone,
+        //     domainEvent.Address,
+        //     domainEvent.OccurredAt);
 
         // TODO: Implement audit database logging
         // Example: Store event in AuditLog table

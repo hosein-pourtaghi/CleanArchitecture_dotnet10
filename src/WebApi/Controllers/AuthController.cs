@@ -65,26 +65,26 @@ public class AuthController(IAuthService auth, ILogger<AuthController> logger) :
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
     {
         var operationName = "AuthController.Register";
-        var correlationId = HttpContext.TraceIdentifier;
         var stopwatch = Stopwatch.StartNew();
 
-        using (var activity = logger.StartOperationSpan(operationName, correlationId))
+        using (var activity = logger.StartOperationSpan(operationName))
         {
+            var traceId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
             try
             {
                 activity?.SetTag("user.email", dto.Email);
                 activity?.SetTag("operation.type", "registration");
 
                 logger.LogInformation(
-                    "User registration attempt. Email: {Email}, CorrelationId: {CorrelationId}",
+                    "User registration attempt. Email: {Email}, TraceId: {TraceId}",
                     dto.Email,
-                    correlationId);
+                    traceId);
 
                 string token = await _auth.RegisterAsync(dto);
                 var expiresAt = DateTime.UtcNow.AddHours(24); // Assuming 24-hour token validity
 
                 stopwatch.Stop();
-                logger.LogOperationSuccess(operationName, stopwatch.ElapsedMilliseconds, correlationId);
+                logger.LogOperationSuccess(operationName, stopwatch.ElapsedMilliseconds);
 
                 var response = new RegisterResponse
                 {
@@ -99,14 +99,14 @@ public class AuthController(IAuthService auth, ILogger<AuthController> logger) :
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                logger.LogOperationError(ex, operationName, correlationId);
+                logger.LogOperationError(ex, operationName);
                 
                 var errorResponse = new ApiErrorResponse
                 {
                     Status = StatusCodes.Status500InternalServerError,
                     Title = "Registration Failed",
                     Detail = ex.Message,
-                    TraceId = correlationId
+                    TraceId = traceId
                 };
 
                 return StatusCode(StatusCodes.Status500InternalServerError, errorResponse);
@@ -168,26 +168,26 @@ public class AuthController(IAuthService auth, ILogger<AuthController> logger) :
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
         var operationName = "AuthController.Login";
-        var correlationId = HttpContext.TraceIdentifier;
         var stopwatch = Stopwatch.StartNew();
 
-        using (var activity = logger.StartOperationSpan(operationName, correlationId))
+        using (var activity = logger.StartOperationSpan(operationName))
         {
+            var traceId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
             try
             {
                 activity?.SetTag("user.email", dto.Email);
                 activity?.SetTag("operation.type", "authentication");
 
                 logger.LogInformation(
-                    "User login attempt. Email: {Email}, CorrelationId: {CorrelationId}",
+                    "User login attempt. Email: {Email}, TraceId: {TraceId}",
                     dto.Email,
-                    correlationId);
+                    traceId);
 
                 string token = await _auth.LoginAsync(dto);
                 var expiresAt = DateTime.UtcNow.AddHours(24); // Assuming 24-hour token validity
 
                 stopwatch.Stop();
-                logger.LogOperationSuccess(operationName, stopwatch.ElapsedMilliseconds, correlationId);
+                logger.LogOperationSuccess(operationName, stopwatch.ElapsedMilliseconds);
 
                 var response = new LoginResponse
                 {
@@ -203,14 +203,14 @@ public class AuthController(IAuthService auth, ILogger<AuthController> logger) :
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                logger.LogOperationError(ex, operationName, correlationId);
+                logger.LogOperationError(ex, operationName);
                 
                 var errorResponse = new ApiErrorResponse
                 {
                     Status = StatusCodes.Status500InternalServerError,
                     Title = "Login Failed",
                     Detail = ex.Message,
-                    TraceId = correlationId
+                    TraceId = traceId
                 };
 
                 return StatusCode(StatusCodes.Status500InternalServerError, errorResponse);
