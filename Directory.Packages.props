@@ -52,4 +52,8 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.8.1" />
 	  <!-- Aspire -->
   </ItemGroup>
+  <ItemGroup>
+    <PackageVersion Include="MediatR" Version="12.1.1" />
+    <PackageVersion Include="FluentValidation" Version="12.1.1" /> 
+  </ItemGroup>
 </Project>

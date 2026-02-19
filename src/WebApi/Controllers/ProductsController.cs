@@ -1,4 +1,3 @@
-using Application.Abstractions.Messaging;
 using Application.Common.DTOs; 
 using Application.Products.Create;
 using Application.Products.Delete;
@@ -6,6 +5,7 @@ using Application.Products.Generate;
 using Application.Products.GetAll;
 using Application.Products.GetById;
 using Application.Products.Update;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc; 
 
@@ -14,14 +14,7 @@ namespace WebApi.Controllers;
 [Route("api/[controller]/[action]")]
 [ApiController]
 [Authorize] 
-public class ProductsController(
-    ICommandHandler<CreateProductCommand, Guid> createCommandHandler, 
-    IQueryHandler<GetAllProductQuery, List<ProductDto>> getAllProductQueryHandler,
-    IQueryHandler<GetByIdProductQuery, ProductDto> getByIdProductQueryHandler,
-    ICommandHandler<UpdateProductCommand> updateCommandHandler,
-    ICommandHandler<DeleteProductCommand> deleteCommandHandler,
-    ICommandHandler<GenerateProductCommand> generateCommandHandler
-    ) : ApiController
+public class ProductsController(IMediator mediator) : ApiController
 {
     
     [HttpGet]
@@ -31,7 +24,7 @@ public class ProductsController(
     [Produces("application/json")]
     public async Task<IActionResult> GetAllProduct(CancellationToken cancellationToken)
     {
-        var result = await getAllProductQueryHandler.Handle(new GetAllProductQuery(), cancellationToken);
+        var result = await mediator.Send(new GetAllProductQuery(), cancellationToken);
         return HandleResult(result);
     }
  
@@ -43,7 +36,7 @@ public class ProductsController(
         [FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
-        var result = await getByIdProductQueryHandler.Handle(new GetByIdProductQuery(id), cancellationToken);
+        var result = await mediator.Send(new GetByIdProductQuery(id), cancellationToken);
         return HandleResult(result);
     }
  
@@ -56,11 +49,8 @@ public class ProductsController(
         [FromBody] CreateProductRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new CreateProductCommand(
-            
-        );
-
-        var result = await createCommandHandler.Handle(command, cancellationToken);
+        var command = new CreateProductCommand();
+        var result = await mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -81,11 +71,8 @@ public class ProductsController(
         [FromBody] UpdateProductRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new UpdateProductCommand(
-            request.Id
-        );
-
-        var result = await updateCommandHandler.Handle(command, cancellationToken);
+        var command = new UpdateProductCommand(id);
+        var result = await mediator.Send(command, cancellationToken);
         return HandleResult(result);
     }
 
@@ -97,30 +84,33 @@ public class ProductsController(
         [FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
-        var result = await deleteCommandHandler.Handle(new DeleteProductCommand(id), cancellationToken);
+        var result = await mediator.Send(new DeleteProductCommand(id), cancellationToken);
         return HandleResult(result);
     }
 
-
-    [HttpPost] 
+    [HttpPost("generate")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Generate(CancellationToken cancellationToken)
     {
-        var result = await generateCommandHandler.Handle(new GenerateProductCommand(), cancellationToken);
+        var result = await mediator.Send(new GenerateProductCommand(), cancellationToken);
         return HandleResult(result);
     }
-
-
 }
 
 
 public sealed class CreateProductRequest
 { 
-
+    public required string Name { get; set; }
+    public required string Description { get; set; }
+    public required decimal Price { get; set; }
 }
  
 public sealed class UpdateProductRequest
 {
     public required Guid Id { get; set; }
-
+    public required string Name { get; set; }
+    public required string Description { get; set; }
+    public required decimal Price { get; set; }
 }
 

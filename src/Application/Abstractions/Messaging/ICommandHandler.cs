@@ -1,38 +1,27 @@
-﻿using SharedKernel;
+﻿using MediatR;
+using SharedKernel;
 
 namespace Application.Abstractions.Messaging;
 
 /// <summary>
 /// Handles a command that modifies state with no return value.
-/// The command must implement ICommand (which returns Unit).
+/// The command must implement ICommand (which returns Result).
+/// Implements MediatR IRequestHandler for pipeline behavior support.
 /// </summary>
 /// <typeparam name="TCommand">The command type implementing ICommand</typeparam>
-public interface ICommandHandler<in TCommand>
+public interface ICommandHandler<in TCommand> : IRequestHandler<TCommand, Result>
     where TCommand : ICommand
 {
-    /// <summary>
-    /// Handles the command execution.
-    /// </summary>
-    /// <param name="command">The command to handle</param>
-    /// <param name="cancellationToken">Cancellation token for long-running operations</param>
-    /// <returns>A result indicating success or failure</returns>
-    Task<Result> Handle(TCommand command, CancellationToken cancellationToken);
 }
 
 /// <summary>
 /// Handles a command that modifies state and returns a response.
 /// The command must implement ICommand&lt;TResponse&gt;.
+/// Implements MediatR IRequestHandler for pipeline behavior support.
 /// </summary>
 /// <typeparam name="TCommand">The command type implementing ICommand&lt;TResponse&gt;</typeparam>
 /// <typeparam name="TResponse">The response type returned by the command</typeparam>
-public interface ICommandHandler<in TCommand, TResponse>
+public interface ICommandHandler<in TCommand, TResponse> : IRequestHandler<TCommand, Result<TResponse>>
     where TCommand : ICommand<TResponse>
 {
-    /// <summary>
-    /// Handles the command execution and returns a response.
-    /// </summary>
-    /// <param name="command">The command to handle</param>
-    /// <param name="cancellationToken">Cancellation token for long-running operations</param>
-    /// <returns>A result containing the response or an error</returns>
-    Task<Result<TResponse>> Handle(TCommand command, CancellationToken cancellationToken);
 }

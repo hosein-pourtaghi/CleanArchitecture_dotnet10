@@ -1,15 +1,16 @@
-﻿using SharedKernel;
+﻿using MediatR;
+using SharedKernel;
 
 namespace Application.Abstractions.Messaging;
 
 /// <summary>
 /// Represents a command that modifies state with no return value.
-/// Inherits from IRequest to enable pipeline behaviors.
+/// Inherits from IRequest to enable MediatR pipeline behaviors.
 /// </summary>
-public interface ICommand : IRequest<Unit>;
+public interface ICommand : IRequest<Result>;
 
 /// <summary>
 /// Represents a command that modifies state and returns a response of type TResponse.
-/// Inherits from IRequest to enable pipeline behaviors.
+/// Inherits from IRequest to enable MediatR pipeline behaviors.
 /// </summary>
-public interface ICommand<TResponse> : IRequest<TResponse>;
+public interface ICommand<TResponse> : IRequest<Result<TResponse>>;

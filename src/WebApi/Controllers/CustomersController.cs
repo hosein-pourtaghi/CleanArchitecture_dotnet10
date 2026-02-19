@@ -1,4 +1,3 @@
-using Application.Abstractions.Messaging;
 using Application.Common.DTOs;
 using Application.Customers.Copy;
 using Application.Customers.Create;
@@ -6,6 +5,7 @@ using Application.Customers.Delete;
 using Application.Customers.Get;
 using Application.Customers.GetById;
 using Application.Customers.Update;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,14 +22,7 @@ namespace WebApi.Controllers;
 [Tags("Customers")]
 [Produces("application/json")]
 [Consumes("application/json")]
-public class CustomersController(
-    ICommandHandler<CreateCustomerCommand, Guid> createCommandHandler,
-    ICommandHandler<CopyCustomerCommand, bool> copyCommandHandler,
-    ICommandHandler<UpdateCustomerCommand> updateCommandHandler,
-    ICommandHandler<DeleteCustomerCommand> deleteCommandHandler,
-    IQueryHandler<GetCustomerByIdQuery, CustomerDto> getCustomerByIdQueryHandler,
-    IQueryHandler<GetCustomersQuery, List<CustomerDto>> getCustomersQueryHandler
-    ) : ApiController
+public class CustomersController(IMediator mediator) : ApiController
 {
     /// <summary>
     /// Retrieves all customers.
@@ -57,7 +50,7 @@ public class CustomersController(
     [Produces("application/json")]
     public async Task<IActionResult> GetCustomers(CancellationToken cancellationToken)
     {
-        var result = await getCustomersQueryHandler.Handle(new GetCustomersQuery(), cancellationToken);
+        var result = await mediator.Send(new GetCustomersQuery(), cancellationToken);
         return HandleResult(result);
     }
 
@@ -93,7 +86,7 @@ public class CustomersController(
         [FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
-        var result = await getCustomerByIdQueryHandler.Handle(new GetCustomerByIdQuery(id), cancellationToken);
+        var result = await mediator.Send(new GetCustomerByIdQuery(id), cancellationToken);
         return HandleResult(result);
     }
 
@@ -154,7 +147,7 @@ public class CustomersController(
             request.Phone,
             request.Address);
 
-        var result = await createCommandHandler.Handle(command, cancellationToken);
+        var result = await mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -223,7 +216,7 @@ public class CustomersController(
             request.Phone,
             request.Address);
 
-        var result = await updateCommandHandler.Handle(command, cancellationToken);
+        var result = await mediator.Send(command, cancellationToken);
         return HandleResult(result);
     }
 
@@ -250,12 +243,6 @@ public class CustomersController(
     /// ## Error Handling
     /// - 404: Customer not found
     /// </remarks>
-    /// <param name="id">The customer's unique identifier</param>
-    /// <param name="cancellationToken">Cancellation token for the operation</param>
-    /// <returns>No content on success</returns>
-    /// <response code="204">Customer deleted successfully</response>
-    /// <response code="404">Customer not found</response>
-    /// <response code="401">Unauthorized - invalid or missing token</response>
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -264,39 +251,35 @@ public class CustomersController(
         [FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
-        var result = await deleteCommandHandler.Handle(new DeleteCustomerCommand(id), cancellationToken);
+        var command = new DeleteCustomerCommand(id);
+        var result = await mediator.Send(command, cancellationToken);
         return HandleResult(result);
     }
 
-
-    [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    /// <summary>
+    /// Copies an existing customer.
+    /// </summary>
+    /// <remarks>
+    /// Creates a copy of an existing customer with all the same details.
+    /// </remarks>
+    /// <param name="id">The customer ID to copy</param>
+    /// <param name="request">The customer data to copy</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Success status</returns>
+    [HttpPost("{id:guid}/copy")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Copy(
-          [FromBody] CopyCustomerRequest request,
-          CancellationToken cancellationToken)
+        [FromRoute] Guid id,
+        [FromBody] CreateCustomerRequest request,
+        CancellationToken cancellationToken)
     {
-        var command = new CopyCustomerCommand(
-            request.Name,
-            request.Email,
-            request.Phone,
-            request.Address);
-
-        var result = await copyCommandHandler.Handle(command, cancellationToken);
-
-        if (result.IsFailure)
-        {
-            return HandleResult<bool>(result);
-        }
-
-        return CreatedAtAction(nameof(GetById), new { id = result.Value }, new { id = result.Value });
+        var command = new CopyCustomerCommand(request.Name, request.Email, request.Phone, request.Address);
+        var result = await mediator.Send(command, cancellationToken);
+        return HandleResult(result);
     }
-
 }
-
-
 
 
 /// <summary>

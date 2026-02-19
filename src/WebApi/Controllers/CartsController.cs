@@ -1,4 +1,3 @@
-using Application.Abstractions.Messaging;
 using Application.Carts.Create;
 using Application.Carts.Generate;
 using Application.Carts.Get;
@@ -6,6 +5,7 @@ using Application.Carts.GetById;
 using Application.Carts.GetCustomerCarts;
 using Application.Carts.Update;
 using Application.Common.DTOs;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,14 +22,7 @@ namespace WebApi.Controllers;
 [Tags("Carts")]
 [Produces("application/json")]
 [Consumes("application/json")]
-public class CartsController(
-    ICommandHandler<CreateCartCommand, Guid> createCommandHandler,
-    ICommandHandler<UpdateCartCommand> updateCommandHandler,
-    ICommandHandler<GenerateCartCommand> generateCommandHandler,
-    IQueryHandler<GetAllCartQuery, List<CartDto>> getAllCartQueryHandler,
-    IQueryHandler<GetCartByIdQuery, CartDto> getCartByIdQueryHandler,
-    IQueryHandler<GetCustomerCartsQuery, List<CartDto>> getCustomerCartsQueryHandler
-    ) : ApiController
+public class CartsController(IMediator mediator) : ApiController
 {
     /// <summary>
     /// Retrieves all carts.
@@ -57,22 +50,9 @@ public class CartsController(
     [Produces("application/json")]
     public async Task<IActionResult> GetAllCart(CancellationToken cancellationToken)
     {
-        var result = await getAllCartQueryHandler.Handle(new GetAllCartQuery(), cancellationToken);
+        var result = await mediator.Send(new GetAllCartQuery(), cancellationToken);
         return HandleResult(result);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     /// <summary>
     /// Retrieves a specific cart by ID.
@@ -106,7 +86,24 @@ public class CartsController(
         [FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
-        var result = await getCartByIdQueryHandler.Handle(new GetCartByIdQuery(id), cancellationToken);
+        var result = await mediator.Send(new GetCartByIdQuery(id), cancellationToken);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Retrieves all carts for a specific customer.
+    /// </summary>
+    [HttpGet("customer/{customerId:guid}")]
+    [ProducesResponseType(typeof(List<CartDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetCustomerCarts(
+        [FromRoute] Guid customerId,
+        [FromQuery] int page = 0,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new GetCustomerCartsQuery(customerId, page, pageSize), cancellationToken);
         return HandleResult(result);
     }
 
@@ -115,43 +112,10 @@ public class CartsController(
     /// </summary>
     /// <remarks>
     /// Creates a new cart record with the provided information.
-    /// 
-    /// ## Request Body
-    /// ```json
-    /// {
-    ///   "name": "John Doe",
-    ///   "email": "john@example.com",
-    ///   "phone": "+1-555-0123",
-    ///   "address": "123 Main St, Anytown, ST 12345"
-    /// }
-    /// ```
-    /// 
-    /// ## Validation Rules
-    /// - **Name**: Required, 1-200 characters
-    /// - **Email**: Required, valid email format, max 255 characters, must be unique
-    /// - **Phone**: Optional, max 20 characters
-    /// - **Address**: Optional, max 500 characters
-    /// 
-    /// ## Response
-    /// Returns HTTP 201 (Created) with the new cart ID and location header.
-    /// 
-    /// ## Domain Events
-    /// Triggers:
-    /// - `CartCreatedDomainEvent` - Published to message bus
-    /// - Audit log entry created for compliance
-    /// 
-    /// ## Error Cases
-    /// - 400: Validation error (invalid email, missing required fields)
-    /// - 409: Email already exists
-    /// - 401: Unauthorized
     /// </remarks>
     /// <param name="request">Cart creation request</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <returns>Created cart ID</returns>
-    /// <response code="201">Cart created successfully</response>
-    /// <response code="400">Validation error</response>
-    /// <response code="409">Email already exists</response>
-    /// <response code="401">Unauthorized - invalid or missing token</response>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -162,16 +126,14 @@ public class CartsController(
         CancellationToken cancellationToken)
     {
         var command = new CreateCartCommand(
-            CustomerId: request.CustomerId,
-            Currency: request.Currency,
-            TransactionId: request.TransactionId,
-            PaymentType: request.PaymentType,
-            Code: request.Code,
-            PurchaseDate: request.PurchaseDate,
-            CartItems: request.CartItems
-            );
-
-        var result = await createCommandHandler.Handle(command, cancellationToken);
+            request.CustomerId,
+            request.Currency,
+            request.TransactionId,
+            request.PaymentType,
+            request.Code,
+            request.PurchaseDate,
+            request.CartItems ?? new());
+        var result = await mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -185,43 +147,12 @@ public class CartsController(
     /// Updates an existing cart.
     /// </summary>
     /// <remarks>
-    /// Updates cart information. All fields are required.
-    /// 
-    /// ## Request Body
-    /// ```json
-    /// {
-    ///   "name": "Jane Doe",
-    ///   "email": "jane@example.com",
-    ///   "phone": "+1-555-0456",
-    ///   "address": "456 Oak Ave, Somewhere, ST 54321"
-    /// }
-    /// ```
-    /// 
-    /// ## Validation Rules
-    /// Same as creation endpoint - see POST endpoint documentation.
-    /// 
-    /// ## Response
-    /// Returns HTTP 204 (No Content) on success.
-    /// 
-    /// ## Domain Events
-    /// Triggers:
-    /// - `CartUpdatedDomainEvent` - Published to message bus
-    /// - Audit log entry created
-    /// 
-    /// ## Error Handling
-    /// - 404: Cart not found
-    /// - 409: Email already in use by another cart
-    /// - 400: Validation error
+    /// Updates cart information.
     /// </remarks>
     /// <param name="id">The cart's unique identifier</param>
     /// <param name="request">Update request with new cart data</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <returns>No content on success</returns>
-    /// <response code="204">Cart updated successfully</response>
-    /// <response code="400">Validation error</response>
-    /// <response code="404">Cart not found</response>
-    /// <response code="409">Email already in use</response>
-    /// <response code="401">Unauthorized - invalid or missing token</response>
     [HttpPut("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -234,83 +165,33 @@ public class CartsController(
         CancellationToken cancellationToken)
     {
         var command = new UpdateCartCommand(
-            Id: request.Id,
-            CustomerId: request.CustomerId,
-            Currency: request.Currency,
-            TransactionId: request.TransactionId,
-            PaymentType: request.PaymentType,
-            Code: request.Code,
-            PurchaseDate: request.PurchaseDate,
-            CartItems: request.CartItems
-            );
-
-        var result = await updateCommandHandler.Handle(command, cancellationToken);
+            request.Id,
+            request.CustomerId,
+            request.Currency,
+            request.TransactionId,
+            request.PaymentType,
+            request.Code,
+            request.PurchaseDate,
+            request.CartItems ?? new());
+        var result = await mediator.Send(command, cancellationToken);
         return HandleResult(result);
     }
 
-    ///// <summary>
-    ///// Deletes a cart.
-    ///// </summary>
-    ///// <remarks>
-    ///// Permanently removes a cart record from the system.
-    ///// 
-    ///// ## Security Considerations
-    ///// - This operation is permanent and cannot be undone
-    ///// - Audit log records are retained for compliance
-    ///// - Consider implementing soft delete if data retention is required
-    ///// 
-    ///// ## Domain Events
-    ///// Triggers:
-    ///// - `CartDeletedDomainEvent` - Published to message bus
-    ///// - Audit log entry created
-    ///// 
-    ///// ## Cascading Effects
-    ///// - Associated orders may be affected (depends on database constraints)
-    ///// - Notification services will be triggered
-    ///// 
-    ///// ## Error Handling
-    ///// - 404: Cart not found
-    ///// </remarks>
-    ///// <param name="id">The cart's unique identifier</param>
-    ///// <param name="cancellationToken">Cancellation token for the operation</param>
-    ///// <returns>No content on success</returns>
-    ///// <response code="204">Cart deleted successfully</response>
-    ///// <response code="404">Cart not found</response>
-    ///// <response code="401">Unauthorized - invalid or missing token</response>
-    //[HttpDelete("{id:guid}")]
-    //[ProducesResponseType(StatusCodes.Status204NoContent)]
-    //[ProducesResponseType(StatusCodes.Status404NotFound)]
-    //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    //public async Task<IActionResult> Delete(
-    //    [FromRoute] Guid id,
-    //    CancellationToken cancellationToken)
-    //{
-    //    var result = await deleteCommandHandler.Handle(new DeleteCartCommand(id), cancellationToken);
-    //    return HandleResult(result);
-    //}
-
-
-    [HttpPost]
+    /// <summary>
+    /// Generates sample carts.
+    /// </summary>
+    /// <remarks>
+    /// Creates sample cart data for testing.
+    /// </remarks>
+    [HttpPost("generate")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [AllowAnonymous]
     public async Task<IActionResult> Generate(CancellationToken cancellationToken)
     {
-
-        var result = await generateCommandHandler.Handle(new GenerateCartCommand(), cancellationToken);
+        var result = await mediator.Send(new GenerateCartCommand(), cancellationToken);
         return HandleResult(result);
     }
-
-    [HttpGet]
-    [ProducesResponseType(typeof(List<CartDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [Produces("application/json")]
-    public async Task<IActionResult> GetCustomerCarts(Guid customerId,int page,int pageSize ,CancellationToken cancellationToken)
-    {
-        var q = new GetCustomerCartsQuery(customerId: customerId , page: page , pageSize : pageSize);
-      
-        var result = await getCustomerCartsQueryHandler.Handle(q, cancellationToken);
-        return HandleResult(result);
-    }
-
 }
 
 

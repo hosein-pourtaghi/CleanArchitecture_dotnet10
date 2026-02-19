@@ -4,7 +4,7 @@ namespace WebApi.Infrastructure;
 
 public static class CustomResults
 {
-    public static IResult Problem(Result result)
+    public static Microsoft.AspNetCore.Http.IResult Problem(Result result)
     {
         if (result.IsSuccess)
         {

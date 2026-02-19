@@ -2,7 +2,7 @@
 
 namespace SharedKernel;
 
-public class Result
+public class Result : IResult
 {
     public Result(bool isSuccess, Error error)
     {
