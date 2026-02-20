@@ -1,6 +1,10 @@
 ﻿using Microsoft.OpenApi;
 using WebApi.Infrastructure;
 using WebApi.Telemetry;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using WebApi.Http;
 
 
 namespace WebApi;
@@ -9,7 +13,6 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddPresentation(this IServiceCollection services)
     {
-        services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
        {
            options.CustomSchemaIds(id => id.FullName!.Replace('+', '-'));
@@ -68,6 +71,44 @@ public static class DependencyInjection
 
         // Register ActivitySource for dependency injection if needed
         services.AddSingleton(TelemetryActivitySource.Instance);
+
+        // Configure high-throughput HttpClient(s) using IHttpClientFactory and SocketsHttpHandler
+        // - Use typed clients (IExternalHttpClient) for strong typing and testability
+        // - Configure SocketsHttpHandler to enable connection pooling and HTTP/2 multiplexing
+        // - Default resilience and service-discovery handlers are applied globally by ProjectSetup.ServiceDefaults
+        const int defaultMaxConnectionsPerServer = 100;
+        //services.AddHttpClient("ExternalService")
+        //    .ConfigureHttpClient(client =>
+        //    {
+        //        client.Timeout = TimeSpan.FromSeconds(30);
+        //        client.DefaultRequestHeaders.Accept.Clear();
+        //        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        //    })
+        //    .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+        //    {
+        //        PooledConnectionLifetime = TimeSpan.FromMinutes(5),
+        //        PooledConnectionIdleTimeout = TimeSpan.FromMinutes(2),
+        //        MaxConnectionsPerServer = defaultMaxConnectionsPerServer,
+        //        AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+        //        EnableMultipleHttp2Connections = true
+        //    });
+
+        // Register a typed wrapper for convenient, testable HTTP calls
+        services.AddHttpClient<IExternalHttpClient, ExternalHttpClient>()
+            .ConfigureHttpClient(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(30);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+            {
+                PooledConnectionLifetime = TimeSpan.FromMinutes(5),
+                PooledConnectionIdleTimeout = TimeSpan.FromMinutes(2),
+                MaxConnectionsPerServer = defaultMaxConnectionsPerServer,
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                EnableMultipleHttp2Connections = true
+            });
 
         return services;
     }
