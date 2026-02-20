@@ -15,6 +15,21 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
+
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:4200") // Your Angular app URL
+                   .AllowAnyHeader()
+                   .AllowAnyMethod()
+                   .AllowCredentials(); // If you're using cookies/auth
+        });
+});
+
+
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
@@ -46,12 +61,12 @@ builder.Services
     .AddApplication()
     .AddPresentation()
     .AddInfrastructure(builder.Configuration);
-
-// automapper & validators
-builder.Services.AddAutoMapper(typeof(CustomerProfile));
-builder.Services.AddValidatorsFromAssembly(typeof(CustomerProfile).Assembly);
-
+ 
 WebApplication app = builder.Build();
+
+// Use CORS (order matters - should be before MapControllers)
+app.UseCors("AllowAngularApp");
+
 
 app.MapHealthChecks("health", new HealthCheckOptions
 {

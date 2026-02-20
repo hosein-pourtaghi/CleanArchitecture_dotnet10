@@ -1,4 +1,5 @@
-﻿using Application.Abstractions.Behaviors;
+﻿using System.Reflection;
+using Application.Abstractions.Behaviors;
 using Application.Abstractions.Messaging;
 using FluentValidation;
 using MediatR;
@@ -11,6 +12,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());
         // Register MediatR with all handlers from this assembly
         services.AddMediatR(config =>
         {
@@ -23,6 +25,7 @@ public static class DependencyInjection
 
         // Add FluentValidation validators
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
+        //services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly()); // other way of get assembly
 
         // Register domain event handlers
         services.Scan(scan => scan.FromAssembliesOf(typeof(DependencyInjection))
