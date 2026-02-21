@@ -69,6 +69,15 @@ csharp_style_expression_bodied_accessors = true:error
 csharp_style_expression_bodied_lambdas = true:error
 csharp_style_expression_bodied_local_functions = true:error
 
+# CA1303: Do not pass literals as localized parameters
+dotnet_diagnostic.CA1303.severity = silent
+
+# CS9113: Parameter is unread.
+dotnet_diagnostic.CS9113.severity = silent
+
+# CA1873: Avoid potentially expensive logging
+dotnet_diagnostic.CA1873.severity = silent
+
 [*.{cs,vb}]
 dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
 dotnet_style_prefer_simplified_interpolation = true:suggestion
@@ -414,3 +423,22 @@ dotnet_diagnostic.S6605.severity = none
 
 # S6781: JWT secret keys should not be disclosed
 dotnet_diagnostic.S6781.severity = none
+
+# Default severity for all analyzer diagnostics
+dotnet_analyzer_diagnostic.severity = suggestion
+
+# Default severity for analyzer diagnostics with category 'Globalization'
+dotnet_analyzer_diagnostic.category-Globalization.severity = none
+
+dotnet_diagnostic.ide0007.severity = suggestion
+
+#pragma warning disable CS0618 // Type or member is obsolete
+dotnet_diagnostic.CS0618.severity = none
+#pragma warning disable CA1305 // Specify IFormatProvider
+dotnet_diagnostic.CA1305.severity = none
+#pragma warning disable CA2000 // Dispose objects before losing scope
+dotnet_diagnostic.CA2000.severity = none
+
+
+# Default severity for analyzer diagnostics with category 'Performance'
+dotnet_analyzer_diagnostic.category-Performance.severity = none

@@ -1,10 +1,10 @@
 services:
   web-api:
     image: ${DOCKER_REGISTRY-}webapi
-    container_name: web-api
+    container_name: webapi
     build:
       context: .
-      dockerfile: src/Web.Api/Dockerfile
+      dockerfile: src/WebApi/Dockerfile
     ports:
       - 5000:8080
       - 5001:8081

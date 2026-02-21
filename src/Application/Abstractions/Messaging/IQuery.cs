@@ -1,3 +1,11 @@
-﻿namespace Application.Abstractions.Messaging;
+﻿using MediatR;
+using SharedKernel;
 
-public interface IQuery<TResponse>;
+namespace Application.Abstractions.Messaging;
+
+/// <summary>
+/// Represents a query that reads data without modifying state.
+/// Always returns a response of type TResponse wrapped in a Result.
+/// Inherits from IRequest to enable MediatR pipeline behaviors.
+/// </summary>
+public interface IQuery<TResponse> : IRequest<Result<TResponse>>;

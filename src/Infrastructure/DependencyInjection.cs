@@ -1,19 +1,22 @@
 ﻿using System.Text;
 using Application.Abstractions.Authentication;
 using Application.Abstractions.Data;
+using Application.Abstractions.Interfaces;
+using Domain.Users;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization;
-using Infrastructure.Database;
 using Infrastructure.DomainEvents;
-using Infrastructure.Time;
+using Infrastructure.Persistence;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using SharedKernel;
+using Serilog;
 
 namespace Infrastructure;
 
@@ -31,9 +34,8 @@ public static class DependencyInjection
 
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
-        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
-
         services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
+        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }
@@ -42,14 +44,30 @@ public static class DependencyInjection
     {
         string? connectionString = configuration["ConnectionString"];
 
+        //services.AddDbContext<ApplicationDbContext>(options => options
+        //    .UseNpgsql(connectionString, npgsqlOptions =>
+        //        npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default))
+        //    );
+
         services.AddDbContext<ApplicationDbContext>(
             options => options
-                .UseNpgsql(connectionString, npgsqlOptions =>
-                    npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default))
-                .UseSnakeCaseNamingConvention());
+                .UseSqlServer(connectionString, options =>
+                {
+                    options.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default);
+                    var minutes = (int)TimeSpan.FromMinutes(3).TotalSeconds;
+                    options.CommandTimeout(minutes);
+                    options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(10), null);
+
+                }));
 
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
+        services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
         return services;
     }
 
@@ -66,16 +84,48 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(o =>
+
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(o =>
             {
                 o.RequireHttpsMetadata = false;
+
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!)),
+
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+
+
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
                     ValidIssuer = configuration["Jwt:Issuer"],
                     ValidAudience = configuration["Jwt:Audience"],
                     ClockSkew = TimeSpan.Zero
+                };
+
+                o.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = ctx =>
+                    {
+                        Console.WriteLine("JWT FAILED:");
+                        Console.WriteLine(ctx.Exception.ToString());
+                        Log.Error("JWT FAILED:");
+                        Log.Error("JWT FAILED Exeption:", ctx.Exception.ToString());
+                        return Task.CompletedTask;
+                    },
+                    OnChallenge = ctx =>
+                    {
+                        Console.WriteLine("JWT CHALLENGE");
+                        Log.Error("JWT CHALLENGE");
+                        return Task.CompletedTask;
+                    }
                 };
             });
 
@@ -99,4 +149,7 @@ public static class DependencyInjection
 
         return services;
     }
+
+
+
 }

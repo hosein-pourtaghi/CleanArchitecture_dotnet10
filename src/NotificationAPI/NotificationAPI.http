@@ -1,0 +1,7 @@
+@NotificationAPI_HostAddress = http://localhost:5002
+
+GET {{NotificationAPI_HostAddress}}/api/Notifications/stream/
+Accept: application/json
+
+###
+ 
