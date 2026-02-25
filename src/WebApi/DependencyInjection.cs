@@ -94,21 +94,25 @@ public static class DependencyInjection
         //    });
 
         // Register a typed wrapper for convenient, testable HTTP calls
-        services.AddHttpClient<IExternalHttpClient, ExternalHttpClient>()
+        services.AddHttpClient<IExternalHttpClient, ExternalHttpClient>() // its transient itself
             .ConfigureHttpClient(client =>
             {
                 client.Timeout = TimeSpan.FromSeconds(30);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                //client.DefaultRequestHeaders.Add("Authorization","token");
+                //client.BaseAddress = ""
             })
-            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler // because it is transient we should config its lifetime and timeout
             {
                 PooledConnectionLifetime = TimeSpan.FromMinutes(5),
                 PooledConnectionIdleTimeout = TimeSpan.FromMinutes(2),
                 MaxConnectionsPerServer = defaultMaxConnectionsPerServer,
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
                 EnableMultipleHttp2Connections = true
-            });
+            })
+            //.SetHandlerLifetime(Timeout.InfiniteTimeSpan) // prevent socket recycling 
+            ;
 
         return services;
     }
