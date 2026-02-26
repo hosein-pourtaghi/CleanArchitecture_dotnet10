@@ -44,22 +44,30 @@ internal static class UpdateBuilder
 
     internal static string UpdateCommandFileBuilder()
     {
+        var reader = new CrudBuilder.EntityReader();
+        reader.ReadEntityFile();
+
+        var parameters = reader.UpdateCommandParameters;
+        var paramSection = string.IsNullOrWhiteSpace(parameters) ? string.Empty : $"\n    {parameters}\n";
+
         var str =
-@$"
-using Application.Abstractions.Messaging;
+@$"using Application.Abstractions.Messaging;
 using Application.Common.DTOs;
 
 namespace  Application.{MyPath.EntityName}s.Update;
 
-public sealed record Update{MyPath.EntityName}Command(
-        Guid Id
-    ) : ICommand; 
+public sealed record Update{MyPath.EntityName}Command({paramSection}) : ICommand; 
 ";
 
         return str;
     }
     internal static string UpdateCommandHandlerFileBuilder()
     {
+        var reader = new CrudBuilder.EntityReader();
+        reader.ReadEntityFile();
+
+        var assignments = reader.PropertyAssignments;
+
         var str =
 @$"
 using Application.Abstractions.Data;
@@ -86,7 +94,7 @@ internal sealed class Update{MyPath.EntityName}CommandHandler(
         }}
 
         // Update entity with new values 
-        {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)} = mapper.Map<{MyPath.EntityName}>(command);
+        {assignments}
 
 
         //// Publish comprehensive domain event with all updated data for auditing and message bus

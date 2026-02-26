@@ -43,15 +43,20 @@ internal static class CreateBuilder
 
     internal static string CreateCommandFileBuilder()
     {
+        // Read entity properties to build command parameters
+        var reader = new CrudBuilder.EntityReader();
+        reader.ReadEntityFile();
+        var parameters = reader.CreateCommandParameters;
+
+        var paramSection = string.IsNullOrWhiteSpace(parameters) ? string.Empty : $"\n    {parameters}\n";
+
         var str =
-@$"
-using Application.Abstractions.Messaging;
+@$"using Application.Abstractions.Messaging;
 using Application.Common.DTOs;
 
 namespace  Application.{MyPath.EntityName}s.Create;
 
-public sealed record Create{MyPath.EntityName}Command(
-    ) : ICommand<Guid>; 
+public sealed record Create{MyPath.EntityName}Command({paramSection}) : ICommand<Guid>; 
 ";
 
         return str;

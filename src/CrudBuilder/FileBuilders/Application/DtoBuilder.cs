@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Linq;
 
 namespace CrudBuilder.FileBuilders.Application;
 internal static class DtoBuilder
@@ -25,26 +26,24 @@ internal static class DtoBuilder
  
     internal static string DtoFileBuilder()
     {
+        var reader = new CrudBuilder.EntityReader();
+        reader.ReadEntityFile();
+
+        // Build DTO properties
+        var dtoProps = reader.Properties
+            .Select(p => $"public {p.Type}{(p.IsNullable ? "?" : string.Empty)} {p.Name} {{ get; set; }}")
+            .ToList();
+
+        var propsSection = dtoProps.Count > 0 ? "    " + string.Join("\n    ", dtoProps) + "\n" : string.Empty;
+
         var str =
-@$"
-using Application.Common.DTOs;
-using AutoDto;
-using Domain.{MyPath.EntityName}s;
+@$"using System;
 
-namespace Application.Common.Mappings;
- 
-public class {MyPath.EntityName}Profile : Profile
+namespace Application.Common.DTOs;
+
+public class {MyPath.EntityName}Dto
 {{
-    public {MyPath.EntityName}Profile()
-    {{
-
-        CreateMap<{MyPath.EntityName}, {MyPath.EntityName}Dto>()
-            ;
-
-
-    }}
-}}
-
+{propsSection}}}
 ";
 
         return str;
