@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-
 namespace LoadSimulator.Infrastructure;
 
 /// <summary>
@@ -9,14 +7,14 @@ public class SimulationMetricsService
 {
     private readonly ConcurrentBag<long> _responseTimes = new();
     private readonly ConcurrentDictionary<string, int> _errorCounts = new();
-    private long _totalOrders = 0;
-    private long _successfulOrders = 0;
-    private long _failedOrders = 0;
-    private int _successfulUsers = 0;
-    private int _failedUsers = 0;
+    private long _totalOrders;
+    private long _successfulOrders;
+    private long _failedOrders;
+    private int _successfulUsers;
+    private int _failedUsers;
     private readonly object _lock = new object();
 
-    public void RecordResponseTime(long milliseconds) => 
+    public void RecordResponseTime(long milliseconds) =>
         _responseTimes.Add(milliseconds);
 
     public void RecordSuccessfulOrder()
@@ -31,10 +29,10 @@ public class SimulationMetricsService
         Interlocked.Increment(ref _totalOrders);
     }
 
-    public void RecordSuccessfulUser() => 
+    public void RecordSuccessfulUser() =>
         Interlocked.Increment(ref _successfulUsers);
 
-    public void RecordFailedUser() => 
+    public void RecordFailedUser() =>
         Interlocked.Increment(ref _failedUsers);
 
     public void RecordError(string errorType)
@@ -70,19 +68,19 @@ public class SimulationMetricsService
                 FailedOrders = _failedOrders,
                 SuccessfulUsers = _successfulUsers,
                 FailedUsers = _failedUsers,
-                AverageResponseTime = responseTimes.Count > 0 
-                    ? responseTimes.Average() 
+                AverageResponseTime = responseTimes.Count > 0
+                    ? responseTimes.Average()
                     : 0,
-                MinResponseTime = responseTimes.Count > 0 
-                    ? responseTimes.First() 
+                MinResponseTime = responseTimes.Count > 0
+                    ? responseTimes.First()
                     : 0,
-                MaxResponseTime = responseTimes.Count > 0 
-                    ? responseTimes.Last() 
+                MaxResponseTime = responseTimes.Count > 0
+                    ? responseTimes.Last()
                     : 0,
                 P95ResponseTime = GetPercentile(responseTimes, 95),
                 P99ResponseTime = GetPercentile(responseTimes, 99),
-                OrdersPerSecond = duration.TotalSeconds > 0 
-                    ? _successfulOrders / duration.TotalSeconds 
+                OrdersPerSecond = duration.TotalSeconds > 0
+                    ? _successfulOrders / duration.TotalSeconds
                     : 0,
                 ErrorCounts = new Dictionary<string, int>(_errorCounts),
                 TotalErrors = _errorCounts.Values.Sum()

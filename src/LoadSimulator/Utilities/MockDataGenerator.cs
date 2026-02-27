@@ -9,8 +9,6 @@ public class MockDataGenerator
     
     public static MockDataGenerator Instance => _instance.Value;
     
-    private readonly object _lock = new object();
-    
     private static readonly string[] FirstNames = new[]
     {
         "James", "Mary", "Robert", "Patricia", "Michael", "Jennifer",
@@ -36,7 +34,7 @@ public class MockDataGenerator
         var domain = Domains[Random.Shared.Next(Domains.Length)];
         var randomNumber = Random.Shared.Next(10000);
         
-        return $"{firstName.ToLower()}.{lastName.ToLower()}{randomNumber}@{domain}";
+        return $"{firstName.ToLowerInvariant()}.{lastName.ToLowerInvariant()}{randomNumber}@{domain}";
     }
 
     public string GeneratePassword() => 
@@ -48,7 +46,7 @@ public class MockDataGenerator
         var lastName = LastNames[Random.Shared.Next(LastNames.Length)];
         var randomNumber = Random.Shared.Next(1000, 9999);
         
-        return $"{firstName.ToLower()}{lastName.ToLower()}{randomNumber}";
+        return $"{firstName.ToLowerInvariant()}{lastName.ToLowerInvariant()}{randomNumber}";
     }
 
     public int GenerateQuantity(int maxQuantity = 10) => 

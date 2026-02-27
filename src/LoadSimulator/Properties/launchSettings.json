@@ -1,12 +1,14 @@
 {
-  "profiles": {
+  "profiles": { 
     "LoadSimulator": {
       "commandName": "Project",
+      "dotnetRunMessages": true,
       "launchBrowser": true,
+      "applicationUrl": "https://localhost:5005;http://localhost:5004",
+      "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "https://localhost:6424;http://localhost:6425"
+      }
     }
   }
 }

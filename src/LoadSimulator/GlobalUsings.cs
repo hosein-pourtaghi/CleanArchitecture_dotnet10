@@ -8,3 +8,7 @@ global using System.Net.Http;
 global using System.Text.Json;
 global using System.Threading;
 global using System.Threading.Tasks;
+global using LoadSimulator.Services;
+global using LoadSimulator.Utilities;
+global using Polly.CircuitBreaker;
+global using Polly.Extensions.Http;

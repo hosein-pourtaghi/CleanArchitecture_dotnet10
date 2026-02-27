@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\NotificationAPI\NotificationAPI.csproj" />
     <ProjectReference Include="..\WebApi\WebApi.csproj" />
+    <ProjectReference Include="..\LoadSimulator\LoadSimulator.csproj" />
   </ItemGroup>
 
 </Project>

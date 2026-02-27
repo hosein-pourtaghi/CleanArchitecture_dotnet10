@@ -1,7 +1,6 @@
-using System.Text.Json;
 using LoadSimulator.Infrastructure;
 using LoadSimulator.Models.DTOs;
-using Microsoft.Extensions.Logging;
+using System.Net.Mime;
 
 namespace LoadSimulator.Services;
 
@@ -27,13 +26,26 @@ public class AuthClient : IAuthClient
     {
         try
         {
-            var request = new { email, password, userName };
+            var firstName = userName;
+            var lastName = userName;
+            var request = new { email, password, firstName, lastName };
             var content = request.AsJsonContent();
+          
+            // Added logging for registration request
+            _logger.LogInformation(
+                "Registering user {Email} at {Url}",
+                email,
+                _httpClient.BaseAddress?.ToString() + "/api/auth/register");
 
             var response = await _httpClient.PostAsync(
                 "/api/auth/register",
                 content,
                 cancellationToken).ConfigureAwait(false);
+
+            // Logging the response status code
+            _logger.LogInformation(
+                "Registration response: {StatusCode}",
+                response.StatusCode);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -46,7 +58,7 @@ public class AuthClient : IAuthClient
 
             var result = await response.Content.ReadAsStringAsync(cancellationToken)
                 .ConfigureAwait(false);
-            
+
             using var doc = JsonDocument.Parse(result);
             var root = doc.RootElement;
 
@@ -59,6 +71,11 @@ public class AuthClient : IAuthClient
 
             var token = tokenElement.GetString() ?? string.Empty;
             var expiresInSeconds = expiresElement.GetInt32();
+
+            // Added logging for successful registration
+            _logger.LogInformation(
+                "User {Email} registered successfully",
+                email);
 
             return new UserSessionDto
             {
@@ -101,7 +118,7 @@ public class AuthClient : IAuthClient
 
             var result = await response.Content.ReadAsStringAsync(cancellationToken)
                 .ConfigureAwait(false);
-            
+
             using var doc = JsonDocument.Parse(result);
             var root = doc.RootElement;
 
@@ -127,6 +144,59 @@ public class AuthClient : IAuthClient
         {
             _logger.LogError(ex, "Login error for {Email}", email);
             return null;
+        }
+    }
+
+    public async Task HealthCheckAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync(
+                "/health",
+                cancellationToken).ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning(
+                    "Health check failed: {StatusCode}",
+                    response.StatusCode);
+            }
+            else
+            {
+                _logger.LogInformation("Health check passed");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Health check error");
+        }
+    }
+
+    public async Task<string> GetSwaggerDocumentAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync(
+                "/swagger",
+                cancellationToken).ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning(
+                    "Failed to fetch swagger document: {StatusCode}",
+                    response.StatusCode);
+                return string.Empty;
+            }
+
+            var swaggerDoc = await response.Content.ReadAsStringAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            return swaggerDoc;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching swagger document");
+            return string.Empty;
         }
     }
 }

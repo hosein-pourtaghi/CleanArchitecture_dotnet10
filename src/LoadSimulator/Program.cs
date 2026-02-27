@@ -5,10 +5,12 @@ using LoadSimulator.Configuration;
 using LoadSimulator.BackgroundServices;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using OpenTelemetry.Exporter;
+using Polly;
+using Polly.CircuitBreaker;
+using Polly.Extensions.Http;
 using Serilog;
 using StackExchange.Redis;
-using Polly.Extensions.Http;
-using Polly.CircuitBreaker;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using HealthChecks.UI.Client;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -92,6 +94,8 @@ if (builder.Configuration.GetValue<bool>("Logging:Database:Enabled"))
 }
 
 // HTTP Clients
+var httpClientPolicy = PollyPolicies.GetCombinedPolicy();
+
 builder.Services.AddHttpClient("MainApi")
     .ConfigureHttpClient(client =>
     {
@@ -100,9 +104,7 @@ builder.Services.AddHttpClient("MainApi")
         client.Timeout = TimeSpan.FromSeconds(30);
         client.DefaultRequestHeaders.Add("Accept", "application/json");
     })
-    .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-    .AddPolicyHandler(PollyPolicies.GetRetryPolicy())
-    .AddPolicyHandler(PollyPolicies.GetCircuitBreakerPolicy());
+    .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
 builder.Services.AddHttpClient<IAuthClient, AuthClient>()
     .ConfigureHttpClient(client =>
@@ -111,9 +113,7 @@ builder.Services.AddHttpClient<IAuthClient, AuthClient>()
         client.BaseAddress = new Uri(settings!.BaseUrl);
         client.Timeout = TimeSpan.FromSeconds(30);
     })
-    .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-    .AddPolicyHandler(PollyPolicies.GetRetryPolicy())
-    .AddPolicyHandler(PollyPolicies.GetCircuitBreakerPolicy());
+    .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
 builder.Services.AddHttpClient<IProductClient, ProductClient>()
     .ConfigureHttpClient(client =>
@@ -122,9 +122,7 @@ builder.Services.AddHttpClient<IProductClient, ProductClient>()
         client.BaseAddress = new Uri(settings!.BaseUrl);
         client.Timeout = TimeSpan.FromSeconds(30);
     })
-    .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-    .AddPolicyHandler(PollyPolicies.GetRetryPolicy())
-    .AddPolicyHandler(PollyPolicies.GetCircuitBreakerPolicy());
+    .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
 builder.Services.AddHttpClient<IOrderClient, OrderClient>()
     .ConfigureHttpClient(client =>
@@ -133,13 +131,11 @@ builder.Services.AddHttpClient<IOrderClient, OrderClient>()
         client.BaseAddress = new Uri(settings!.BaseUrl);
         client.Timeout = TimeSpan.FromSeconds(30);
     })
-    .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-    .AddPolicyHandler(PollyPolicies.GetRetryPolicy())
-    .AddPolicyHandler(PollyPolicies.GetCircuitBreakerPolicy());
+    .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
 // Services
 builder.Services.AddSingleton<IProductCacheService, ProductCacheService>();
-builder.Services.AddScoped<IUserSimulationService, UserSimulationService>();
+builder.Services.AddSingleton<IUserSimulationService, UserSimulationService>();
 builder.Services.AddSingleton<SimulationMetricsService>();
 builder.Services.AddSingleton(MockDataGenerator.Instance);
 
@@ -161,7 +157,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowAll");
 app.UseRouting();
 app.MapHealthChecks("health");
-app.MapPrometheusScrapingEndpoint();
+// app.MapPrometheusScrapingEndpoint(); // Requires compatible OpenTelemetry version
 app.MapControllers();
 
 try
