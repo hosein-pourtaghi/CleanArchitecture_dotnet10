@@ -18,7 +18,7 @@ public class OrderClient : IOrderClient
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<OrderDto?> CreateOrderAsync(
+    public async Task<CartDto?> CreateOrderAsync(
         string jwtToken,
         CancellationToken cancellationToken = default)
     {
@@ -39,7 +39,7 @@ public class OrderClient : IOrderClient
                 return null;
             }
 
-            var order = await response.DeserializeAsync<OrderDto>(cancellationToken)
+            var order = await response.DeserializeAsync<CartDto>(cancellationToken)
                 .ConfigureAwait(false);
 
             return order;
@@ -52,10 +52,10 @@ public class OrderClient : IOrderClient
     }
 
     public async Task<bool> AddOrderItemAsync(
-        int orderId,
-        int productId,
+        Guid orderId,
+        Guid productId,
         int quantity,
-        decimal price,
+        decimal? price,
         string jwtToken,
         CancellationToken cancellationToken = default)
     {
@@ -90,7 +90,7 @@ public class OrderClient : IOrderClient
     }
 
     public async Task<bool> SubmitOrderAsync(
-        int orderId,
+        Guid orderId,
         string jwtToken,
         CancellationToken cancellationToken = default)
     {

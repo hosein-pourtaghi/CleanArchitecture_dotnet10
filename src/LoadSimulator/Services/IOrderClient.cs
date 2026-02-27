@@ -7,20 +7,20 @@ namespace LoadSimulator.Services;
 /// </summary>
 public interface IOrderClient
 {
-    Task<OrderDto?> CreateOrderAsync(
+    Task<CartDto?> CreateOrderAsync(
         string jwtToken,
         CancellationToken cancellationToken = default);
 
     Task<bool> AddOrderItemAsync(
-        int orderId,
-        int productId,
+        Guid orderId,
+        Guid productId,
         int quantity,
-        decimal price,
+        decimal? price,
         string jwtToken,
         CancellationToken cancellationToken = default);
 
     Task<bool> SubmitOrderAsync(
-        int orderId,
+        Guid orderId,
         string jwtToken,
         CancellationToken cancellationToken = default);
 }

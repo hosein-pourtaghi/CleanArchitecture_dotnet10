@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace LoadSimulator.Models.DTOs;
 
 /// <summary>
@@ -65,22 +67,63 @@ public class ProductDto
     public float PurchasePrice { get; set; }
 }
 
-public class OrderDto
+public class CartDto
 {
-    public int Id { get; set; }
-    
-    public List<OrderItemDto> Items { get; set; } = new();
-    
+    public Guid Id { get; set; }
+
+    public Guid CustomerId { get; set; }
+
+    [NotMapped]
+    public decimal TotalOriginalPrice { get => CartItems.Sum(x => x.OriginalPrice); }
+    [NotMapped]
+    public decimal TotalDiscountedPrice { get => CartItems.Sum(x => x.DiscountedPrice); }
+    [NotMapped]
+    public decimal TotalDiscountAmount { get => CartItems.Sum(x => x.DiscountAmount); }
+    public string Currency { get; set; }
+    public string? TransactionId { get; set; }
+    public string? PaymentType { get; set; }
+    /// <summary>
+    /// invoice code
+    /// </summary>
+    public string? Code { get; set; }
+    public DateTime PurchaseDate { get; set; }
+
     public decimal TotalAmount { get; set; }
-    
     public string Status { get; set; } = string.Empty;
+
+
+
+    public List<CartItemDto> CartItems { get; set; } = new();
+    
 }
 
-public class OrderItemDto
+public class CartItemDto
 {
-    public int ProductId { get; set; }
-    
-    public int Quantity { get; set; }
-    
-    public decimal Price { get; set; }
+    public Guid Id { get; set; }
+    public Guid CartId { get; set; }
+
+    public int Quantity { get; set; } = 1;
+    /// <summary>
+    /// price of plan on purchase 
+    /// </summary>
+    public decimal OriginalPrice { get; set; }
+    /// <summary>
+    /// price after applying coupon if exists
+    /// if not its OriginalPrice
+    /// </summary>
+    public decimal DiscountedPrice { get; set; }
+    /// <summary>
+    /// Discount amount that is applied to the original price in Currency(Dollar)
+    /// </summary>
+    /// <value></value>
+    public decimal DiscountAmount { get; set; }
+    /// <summary>
+    /// applied tax for cartItem in dollar
+    /// </summary>
+    public decimal TaxPrice { get; set; } = 0;
+    public string? TransactionId { get; set; }
+    public string CouponCode { get; set; }
+    public Guid ProductId { get; set; }
+
+
 }
