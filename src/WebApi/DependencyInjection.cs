@@ -42,13 +42,16 @@ public static class DependencyInjection
            });
 
            // Apply Bearer security globally to all endpoints
-           options.AddSecurityRequirement((doc) => new OpenApiSecurityRequirement
+           options.AddSecurityRequirement(new OpenApiSecurityRequirement
            {
                {
-                   new OpenApiSecuritySchemeReference
+                   new OpenApiSecurityScheme
                    {
-                       Type = ReferenceType.SecurityScheme,
-                       Id = "Bearer"
+                       Reference = new OpenApiReference
+                       {
+                           Type = ReferenceType.SecurityScheme,
+                           Id = "Bearer"
+                       }
                    },
                    new List<string>()
                }

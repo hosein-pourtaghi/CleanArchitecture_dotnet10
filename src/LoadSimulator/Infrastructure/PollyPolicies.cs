@@ -1,6 +1,4 @@
 using Polly;
-using Polly.Circuit;
-using Polly.Retry;
 
 namespace LoadSimulator.Infrastructure;
 
@@ -17,7 +15,7 @@ public static class PollyPolicies
         return Policy
             .Handle<HttpRequestException>()
             .Or<OperationCanceledException>()
-            .OrResult<HttpResponseMessage>(r => 
+            .OrResult<HttpResponseMessage>(r =>
                 r.StatusCode == System.Net.HttpStatusCode.RequestTimeout ||
                 r.StatusCode == System.Net.HttpStatusCode.BadGateway ||
                 r.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable ||
@@ -40,7 +38,7 @@ public static class PollyPolicies
     {
         return Policy
             .Handle<HttpRequestException>()
-            .OrResult<HttpResponseMessage>(r => 
+            .OrResult<HttpResponseMessage>(r =>
                 r.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
             .CircuitBreakerAsync(
                 handledEventsAllowedBeforeBreaking: 5,
