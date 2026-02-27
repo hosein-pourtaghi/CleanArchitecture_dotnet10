@@ -1,10 +1,11 @@
-﻿using Microsoft.OpenApi;
+﻿using Microsoft.OpenApi.Models;
 using WebApi.Infrastructure;
 using WebApi.Telemetry;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using WebApi.Http;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 
 namespace WebApi;
@@ -29,24 +30,57 @@ public static class DependencyInjection
                //    }
            });
 
+           // Bearer Token Security Scheme - allows entering JWT token in Swagger UI
            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
            {
-               Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
-                      Enter 'Bearer' [space] and then your token in the text input below.
-                      \r\n\r\nExample: 'Bearer 12345abcdef'",
-               Name = "Authorization",
-               In = ParameterLocation.Header,
                Type = SecuritySchemeType.Http,
-               Scheme = "Bearer"
+               Scheme = "Bearer",
+               BearerFormat = "JWT",
+               Description = "Enter your JWT token in the text field below.\n\nExample: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+               Name = "Authorization",
+               In = ParameterLocation.Header
            });
 
+           // Apply Bearer security globally to all endpoints
            options.AddSecurityRequirement((doc) => new OpenApiSecurityRequirement
            {
                {
-                   new OpenApiSecuritySchemeReference("Bearer"),
+                   new OpenApiSecuritySchemeReference
+                   {
+                       Type = ReferenceType.SecurityScheme,
+                       Id = "Bearer"
+                   },
                    new List<string>()
                }
            });
+
+           // Optional: Add Basic Authentication (username/password)
+           // Uncomment below to enable username/password authentication in Swagger UI
+           /*
+           options.AddSecurityDefinition("Basic", new OpenApiSecurityScheme
+           {
+               Type = SecuritySchemeType.Http,
+               Scheme = "Basic",
+               Description = "Enter your username and password.",
+               Name = "Authorization",
+               In = ParameterLocation.Header
+           });
+
+           options.AddSecurityRequirement(new OpenApiSecurityRequirement
+           {
+               {
+                   new OpenApiSecurityScheme
+                   {
+                       Reference = new OpenApiReference
+                       {
+                           Type = ReferenceType.SecurityScheme,
+                           Id = "Basic"
+                       }
+                   },
+                   Array.Empty<string>()
+               }
+           });
+           */
 
            // Include XML documentation comments
            var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
