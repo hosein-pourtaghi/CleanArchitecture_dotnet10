@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 
 namespace CrudBuilder.FileBuilders.Application;
 internal static class GetByIdBuilder
@@ -29,10 +29,14 @@ internal static class GetByIdBuilder
 @$"using Application.Abstractions.Messaging;
 using Application.Common.DTOs;
 
-namespace  Application.{MyPath.EntityName}s.GetById;
- 
-public sealed record GetById{MyPath.EntityName}Query(Guid Id) : IQuery<{MyPath.EntityName}Dto>;
+namespace Application.{MyPath.EntityName}s.GetById;
 
+/// <summary>
+/// Query to retrieve a {MyPath.EntityName} by its unique identifier.
+/// Inherits from IQuery&lt;{MyPath.EntityName}Dto&gt; which returns Result&lt;{MyPath.EntityName}Dto&gt;.
+/// Handled by <see cref=""GetById{MyPath.EntityName}QueryHandler""/>
+/// </summary>
+public sealed record GetById{MyPath.EntityName}Query(Guid Id) : IQuery<{MyPath.EntityName}Dto>;
 ";
 
         return str;
@@ -69,13 +73,20 @@ using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
 namespace Application.{MyPath.EntityName}s.GetById;
- 
+
+/// <summary>
+/// Handles <see cref=""GetById{MyPath.EntityName}Query""/> requests.
+/// Retrieves a single {MyPath.EntityName} by ID with no-tracking for read-only access.
+/// Returns <see cref=""Result{{TValue}}""/> containing the DTO or a failure result if not found.
+/// </summary>
 internal sealed class GetById{MyPath.EntityName}QueryHandler(
     IApplicationDbContext context,
     IMapper mapper)
     : IQueryHandler<GetById{MyPath.EntityName}Query, {MyPath.EntityName}Dto>
 {{
-    public async Task<Result<{MyPath.EntityName}Dto>> Handle(GetById{MyPath.EntityName}Query query, CancellationToken cancellationToken)
+    public async Task<Result<{MyPath.EntityName}Dto>> Handle(
+        GetById{MyPath.EntityName}Query query,
+        CancellationToken cancellationToken)
     {{
         var {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)} = await context.{MyPath.EntityName}s
             .AsNoTracking()
@@ -83,15 +94,16 @@ internal sealed class GetById{MyPath.EntityName}QueryHandler(
 
         if ({MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)} is null)
         {{
-            return Result.Failure<{MyPath.EntityName}Dto>({MyPath.EntityName}Errors.NotFound(query.Id));
+            return Result.Failure<{MyPath.EntityName}Dto>(
+                {MyPath.EntityName}Errors.NotFound(query.Id));
         }}
 
-        var {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}Dto = mapper.Map<{MyPath.EntityName}Dto>({MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)});
+        var {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}Dto = mapper.Map<{MyPath.EntityName}Dto>(
+            {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)});
 
         return {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)}Dto;
     }}
 }}
-
 ";
 
         return str;
