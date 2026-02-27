@@ -1,19 +1,11 @@
-using LoadSimulator;
-using LoadSimulator.Infrastructure;
-using LoadSimulator.Services;
-using LoadSimulator.Configuration;
 using LoadSimulator.BackgroundServices;
+using LoadSimulator.Configuration;
+using LoadSimulator.Infrastructure;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
-using OpenTelemetry.Exporter;
-using Polly;
-using Polly.CircuitBreaker;
-using Polly.Extensions.Http;
 using Serilog;
 using StackExchange.Redis;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using HealthChecks.UI.Client;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,7 +64,7 @@ builder.Services.AddOpenTelemetry()
 // Health Checks
 var healthCheckTags = new[] { "live" };
 var healthChecksBuilder = builder.Services.AddHealthChecks()
-    .AddCheck("self", () => new HealthCheckResult(HealthStatus.Healthy), 
+    .AddCheck("self", () => new HealthCheckResult(HealthStatus.Healthy),
         tags: healthCheckTags);
 
 if (builder.Configuration.GetValue<bool>("Redis:Enabled"))
@@ -97,6 +89,11 @@ if (builder.Configuration.GetValue<bool>("Logging:Database:Enabled"))
 var httpClientPolicy = PollyPolicies.GetCombinedPolicy();
 
 builder.Services.AddHttpClient("MainApi")
+     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+     {
+         UseProxy = false,
+         Proxy = null
+     })
     .ConfigureHttpClient(client =>
     {
         var settings = builder.Configuration.GetSection("Simulator").Get<SimulatorSettings>();
@@ -107,7 +104,12 @@ builder.Services.AddHttpClient("MainApi")
     .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
 builder.Services.AddHttpClient<IAuthClient, AuthClient>()
-    .ConfigureHttpClient(client =>
+     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+     {
+         UseProxy = false,
+         Proxy = null
+     })
+     .ConfigureHttpClient(client =>
     {
         var settings = builder.Configuration.GetSection("Simulator").Get<SimulatorSettings>();
         client.BaseAddress = new Uri(settings!.BaseUrl);
@@ -116,6 +118,11 @@ builder.Services.AddHttpClient<IAuthClient, AuthClient>()
     .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
 builder.Services.AddHttpClient<IProductClient, ProductClient>()
+     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+     {
+         UseProxy = false,
+         Proxy = null
+     })
     .ConfigureHttpClient(client =>
     {
         var settings = builder.Configuration.GetSection("Simulator").Get<SimulatorSettings>();
@@ -125,6 +132,11 @@ builder.Services.AddHttpClient<IProductClient, ProductClient>()
     .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
 builder.Services.AddHttpClient<IOrderClient, OrderClient>()
+     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+     {
+         UseProxy = false,
+         Proxy = null
+     })
     .ConfigureHttpClient(client =>
     {
         var settings = builder.Configuration.GetSection("Simulator").Get<SimulatorSettings>();

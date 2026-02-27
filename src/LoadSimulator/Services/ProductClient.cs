@@ -26,7 +26,7 @@ public class ProductClient : IProductClient
     {
         try
         {
-            var url = $"/api/products?page={page}&pageSize={pageSize}";
+            var url = $"/api/products/GetAll?page={page}&pageSize={pageSize}";
             var request = new HttpRequestMessage(HttpMethod.Get, url);
 
             if (!string.IsNullOrEmpty(jwtToken))

@@ -123,7 +123,7 @@ public class UserSimulationService : IUserSimulationService
 
                     // Add items to order
                     var itemCount = _dataGenerator.GenerateQuantity(maxProductsPerOrder);
-                    var selectedProductIds = _dataGenerator.GenerateProductIds(itemCount, maxProductsPerOrder);
+                    var selectedProductIds =  _dataGenerator.GenerateProductIds(itemCount, products.Select(x=>x.Id).ToList());
 
                     var addItemsSuccess = true;
                     foreach (var productId in selectedProductIds)

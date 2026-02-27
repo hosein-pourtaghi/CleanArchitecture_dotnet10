@@ -14,13 +14,24 @@ internal sealed class GetAllProductQueryHandler(
 {
     public async Task<Result<List<ProductDto>>> Handle(GetAllProductQuery query, CancellationToken cancellationToken)
     {
+        try
+        {
+
         var products = await context.Products
             .AsNoTracking()
+            .Skip(0)
+            .Take(100) // You can adjust the page size as needed
             .ToListAsync(cancellationToken);
 
         var productDtos = mapper.Map<List<ProductDto>>(products);
 
         return productDtos;
+        }
+        catch (Exception ee)
+        {
+
+            throw;
+        }
     }
 }
 

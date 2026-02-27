@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace LoadSimulator.Utilities;
 
 /// <summary>
@@ -24,8 +26,7 @@ public class MockDataGenerator
     };
     
     private static readonly string[] Domains = new[] { "gmail.com", "outlook.com", "yahoo.com", "example.com" };
-    
-    private static readonly int[] ProductIds = Enumerable.Range(1, 100).ToArray();
+     
 
     public string GenerateEmail()
     {
@@ -52,17 +53,15 @@ public class MockDataGenerator
     public int GenerateQuantity(int maxQuantity = 10) => 
         Math.Max(1, Random.Shared.Next(1, maxQuantity + 1));
 
-    public int GenerateProductId() => 
-        ProductIds[Random.Shared.Next(ProductIds.Length)];
-
-    public List<int> GenerateProductIds(int count, int maxProductsPerOrder)
+   
+    public List<Guid> GenerateProductIds(int count, List<Guid> maxProductsPerOrder)
     {
-        var productCount = Math.Min(count, maxProductsPerOrder);
-        var selected = new HashSet<int>();
+        var productCount = Math.Min(count, 10);
+        var selected = new HashSet<Guid>();
         
         while (selected.Count < productCount)
         {
-            selected.Add(GenerateProductId());
+            selected.Add(maxProductsPerOrder[Random.Shared.Next(maxProductsPerOrder.Count-1)]);
         }
         
         return selected.ToList();

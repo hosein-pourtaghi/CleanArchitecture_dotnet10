@@ -22,7 +22,7 @@ public class ProductsController(IMediator mediator) : ApiController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [Produces("application/json")]
-    public async Task<IActionResult> GetAllProduct(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetAllProductQuery(), cancellationToken);
         return HandleResult(result);

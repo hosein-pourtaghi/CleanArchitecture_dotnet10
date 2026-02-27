@@ -30,7 +30,7 @@ public class AuthClient : IAuthClient
             var lastName = userName;
             var request = new { email, password, firstName, lastName };
             var content = request.AsJsonContent();
-          
+                         
             // Added logging for registration request
             _logger.LogInformation(
                 "Registering user {Email} at {Url}",
@@ -44,8 +44,10 @@ public class AuthClient : IAuthClient
 
             // Logging the response status code
             _logger.LogInformation(
-                "Registration response: {StatusCode}",
-                response.StatusCode);
+                "Registration response: {StatusCode} : {ReasonPhrase}",
+                response.StatusCode,
+                response.ReasonPhrase
+                );
 
             if (!response.IsSuccessStatusCode)
             {
