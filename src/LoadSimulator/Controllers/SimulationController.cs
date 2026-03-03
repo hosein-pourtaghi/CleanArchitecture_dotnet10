@@ -51,13 +51,13 @@ public class SimulationController : ControllerBase
 
         _metricsService.Reset();
 
-        var ordersPerUser = request.OrdersPerUser ?? _settings.OrdersPerUser;
-        var maxProductsPerOrder = request.MaxProductsPerOrder ?? _settings.MaxProductsPerOrder;
+        var cartsPerUser = request.CartsPerUser ?? _settings.CartsPerUser;
+        var maxProductsPerCart = request.MaxProductsPerCart ?? _settings.MaxProductsPerCart;
 
         _logger.LogInformation(
-            "Starting simulation with {Users} users, {OrdersPerUser} orders each",
+            "Starting simulation with {Users} users, {CartsPerUser} carts each",
             request.Users,
-            ordersPerUser);
+            cartsPerUser);
 
         try
         {
@@ -88,8 +88,8 @@ public class SimulationController : ControllerBase
 
                 var task = _simulationService.SimulateUserAsync(
                     userId,
-                    ordersPerUser,
-                    maxProductsPerOrder,
+                    cartsPerUser,
+                    maxProductsPerCart,
                     _settings.DelayMinMs,
                     _settings.DelayMaxMs,
                     _settings.NormalDistributionMean,
@@ -123,20 +123,20 @@ public class SimulationController : ControllerBase
 
                 _metricsService.RecordResponseTime(result.TotalResponseTimeMs);
 
-                for (int i = 0; i < result.OrdersCreated; i++)
+                for (int i = 0; i < result.CartsCreated; i++)
                 {
-                    _metricsService.RecordSuccessfulOrder();
+                    _metricsService.RecordSuccessfulCart();
                 }
 
-                for (int i = 0; i < result.OrdersFailed; i++)
+                for (int i = 0; i < result.CartsFailed; i++)
                 {
-                    _metricsService.RecordFailedOrder();
+                    _metricsService.RecordFailedCart();
                 }
 
                 foreach (var error in result.Errors)
                 {
                     var errorType = error.Contains("Authentication") ? "Authentication" :
-                                   error.Contains("order") ? "OrderOperation" :
+                                   error.Contains("cart") ? "CartOperation" :
                                    error.Contains("product") ? "ProductRetrieval" : "Unknown";
                     _metricsService.RecordError(errorType);
                 }
@@ -149,11 +149,11 @@ public class SimulationController : ControllerBase
                 TotalUsers = request.Users,
                 SuccessfulUsers = snapshot.SuccessfulUsers,
                 FailedUsers = snapshot.FailedUsers,
-                TotalOrders = snapshot.TotalOrders,
-                SuccessfulOrders = snapshot.SuccessfulOrders,
-                FailedOrders = snapshot.FailedOrders,
+                TotalCarts = snapshot.TotalCarts,
+                SuccessfulCarts = snapshot.SuccessfulCarts,
+                FailedCarts = snapshot.FailedCarts,
                 Duration = stopwatch.Elapsed,
-                OrdersPerSecond = snapshot.OrdersPerSecond,
+                CartsPerSecond = snapshot.CartsPerSecond,
                 AverageResponseTimeMs = snapshot.AverageResponseTime,
                 MinResponseTimeMs = snapshot.MinResponseTime,
                 MaxResponseTimeMs = snapshot.MaxResponseTime,
@@ -167,10 +167,10 @@ public class SimulationController : ControllerBase
             };
 
             _logger.LogInformation(
-                "Simulation completed: {SuccessfulOrders}/{TotalOrders} orders, {OrdersPerSecond} orders/sec",
-                summary.SuccessfulOrders,
-                summary.TotalOrders,
-                summary.OrdersPerSecond);
+                "Simulation completed: {SuccessfulCarts}/{TotalCarts} carts, {CartsPerSecond} carts/sec",
+                summary.SuccessfulCarts,
+                summary.TotalCarts,
+                summary.CartsPerSecond);
 
             return Ok(summary);
         }
@@ -212,10 +212,10 @@ public class SimulationController : ControllerBase
 
             return Ok(new
             {
-                totalOrders = snapshot.TotalOrders,
-                successfulOrders = snapshot.SuccessfulOrders,
-                failedOrders = snapshot.FailedOrders,
-                ordersPerSecond = snapshot.OrdersPerSecond,
+                totalCarts = snapshot.TotalCarts,
+                successfulCarts = snapshot.SuccessfulCarts,
+                failedCarts = snapshot.FailedCarts,
+                cartsPerSecond = snapshot.CartsPerSecond,
                 averageResponseTime = snapshot.AverageResponseTime,
                 p95ResponseTime = snapshot.P95ResponseTime,
                 p99ResponseTime = snapshot.P99ResponseTime,

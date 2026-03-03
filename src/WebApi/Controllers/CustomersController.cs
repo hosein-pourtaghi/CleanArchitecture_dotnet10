@@ -237,7 +237,7 @@ public class CustomersController(IMediator mediator) : ApiController
     /// - Audit log entry created
     /// 
     /// ## Cascading Effects
-    /// - Associated orders may be affected (depends on database constraints)
+    /// - Associated carts may be affected (depends on database constraints)
     /// - Notification services will be triggered
     /// 
     /// ## Error Handling

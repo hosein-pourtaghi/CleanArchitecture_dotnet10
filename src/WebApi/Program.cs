@@ -64,7 +64,7 @@ builder.Services
  
 WebApplication app = builder.Build();
 
-// Use CORS (order matters - should be before MapControllers)
+// Use CORS (cart matters - should be before MapControllers)
 app.UseCors("AllowAngularApp");
 
 

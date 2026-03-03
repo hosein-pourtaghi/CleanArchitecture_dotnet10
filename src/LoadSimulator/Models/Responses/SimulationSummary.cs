@@ -11,15 +11,15 @@ public class SimulationSummary
     
     public int FailedUsers { get; set; }
     
-    public long TotalOrders { get; set; }
+    public long TotalCarts { get; set; }
     
-    public long SuccessfulOrders { get; set; }
+    public long SuccessfulCarts { get; set; }
     
-    public long FailedOrders { get; set; }
+    public long FailedCarts { get; set; }
     
     public TimeSpan Duration { get; set; }
     
-    public double OrdersPerSecond { get; set; }
+    public double CartsPerSecond { get; set; }
     
     public double AverageResponseTimeMs { get; set; }
     

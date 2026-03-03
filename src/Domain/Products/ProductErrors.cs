@@ -21,5 +21,5 @@ public static class ProductErrors
     public static Error CannotDeleteProduct() =>
         Error.Failure(
             "Products.CannotDelete",
-            "This product cannot be deleted due to existing orders.");
+            "This product cannot be deleted due to existing carts.");
 }

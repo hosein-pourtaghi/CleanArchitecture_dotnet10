@@ -4,20 +4,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 //
-// public class OrderRepository : IOrderRepository
+// public class CartRepository : ICartRepository
 // {
 //     private readonly AppDbContext _db;
-//     public OrderRepository(AppDbContext db) => _db = db;
+//     public CartRepository(AppDbContext db) => _db = db;
 //
-//     public async Task AddAsync(Order order)
+//     public async Task AddAsync(Cart cart)
 //     {
-//             _db.Orders.Add(order);
+//             _db.Carts.Add(cart);
 //         await _db.SaveChangesAsync();
 //     }
 //
-//     public async Task<Order?> GetByIdAsync(Guid id) =>
-//         await _db.Orders.AsNoTracking().Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == id);
+//     public async Task<Cart?> GetByIdAsync(Guid id) =>
+//         await _db.Carts.AsNoTracking().Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == id);
 //
-//     public async Task<List<Order>> GetByUserAsync(string userId) =>
-//         await _db.Orders.AsNoTracking().Where(o => o.UserId == userId).ToListAsync();
+//     public async Task<List<Cart>> GetByUserAsync(string userId) =>
+//         await _db.Carts.AsNoTracking().Where(o => o.UserId == userId).ToListAsync();
 // }

@@ -3,24 +3,24 @@ using LoadSimulator.Models.DTOs;
 namespace LoadSimulator.Services;
 
 /// <summary>
-/// Interface for order operations against main API
+/// Interface for cart operations against main API
 /// </summary>
-public interface IOrderClient
+public interface ICartClient
 {
-    Task<CartDto?> CreateOrderAsync(
+    Task<CartDto?> CreateCartAsync(
         string jwtToken,
         CancellationToken cancellationToken = default);
 
-    Task<bool> AddOrderItemAsync(
-        Guid orderId,
+    Task<bool> AddCartItemAsync(
+        Guid cartId,
         Guid productId,
         int quantity,
         decimal? price,
         string jwtToken,
         CancellationToken cancellationToken = default);
 
-    Task<bool> SubmitOrderAsync(
-        Guid orderId,
+    Task<bool> SubmitCartAsync(
+        Guid cartId,
         string jwtToken,
         CancellationToken cancellationToken = default);
 }

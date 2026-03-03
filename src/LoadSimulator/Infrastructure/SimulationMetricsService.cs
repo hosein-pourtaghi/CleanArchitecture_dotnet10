@@ -7,9 +7,9 @@ public class SimulationMetricsService
 {
     private readonly ConcurrentBag<long> _responseTimes = new();
     private readonly ConcurrentDictionary<string, int> _errorCounts = new();
-    private long _totalOrders;
-    private long _successfulOrders;
-    private long _failedOrders;
+    private long _totalCarts;
+    private long _successfulCarts;
+    private long _failedCarts;
     private int _successfulUsers;
     private int _failedUsers;
     private readonly object _lock = new object();
@@ -17,16 +17,16 @@ public class SimulationMetricsService
     public void RecordResponseTime(long milliseconds) =>
         _responseTimes.Add(milliseconds);
 
-    public void RecordSuccessfulOrder()
+    public void RecordSuccessfulCart()
     {
-        Interlocked.Increment(ref _successfulOrders);
-        Interlocked.Increment(ref _totalOrders);
+        Interlocked.Increment(ref _successfulCarts);
+        Interlocked.Increment(ref _totalCarts);
     }
 
-    public void RecordFailedOrder()
+    public void RecordFailedCart()
     {
-        Interlocked.Increment(ref _failedOrders);
-        Interlocked.Increment(ref _totalOrders);
+        Interlocked.Increment(ref _failedCarts);
+        Interlocked.Increment(ref _totalCarts);
     }
 
     public void RecordSuccessfulUser() =>
@@ -46,9 +46,9 @@ public class SimulationMetricsService
         {
             _responseTimes.Clear();
             _errorCounts.Clear();
-            _totalOrders = 0;
-            _successfulOrders = 0;
-            _failedOrders = 0;
+            _totalCarts = 0;
+            _successfulCarts = 0;
+            _failedCarts = 0;
             _successfulUsers = 0;
             _failedUsers = 0;
         }
@@ -63,9 +63,9 @@ public class SimulationMetricsService
 
             return new MetricsSnapshot
             {
-                TotalOrders = _totalOrders,
-                SuccessfulOrders = _successfulOrders,
-                FailedOrders = _failedOrders,
+                TotalCarts = _totalCarts,
+                SuccessfulCarts = _successfulCarts,
+                FailedCarts = _failedCarts,
                 SuccessfulUsers = _successfulUsers,
                 FailedUsers = _failedUsers,
                 AverageResponseTime = responseTimes.Count > 0
@@ -79,8 +79,8 @@ public class SimulationMetricsService
                     : 0,
                 P95ResponseTime = GetPercentile(responseTimes, 95),
                 P99ResponseTime = GetPercentile(responseTimes, 99),
-                OrdersPerSecond = duration.TotalSeconds > 0
-                    ? _successfulOrders / duration.TotalSeconds
+                CartsPerSecond = duration.TotalSeconds > 0
+                    ? _successfulCarts / duration.TotalSeconds
                     : 0,
                 ErrorCounts = new Dictionary<string, int>(_errorCounts),
                 TotalErrors = _errorCounts.Values.Sum()
@@ -99,9 +99,9 @@ public class SimulationMetricsService
 
     public class MetricsSnapshot
     {
-        public long TotalOrders { get; set; }
-        public long SuccessfulOrders { get; set; }
-        public long FailedOrders { get; set; }
+        public long TotalCarts { get; set; }
+        public long SuccessfulCarts { get; set; }
+        public long FailedCarts { get; set; }
         public int SuccessfulUsers { get; set; }
         public int FailedUsers { get; set; }
         public double AverageResponseTime { get; set; }
@@ -109,7 +109,7 @@ public class SimulationMetricsService
         public long MaxResponseTime { get; set; }
         public long P95ResponseTime { get; set; }
         public long P99ResponseTime { get; set; }
-        public double OrdersPerSecond { get; set; }
+        public double CartsPerSecond { get; set; }
         public Dictionary<string, int> ErrorCounts { get; set; } = new();
         public int TotalErrors { get; set; }
     }

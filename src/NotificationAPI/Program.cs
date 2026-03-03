@@ -41,4 +41,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+try
+{
+    await app.RunAsync();
+}
+catch (Exception ex)
+{
+}

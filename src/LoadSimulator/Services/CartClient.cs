@@ -5,26 +5,26 @@ using Microsoft.Extensions.Logging;
 namespace LoadSimulator.Services;
 
 /// <summary>
-/// HTTP client for order operations
+/// HTTP client for cart operations
 /// </summary>
-public class OrderClient : IOrderClient
+public class CartClient : ICartClient
 {
     private readonly HttpClient _httpClient;
-    private readonly ILogger<OrderClient> _logger;
+    private readonly ILogger<CartClient> _logger;
 
-    public OrderClient(HttpClient httpClient, ILogger<OrderClient> logger)
+    public CartClient(HttpClient httpClient, ILogger<CartClient> logger)
     {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<CartDto?> CreateOrderAsync(
+    public async Task<CartDto?> CreateCartAsync(
         string jwtToken,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "/api/orders");
+            var request = new HttpRequestMessage(HttpMethod.Post, "/api/carts");
             request.AddBearerToken(jwtToken);
             request.Content = new StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
 
@@ -34,25 +34,25 @@ public class OrderClient : IOrderClient
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogWarning(
-                    "Failed to create order: {StatusCode}",
+                    "Failed to create cart: {StatusCode}",
                     response.StatusCode);
                 return null;
             }
 
-            var order = await response.DeserializeAsync<CartDto>(cancellationToken)
+            var cart = await response.DeserializeAsync<CartDto>(cancellationToken)
                 .ConfigureAwait(false);
 
-            return order;
+            return cart;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating order");
+            _logger.LogError(ex, "Error creating cart");
             return null;
         }
     }
 
-    public async Task<bool> AddOrderItemAsync(
-        Guid orderId,
+    public async Task<bool> AddCartItemAsync(
+        Guid cartId,
         Guid productId,
         int quantity,
         decimal? price,
@@ -61,7 +61,7 @@ public class OrderClient : IOrderClient
     {
         try
         {
-            var url = $"/api/orders/{orderId}/items";
+            var url = $"/api/carts/{cartId}/items";
             var item = new { productId, quantity, price };
             var content = item.AsJsonContent();
 
@@ -74,8 +74,8 @@ public class OrderClient : IOrderClient
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogWarning(
-                    "Failed to add order item to order {OrderId}: {StatusCode}",
-                    orderId,
+                    "Failed to add cart item to cart {CartId}: {StatusCode}",
+                    cartId,
                     response.StatusCode);
                 return false;
             }
@@ -84,19 +84,19 @@ public class OrderClient : IOrderClient
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding item to order {OrderId}", orderId);
+            _logger.LogError(ex, "Error adding item to cart {CartId}", cartId);
             return false;
         }
     }
 
-    public async Task<bool> SubmitOrderAsync(
-        Guid orderId,
+    public async Task<bool> SubmitCartAsync(
+        Guid cartId,
         string jwtToken,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var url = $"/api/orders/{orderId}/submit";
+            var url = $"/api/carts/{cartId}/submit";
             var request = new HttpRequestMessage(HttpMethod.Post, url);
             request.AddBearerToken(jwtToken);
             request.Content = new StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
@@ -107,8 +107,8 @@ public class OrderClient : IOrderClient
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogWarning(
-                    "Failed to submit order {OrderId}: {StatusCode}",
-                    orderId,
+                    "Failed to submit cart {CartId}: {StatusCode}",
+                    cartId,
                     response.StatusCode);
                 return false;
             }
@@ -117,7 +117,7 @@ public class OrderClient : IOrderClient
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error submitting order {OrderId}", orderId);
+            _logger.LogError(ex, "Error submitting cart {CartId}", cartId);
             return false;
         }
     }

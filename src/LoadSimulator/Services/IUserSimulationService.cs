@@ -7,8 +7,8 @@ public interface IUserSimulationService
 {
     Task<UserSimulationResult> SimulateUserAsync(
         int userId,
-        int ordersPerUser,
-        int maxProductsPerOrder,
+        int cartsPerUser,
+        int maxProductsPerCart,
         int delayMinMs,
         int delayMaxMs,
         double normalDistMean,
@@ -23,8 +23,8 @@ public class UserSimulationResult
 {
     public int UserId { get; set; }
     public bool Success { get; set; }
-    public int OrdersCreated { get; set; }
-    public int OrdersFailed { get; set; }
+    public int CartsCreated { get; set; }
+    public int CartsFailed { get; set; }
     public TimeSpan Duration { get; set; }
     public List<string> Errors { get; set; } = new();
     public long TotalResponseTimeMs { get; set; }

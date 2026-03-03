@@ -131,7 +131,7 @@ builder.Services.AddHttpClient<IProductClient, ProductClient>()
     })
     .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
-builder.Services.AddHttpClient<IOrderClient, OrderClient>()
+builder.Services.AddHttpClient<ICartClient, CartClient>()
      .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
      {
          UseProxy = false,

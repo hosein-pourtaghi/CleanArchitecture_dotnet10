@@ -31,5 +31,5 @@ public static class CustomerErrors
     public static Error CannotDeleteCustomer() =>
         Error.Failure(
             "Customers.CannotDelete",
-            "This customer cannot be deleted due to existing orders.");
+            "This customer cannot be deleted due to existing carts.");
 }

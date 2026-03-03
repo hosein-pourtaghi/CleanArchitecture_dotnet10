@@ -10,7 +10,7 @@ namespace Infrastructure.Services;
 public class NotificationHub : Hub
 {
     
-    // Server can call Clients.User(userId).SendAsync("OrderCreated", payload)
+    // Server can call Clients.User(userId).SendAsync("CartCreated", payload)
     //public async Task SendNotification(string message)
     //{
     //    // Use standard Activity.Current.Id for trace context

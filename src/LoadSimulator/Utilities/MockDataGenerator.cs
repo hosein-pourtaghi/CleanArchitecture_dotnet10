@@ -54,14 +54,14 @@ public class MockDataGenerator
         Math.Max(1, Random.Shared.Next(1, maxQuantity + 1));
 
    
-    public List<Guid> GenerateProductIds(int count, List<Guid> maxProductsPerOrder)
+    public List<Guid> GenerateProductIds(int count, List<Guid> maxProductsPerCart)
     {
         var productCount = Math.Min(count, 10);
         var selected = new HashSet<Guid>();
         
         while (selected.Count < productCount)
         {
-            selected.Add(maxProductsPerOrder[Random.Shared.Next(maxProductsPerOrder.Count-1)]);
+            selected.Add(maxProductsPerCart[Random.Shared.Next(maxProductsPerCart.Count-1)]);
         }
         
         return selected.ToList();

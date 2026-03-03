@@ -90,8 +90,8 @@ public class SimulationBackgroundService : BackgroundService
 
             var task = _simulationService.SimulateUserAsync(
                 userId,
-                _settings.OrdersPerUser,
-                _settings.MaxProductsPerOrder,
+                _settings.CartsPerUser,
+                _settings.MaxProductsPerCart,
                 _settings.DelayMinMs,
                 _settings.DelayMaxMs,
                 _settings.NormalDistributionMean,
@@ -106,7 +106,7 @@ public class SimulationBackgroundService : BackgroundService
         // Aggregate metrics
         var successCount = 0;
         var failureCount = 0;
-        var totalOrders = 0;
+        var totalCarts = 0;
 
         foreach (var result in results)
         {
@@ -115,16 +115,16 @@ public class SimulationBackgroundService : BackgroundService
             else
                 failureCount++;
 
-            totalOrders += result.OrdersCreated + result.OrdersFailed;
+            totalCarts += result.CartsCreated + result.CartsFailed;
         }
 
         var duration = DateTime.UtcNow - startTime;
 
         _logger.LogInformation(
-            "Background simulation completed: {SuccessCount}/{TotalUsers} successful, {TotalOrders} orders in {Duration}",
+            "Background simulation completed: {SuccessCount}/{TotalUsers} successful, {TotalCarts} carts in {Duration}",
             successCount,
             _settings.ConcurrentUsers,
-            totalOrders,
+            totalCarts,
             duration);
     }
 }

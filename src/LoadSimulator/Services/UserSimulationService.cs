@@ -13,7 +13,7 @@ public class UserSimulationService : IUserSimulationService
 {
     private readonly IAuthClient _authClient;
     private readonly IProductClient _productClient;
-    private readonly IOrderClient _orderClient;
+    private readonly ICartClient _cartClient;
     private readonly IProductCacheService _cacheService;
     private readonly MockDataGenerator _dataGenerator;
     private readonly ILogger<UserSimulationService> _logger;
@@ -22,7 +22,7 @@ public class UserSimulationService : IUserSimulationService
     public UserSimulationService(
         IAuthClient authClient,
         IProductClient productClient,
-        IOrderClient orderClient,
+        ICartClient cartClient,
         IProductCacheService cacheService,
         MockDataGenerator dataGenerator,
         ILogger<UserSimulationService> logger,
@@ -30,7 +30,7 @@ public class UserSimulationService : IUserSimulationService
     {
         _authClient = authClient ?? throw new ArgumentNullException(nameof(authClient));
         _productClient = productClient ?? throw new ArgumentNullException(nameof(productClient));
-        _orderClient = orderClient ?? throw new ArgumentNullException(nameof(orderClient));
+        _cartClient = cartClient ?? throw new ArgumentNullException(nameof(cartClient));
         _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
         _dataGenerator = dataGenerator ?? throw new ArgumentNullException(nameof(dataGenerator));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -39,8 +39,8 @@ public class UserSimulationService : IUserSimulationService
 
     public async Task<UserSimulationResult> SimulateUserAsync(
         int userId,
-        int ordersPerUser,
-        int maxProductsPerOrder,
+        int cartsPerUser,
+        int maxProductsPerCart,
         int delayMinMs,
         int delayMaxMs,
         double normalDistMean,
@@ -79,10 +79,10 @@ public class UserSimulationService : IUserSimulationService
             await DelayAsync(delayMinMs, delayMaxMs, normalDistMean, normalDistStdDev, cancellationToken)
                 .ConfigureAwait(false);
 
-            // Step 2: Simulate Orders
-            for (int orderIndex = 0; orderIndex < ordersPerUser && !cancellationToken.IsCancellationRequested; orderIndex++)
+            // Step 2: Simulate Carts
+            for (int cartIndex = 0; cartIndex < cartsPerUser && !cancellationToken.IsCancellationRequested; cartIndex++)
             {
-                var orderStopwatch = Stopwatch.StartNew();
+                var cartStopwatch = Stopwatch.StartNew();
 
                 try
                 {
@@ -99,7 +99,7 @@ public class UserSimulationService : IUserSimulationService
 
                     if (products == null || products.Count == 0)
                     {
-                        result.OrdersFailed++;
+                        result.CartsFailed++;
                         result.Errors.Add($"No products available");
                         continue;
                     }
@@ -107,22 +107,22 @@ public class UserSimulationService : IUserSimulationService
                     await DelayAsync(delayMinMs, delayMaxMs, normalDistMean, normalDistStdDev, cancellationToken)
                         .ConfigureAwait(false);
 
-                    // Create order
-                    var order = await _orderClient.CreateOrderAsync(userSession.JwtToken, cancellationToken)
+                    // Create cart
+                    var cart = await _cartClient.CreateCartAsync(userSession.JwtToken, cancellationToken)
                         .ConfigureAwait(false);
 
-                    if (order == null)
+                    if (cart == null)
                     {
-                        result.OrdersFailed++;
-                        result.Errors.Add("Failed to create order");
+                        result.CartsFailed++;
+                        result.Errors.Add("Failed to create cart");
                         continue;
                     }
 
                     await DelayAsync(delayMinMs, delayMaxMs, normalDistMean, normalDistStdDev, cancellationToken)
                         .ConfigureAwait(false);
 
-                    // Add items to order
-                    var itemCount = _dataGenerator.GenerateQuantity(maxProductsPerOrder);
+                    // Add items to cart
+                    var itemCount = _dataGenerator.GenerateQuantity(maxProductsPerCart);
                     var selectedProductIds =  _dataGenerator.GenerateProductIds(itemCount, products.Select(x=>x.Id).ToList());
 
                     var addItemsSuccess = true;
@@ -133,8 +133,8 @@ public class UserSimulationService : IUserSimulationService
                             product = products[Random.Shared.Next(products.Count)];
 
                         var quantity = _dataGenerator.GenerateQuantity(5);
-                        var added = await _orderClient.AddOrderItemAsync(
-                            order.Id,
+                        var added = await _cartClient.AddCartItemAsync(
+                            cart.Id,
                             product.Id,
                             quantity,
                             product.Price,
@@ -153,29 +153,29 @@ public class UserSimulationService : IUserSimulationService
 
                     if (!addItemsSuccess)
                     {
-                        result.OrdersFailed++;
-                        result.Errors.Add($"Failed to add items to order {order.Id}");
+                        result.CartsFailed++;
+                        result.Errors.Add($"Failed to add items to cart {cart.Id}");
                         continue;
                     }
 
                     await DelayAsync(delayMinMs, delayMaxMs, normalDistMean, normalDistStdDev, cancellationToken)
                         .ConfigureAwait(false);
 
-                    // Submit order
-                    var submitted = await _orderClient.SubmitOrderAsync(
-                        order.Id,
+                    // Submit cart
+                    var submitted = await _cartClient.SubmitCartAsync(
+                        cart.Id,
                         userSession.JwtToken,
                         cancellationToken).ConfigureAwait(false);
 
                     if (submitted)
                     {
-                        result.OrdersCreated++;
-                        _logger.LogDebug("User {UserId}: Order {OrderId} submitted successfully", userId, order.Id);
+                        result.CartsCreated++;
+                        _logger.LogDebug("User {UserId}: Cart {CartId} submitted successfully", userId, cart.Id);
                     }
                     else
                     {
-                        result.OrdersFailed++;
-                        result.Errors.Add($"Failed to submit order {order.Id}");
+                        result.CartsFailed++;
+                        result.Errors.Add($"Failed to submit cart {cart.Id}");
                     }
                 }
                 catch (OperationCanceledException)
@@ -184,23 +184,23 @@ public class UserSimulationService : IUserSimulationService
                 }
                 catch (Exception ex)
                 {
-                    result.OrdersFailed++;
-                    result.Errors.Add($"Order error: {ex.Message}");
-                    _logger.LogError(ex, "User {UserId}: Error during order simulation", userId);
+                    result.CartsFailed++;
+                    result.Errors.Add($"Cart error: {ex.Message}");
+                    _logger.LogError(ex, "User {UserId}: Error during cart simulation", userId);
                 }
                 finally
                 {
-                    orderStopwatch.Stop();
-                    result.TotalResponseTimeMs += orderStopwatch.ElapsedMilliseconds;
+                    cartStopwatch.Stop();
+                    result.TotalResponseTimeMs += cartStopwatch.ElapsedMilliseconds;
                 }
             }
 
             result.Success = true;
             _logger.LogInformation(
-                "User {UserId}: Completed with {OrdersCreated} successful orders and {OrdersFailed} failures",
+                "User {UserId}: Completed with {CartsCreated} successful carts and {CartsFailed} failures",
                 userId,
-                result.OrdersCreated,
-                result.OrdersFailed);
+                result.CartsCreated,
+                result.CartsFailed);
         }
         catch (OperationCanceledException)
         {

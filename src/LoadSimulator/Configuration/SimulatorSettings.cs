@@ -9,9 +9,9 @@ public class SimulatorSettings
     
     public int ConcurrentUsers { get; set; } = 100;
     
-    public int OrdersPerUser { get; set; } = 5;
+    public int CartsPerUser { get; set; } = 5;
     
-    public int MaxProductsPerOrder { get; set; } = 3;
+    public int MaxProductsPerCart { get; set; } = 3;
     
     public int DelayMinMs { get; set; } = 500;
     
