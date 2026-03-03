@@ -24,7 +24,7 @@ public class CartClient : ICartClient
     {
         try
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "/api/carts");
+            var request = new HttpRequestMessage(HttpMethod.Post, "/api/carts/create");
             request.AddBearerToken(jwtToken);
             request.Content = new StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
 
