@@ -110,7 +110,7 @@ public class EntityReader
             var propName = prop.Identifier.Text;
 
             Properties.Add(new EntityProperty(typeName, propName, isNullable));
-        }
+        } 
     }
 
     /// <summary>

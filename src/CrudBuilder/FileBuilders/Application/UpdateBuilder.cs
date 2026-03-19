@@ -66,7 +66,7 @@ public sealed record Update{MyPath.EntityName}Command({paramSection}) : ICommand
         var reader = new CrudBuilder.EntityReader();
         reader.ReadEntityFile();
 
-        var assignments = reader.PropertyAssignments;
+        //var assignments = reader.PropertyAssignments;
 
         var str =
 @$"
@@ -94,7 +94,7 @@ internal sealed class Update{MyPath.EntityName}CommandHandler(
         }}
 
         // Update entity with new values 
-        {assignments}
+        {MyPath.EntityName.ToLower(CultureInfo.CurrentCulture)} = mapper.Map<{MyPath.EntityName}>(command);
 
 
         //// Publish comprehensive domain event with all updated data for auditing and message bus
