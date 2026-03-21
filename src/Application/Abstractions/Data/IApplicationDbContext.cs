@@ -1,4 +1,5 @@
 ﻿using Domain.Carts;
+using Domain.Checklists;
 using Domain.Customers;
 using Domain.Products;
 using Domain.Users;
@@ -12,6 +13,8 @@ public interface IApplicationDbContext
     DbSet<Customer> Customers { get; }
     DbSet<Cart> Carts { get; set; }
     DbSet<Product> Products { get; set; }
+    DbSet<Checklist> Checklists { get; set; }
+    DbSet<Assessment> Assessments { get; set; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

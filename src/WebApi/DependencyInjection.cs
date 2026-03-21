@@ -1,11 +1,14 @@
-﻿using Microsoft.OpenApi.Models;
-using WebApi.Infrastructure;
-using WebApi.Telemetry;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using WebApi.Http;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using WebApi.Http;
+using WebApi.Infrastructure;
+using WebApi.Models.Binders;
+using WebApi.Telemetry;
 
 
 namespace WebApi;
@@ -102,7 +105,16 @@ public static class DependencyInjection
 
 
         // REMARK: If you want to use Controllers, you'll need this.
-        services.AddControllers();
+        services.AddControllers()
+             .AddJsonOptions(options =>
+             {
+                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+             })         
+             .AddControllersAsServices()
+             ;
+
+        services.AddSingleton<IModelBinderProvider, GenericFilterModelBinderProvider>();
+
 
         services.AddProblemDetails();
 

@@ -9,7 +9,7 @@
     <EmbeddedResource Remove="Cart\**" />
     <None Remove="Cart\**" />
   </ItemGroup>
-
+ 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
@@ -28,5 +28,5 @@
   <ItemGroup>
 	<InternalsVisibleTo Include="Application.UnitTests" />
   </ItemGroup>
-
+ 
 </Project>

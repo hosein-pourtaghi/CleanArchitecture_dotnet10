@@ -1,13 +1,13 @@
 ﻿using Application.Abstractions.Data;
-using Domain.Users;
-using Domain.Customers;
-using Infrastructure.DomainEvents;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using SharedKernel;
-using Microsoft.AspNetCore.Identity;
-using Domain.Products;
 using Domain.Carts;
+using Domain.Checklists;
+using Domain.Customers;
+using Domain.Products;
+using Domain.Users;
+using Infrastructure.DomainEvents;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using SharedKernel;
 
 namespace Infrastructure.Persistence;
 
@@ -22,6 +22,8 @@ public sealed class ApplicationDbContext(
     public DbSet<Cart> Carts { get; set; }
     public DbSet<CartItem> CartItems { get; set; }
     public DbSet<Product> Products { get; set; }
+    public DbSet<Checklist> Checklists { get; set; }
+    public DbSet<Assessment> Assessments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

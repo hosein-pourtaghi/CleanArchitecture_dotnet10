@@ -53,9 +53,8 @@ builder.Services.AddOpenTelemetry()
             .AddRuntimeInstrumentation()
             .AddOtlpExporter();
     });
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
+ 
+//builder.Services.AddEndpointsApiExplorer();
 
 builder.Services
     .AddApplication()
