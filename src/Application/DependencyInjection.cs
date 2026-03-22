@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Application.Abstractions.Behaviors;
+using Application.Abstractions.Interfaces;
 using Application.Abstractions.Messaging;
 using FluentValidation;
 using MediatR;
@@ -13,6 +14,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
         // Register MediatR with all handlers from this assembly
         services.AddMediatR(config =>
         {

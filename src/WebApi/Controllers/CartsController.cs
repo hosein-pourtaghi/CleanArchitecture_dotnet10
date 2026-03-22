@@ -45,8 +45,6 @@ public class CartsController(IMediator mediator) : ApiController
     /// <response code="401">Unauthorized - invalid or missing token</response>
     [HttpGet]
     [ProducesResponseType(typeof(List<CartDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [Produces("application/json")]
     public async Task<IActionResult> GetAllCart(CancellationToken cancellationToken)
     {
@@ -80,8 +78,6 @@ public class CartsController(IMediator mediator) : ApiController
     /// <response code="401">Unauthorized - invalid or missing token</response>
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(CartDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetById(
         [FromRoute] Guid id,
         CancellationToken cancellationToken)
@@ -95,8 +91,6 @@ public class CartsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet("customer/{customerId:guid}")]
     [ProducesResponseType(typeof(List<CartDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetCustomerCarts(
         [FromRoute] Guid customerId,
         [FromQuery] int page = 0,
@@ -117,10 +111,6 @@ public class CartsController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <returns>Created cart ID</returns>
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Create(
         [FromBody] CreateCartRequest request,
         CancellationToken cancellationToken)
@@ -154,11 +144,6 @@ public class CartsController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <returns>No content on success</returns>
     [HttpPut("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Update(
         [FromRoute] Guid id,
         [FromBody] UpdateCartRequest request,
@@ -184,8 +169,6 @@ public class CartsController(IMediator mediator) : ApiController
     /// Creates sample cart data for testing.
     /// </remarks>
     [HttpPost("generate")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [AllowAnonymous]
     public async Task<IActionResult> Generate(CancellationToken cancellationToken)
     {

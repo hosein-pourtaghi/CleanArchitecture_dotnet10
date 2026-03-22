@@ -12,8 +12,9 @@ using SharedKernel;
 namespace Infrastructure.Persistence;
 
 public sealed class ApplicationDbContext(
-    DbContextOptions<ApplicationDbContext> options,
-    IDomainEventsDispatcher domainEventsDispatcher)
+    DbContextOptions<ApplicationDbContext> options
+    //, IDomainEventsDispatcher domainEventsDispatcher
+    )
     : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>(options), IApplicationDbContext
 {
     DbSet<ApplicationUser> IApplicationDbContext.Users => Set<ApplicationUser>();
@@ -70,6 +71,6 @@ public sealed class ApplicationDbContext(
             })
             .ToList();
 
-        await domainEventsDispatcher.DispatchAsync(domainEvents);
+        //await domainEventsDispatcher.DispatchAsync(domainEvents);
     }
 }

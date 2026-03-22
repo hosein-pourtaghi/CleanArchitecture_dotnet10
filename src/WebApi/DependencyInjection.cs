@@ -1,12 +1,11 @@
 ﻿using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using WebApi.Http;
-using WebApi.Infrastructure;
 using WebApi.Models.Binders;
 using WebApi.Telemetry;
 
@@ -105,13 +104,16 @@ public static class DependencyInjection
 
 
         // REMARK: If you want to use Controllers, you'll need this.
-        services.AddControllers()
-             .AddJsonOptions(options =>
-             {
-                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-             })         
-             .AddControllersAsServices()
-             ;
+        services.AddControllers(options =>
+            {
+                options.Filters.Add(new ProducesResponseTypeAttribute(StatusCodes.Status200OK));
+            })
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            })
+            .AddControllersAsServices()
+            ; 
 
         services.AddSingleton<IModelBinderProvider, GenericFilterModelBinderProvider>();
 

@@ -7,6 +7,7 @@ using Infrastructure.Authentication;
 using Infrastructure.Authorization;
 using Infrastructure.DomainEvents;
 using Infrastructure.Persistence;
+using Infrastructure.Repositories.Base;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -34,6 +35,8 @@ public static class DependencyInjection
 
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
+        services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+
         services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
         services.AddScoped<IAuthService, AuthService>();
 

@@ -1,6 +1,11 @@
 ﻿namespace Application.Common.DTOs.Shared;
 
-public class Filter
+/// <summary>
+/// base request for rilter/sort/pagination 
+/// implement this for spesific usecases of filters
+/// </summary>
+/// PaginatedResult
+public class PaginatedRequest
 {
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 10;
@@ -8,7 +13,7 @@ public class Filter
     public List<SortExpression> SortExpressions { get; set; } = new List<SortExpression>();
     public List<FilterCondition> FilterConditions { get; set; } = new List<FilterCondition>();
 
-    public Filter()
+    public PaginatedRequest()
     {
         Validate();
     }
@@ -26,7 +31,7 @@ public class Filter
     public DateTime? ToDate { get; set; }
 
     // ===== ADVANCED FILTERING (CONDITIONS) =====
-    public Filter And(string property, object value, FilterOperator op = FilterOperator.Equal)
+    public PaginatedRequest And(string property, object value, FilterOperator op = FilterOperator.Equal)
     {
         FilterConditions.Add(new FilterCondition
         {
@@ -38,7 +43,7 @@ public class Filter
         return this;
     }
 
-    public Filter Or(string property, object value, FilterOperator op = FilterOperator.Equal)
+    public PaginatedRequest Or(string property, object value, FilterOperator op = FilterOperator.Equal)
     {
         FilterConditions.Add(new FilterCondition
         {

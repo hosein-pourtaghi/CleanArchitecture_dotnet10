@@ -1,84 +1,17 @@
-using System;
 using System.Linq.Expressions;
+using Application.Abstractions.Interfaces;
 using Application.Common.DTOs.Shared;
 using AutoMapper;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-//public abstract class BaseRepository<T> where T : class
-//{
-//    protected readonly ApplicationDbContext _context;
+namespace Infrastructure.Repositories.Base;
 
-//    protected BaseRepository(ApplicationDbContext context)
-//    {
-//        _context = context;
-//    }
-
-//    public virtual async Task<PaginatedResult<T>> GetAllAsync(BaseFilter filter)
-//    {
-//        var query = _context.Set<T>().AsQueryable();
-
-//        // Apply sorting (handles multiple sort expressions)
-//        query = ApplySorting(query, filter);
-
-//        // Apply entity-specific filters
-//        query = ApplyEntityFilters(query, filter);
-
-//        // Apply pagination
-//        var totalCount = await query.CountAsync();
-//        var items = await query
-//            .Skip((filter.Page - 1) * filter.PageSize)
-//            .Take(filter.PageSize)
-//            .ToListAsync();
-
-//        return new PaginatedResult<T>(items, totalCount, filter.Page, filter.PageSize);
-//    }
-
-//    protected virtual IQueryable<T> ApplyEntityFilters(IQueryable<T> query, BaseFilter filter)
-//    {
-//        return query;
-//    }
-
-//    protected virtual IQueryable<T> ApplySorting(IQueryable<T> query, BaseFilter filter)
-//    {
-//        foreach (var sort in filter.SortExpressions)
-//        {
-//            var property = typeof(T).GetProperty(sort.Property);
-//            if (property == null)
-//                continue;
-
-//            var parameter = Expression.Parameter(typeof(T), "x");
-//            var propertyAccess = Expression.MakeMemberAccess(parameter, property);
-//            var orderBy = Expression.Lambda(propertyAccess, parameter);
-//            var method = sort.IsAscending ?
-//                typeof(Queryable).GetMethod("OrderBy") :
-//                typeof(Queryable).GetMethod("OrderByDescending");
-
-//            var genericMethod = method.MakeGenericMethod(typeof(T), property.PropertyType);
-//            query = (IQueryable<T>)genericMethod.Invoke(null, new object[] { query, orderBy });
-//        }
-//        return query;
-//    }
-//}
-
-
-public class Repository<T>(ApplicationDbContext _context, IMapper _mapper) where T : class
-{ 
-    public IQueryable<T> ApplyFilter(IQueryable<T> query, Filter filter)
+public class BaseRepository<T>(ApplicationDbContext _context, IMapper _mapper) : IBaseRepository<T>
+    where T : class
+{
+    public IQueryable<T> ApplyFiltering(IQueryable<T> query, PaginatedRequest filter)
     {
-        // Convert simple properties to conditions
-        if (filter.ChecklistId.HasValue)
-            filter.And("ChecklistId", filter.ChecklistId.Value);
-
-        if (filter.ChecklistVersion.HasValue)
-            filter.And("ChecklistVersion", filter.ChecklistVersion.Value);
-
-        if (filter.FromDate.HasValue)
-            filter.And("AssessmentDate", filter.FromDate.Value, FilterOperator.GreaterThan);
-
-        if (filter.ToDate.HasValue)
-            filter.Or("AssessmentDate", filter.ToDate.Value.AddDays(1).AddTicks(-1), FilterOperator.LessThan);
-
         // Apply all conditions
         foreach (var condition in filter.FilterConditions)
         {
@@ -112,7 +45,7 @@ public class Repository<T>(ApplicationDbContext _context, IMapper _mapper) where
         return query;
     }
 
-    public IQueryable<T> ApplySorting(IQueryable<T> query, Filter filter)
+    public IQueryable<T> ApplySorting(IQueryable<T> query, PaginatedRequest filter)
     {
         foreach (var sort in filter.SortExpressions)
         {
@@ -133,14 +66,44 @@ public class Repository<T>(ApplicationDbContext _context, IMapper _mapper) where
         return query;
     }
 
+    public virtual async Task<T> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await _context.Set<T>().FindAsync([id], cancellationToken: cancellationToken)
+            ?? throw new KeyNotFoundException($"Entity with ID {id} not found");
+    }
+
+    public virtual async Task<T> CreateAsync(T entity, CancellationToken cancellationToken)
+    {
+        _context.Set<T>().Add(entity);
+        await _context.SaveChangesAsync(cancellationToken);
+        return entity;
+    }
+
+    public virtual async Task UpdateAsync(T entity, CancellationToken cancellationToken)
+    {
+        _context.Set<T>().Update(entity);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public virtual async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var entity = await _context.Set<T>().FindAsync([id], cancellationToken: cancellationToken);
+        if (entity != null)
+        {
+            _context.Set<T>().Remove(entity);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+    }
+
+
     public async Task<PaginatedResult<TDto>> GetAllAsync<TDto>(
-        Filter filter,
-        Expression<Func<T, bool>>? additionalFilter = null)
+      PaginatedRequest filter,
+      Expression<Func<T, bool>>? additionalFilter = null)
     {
         var query = _context.Set<T>().AsQueryable();
 
         // Apply filters (simple + advanced)
-        query = ApplyFilter(query, filter);
+        query = ApplyFiltering(query, filter);
 
         // Apply additional filter (AND)
         if (additionalFilter != null)
@@ -161,4 +124,31 @@ public class Repository<T>(ApplicationDbContext _context, IMapper _mapper) where
 
         return new PaginatedResult<TDto>(dtoItems, totalCount, filter.Page, filter.PageSize);
     }
+
+    public async Task<PaginatedResult<T>> GetAllAsync(
+      PaginatedRequest filter,
+      Expression<Func<T, bool>>? additionalFilter = null)
+    {
+        var query = _context.Set<T>().AsQueryable();
+
+        // Apply filters (simple + advanced)
+        query = ApplyFiltering(query, filter);
+
+        // Apply additional filter (AND)
+        if (additionalFilter != null)
+            query = query.Where(additionalFilter);
+
+        // Apply sorting
+        query = ApplySorting(query, filter);
+ 
+        // Apply pagination
+        var totalCount = await query.CountAsync();
+        var paginatedQuery = await query
+            .Skip((filter.Page - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        return new PaginatedResult<T>(paginatedQuery, totalCount, filter.Page, filter.PageSize);
+    }
+
 }

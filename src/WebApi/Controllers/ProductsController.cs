@@ -19,8 +19,6 @@ public class ProductsController(IMediator mediator) : ApiController
     
     [HttpGet]
     [ProducesResponseType(typeof(List<ProductDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [Produces("application/json")]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
@@ -30,8 +28,6 @@ public class ProductsController(IMediator mediator) : ApiController
  
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetById(
         [FromRoute] Guid id,
         CancellationToken cancellationToken)
@@ -41,10 +37,6 @@ public class ProductsController(IMediator mediator) : ApiController
     }
  
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Create(
         [FromBody] CreateProductRequest request,
         CancellationToken cancellationToken)
@@ -61,11 +53,6 @@ public class ProductsController(IMediator mediator) : ApiController
     }
 
     [HttpPut("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Update(
         [FromRoute] Guid id,
         [FromBody] UpdateProductRequest request,
@@ -77,9 +64,6 @@ public class ProductsController(IMediator mediator) : ApiController
     }
 
     [HttpDelete("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Delete(
         [FromRoute] Guid id,
         CancellationToken cancellationToken)
@@ -89,8 +73,6 @@ public class ProductsController(IMediator mediator) : ApiController
     }
 
     [HttpPost("generate")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Generate(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GenerateProductCommand(), cancellationToken);

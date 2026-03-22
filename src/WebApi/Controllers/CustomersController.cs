@@ -45,8 +45,6 @@ public class CustomersController(IMediator mediator) : ApiController
     /// <response code="401">Unauthorized - invalid or missing token</response>
     [HttpGet]
     [ProducesResponseType(typeof(List<CustomerDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [Produces("application/json")]
     public async Task<IActionResult> GetCustomers(CancellationToken cancellationToken)
     {
@@ -80,8 +78,6 @@ public class CustomersController(IMediator mediator) : ApiController
     /// <response code="401">Unauthorized - invalid or missing token</response>
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetById(
         [FromRoute] Guid id,
         CancellationToken cancellationToken)
@@ -133,10 +129,6 @@ public class CustomersController(IMediator mediator) : ApiController
     /// <response code="409">Email already exists</response>
     /// <response code="401">Unauthorized - invalid or missing token</response>
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Create(
         [FromBody] CreateCustomerRequest request,
         CancellationToken cancellationToken)
@@ -199,11 +191,6 @@ public class CustomersController(IMediator mediator) : ApiController
     /// <response code="409">Email already in use</response>
     /// <response code="401">Unauthorized - invalid or missing token</response>
     [HttpPut("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Update(
         [FromRoute] Guid id,
         [FromBody] UpdateCustomerRequest request,
@@ -244,9 +231,6 @@ public class CustomersController(IMediator mediator) : ApiController
     /// - 404: Customer not found
     /// </remarks>
     [HttpDelete("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Delete(
         [FromRoute] Guid id,
         CancellationToken cancellationToken)
@@ -267,9 +251,6 @@ public class CustomersController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
     [HttpPost("{id:guid}/copy")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Copy(
         [FromRoute] Guid id,
         [FromBody] CreateCustomerRequest request,

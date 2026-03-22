@@ -7,7 +7,7 @@ public class GenericFilterModelBinder : IModelBinder
 {
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
-        var filter = (Filter)Activator.CreateInstance(bindingContext.ModelType);
+        var filter = (PaginatedRequest)Activator.CreateInstance(bindingContext.ModelType);
 
         // Handle common properties
         if (bindingContext.ValueProvider.GetValue("page").FirstValue != null)
@@ -26,8 +26,11 @@ public class GenericFilterModelBinder : IModelBinder
         {
             for (int i = 0; i < sortProperties.Count(); i++)
             {
-                var sortProperty =sortProperties[i];
-                var direction = directionProperties[i];
+                var s = sortProperties.ToArray();
+                var d = directionProperties.ToArray();
+
+                var sortProperty = s[i];
+                var direction = d[i];
                 bool isAscending = direction.Equals("asc", StringComparison.OrdinalIgnoreCase);
                 filter.SortExpressions.Add(new SortExpression { Property = sortProperty, IsAscending = isAscending });
             }
@@ -64,7 +67,7 @@ public class GenericFilterModelBinderProvider : IModelBinderProvider
 {
     public IModelBinder GetBinder(ModelBinderProviderContext context)
     {
-        if (context.Metadata.ModelType.IsSubclassOf(typeof(Filter)))
+        if (context.Metadata.ModelType.IsSubclassOf(typeof(PaginatedRequest)))
         {
             return new GenericFilterModelBinder();
         }

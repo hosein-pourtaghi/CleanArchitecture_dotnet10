@@ -31,7 +31,7 @@ public class Checklist : Entity
     /// <summary>
     /// لیست ستون های اضافی
     /// </summary>
-    public virtual ICollection<ChecklistQuestion> ChecklistQuestions { get; set; } = new List<ChecklistQuestion>();
+    public virtual ICollection<ChecklistQuestion> Questions { get; set; } = new List<ChecklistQuestion>();
     #endregion
 
 
