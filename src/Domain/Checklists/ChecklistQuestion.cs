@@ -15,7 +15,7 @@ public class ChecklistQuestion : Entity
     /// <summary>
     /// ایدی گروه سوال
     /// </summary>
-    public Guid ChecklistGroupId { get; set; }
+    public Guid GroupId { get; set; }
     /// <summary>
     /// بارم سوال
     /// </summary>
@@ -36,12 +36,12 @@ public class ChecklistQuestion : Entity
 
 
     #region Navigation
-    public ChecklistGroup Group { get; set; }
+    public virtual ChecklistGroup Group { get; set; }
     /// <summary>
     /// list of options based on question type
     /// if question has no option assessment is a simple string
     /// </summary>
-    public ICollection<ChecklistQuestionOption>? Options{ get; set; }
+    public virtual ICollection<ChecklistQuestionOption>? Options{ get; set; }
     #endregion
 
 

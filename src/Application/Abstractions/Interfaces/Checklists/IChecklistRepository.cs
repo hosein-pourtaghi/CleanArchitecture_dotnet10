@@ -2,7 +2,7 @@
 
 namespace Application.Abstractions.Interfaces.Checklists;
 
-public interface IChecklistRepository
+public interface IChecklistRepository :IBaseRepository<Checklist>
 {
     Task<Checklist> GetByIdAsync(Guid id, bool includeGroups = true);
     Task<Checklist> GetByVersionAsync(Guid checklistId, int version);

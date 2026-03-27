@@ -49,7 +49,7 @@ public class Checklist : Entity
         if (!Groups.Any(g => g.Id == group.Id))
             throw new InvalidOperationException("Group not found in checklist");
 
-        question.ChecklistGroupId = group.Id;
+        question.GroupId = group.Id;
         group.Questions.Add(question);
     }
 

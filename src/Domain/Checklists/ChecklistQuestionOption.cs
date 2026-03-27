@@ -18,7 +18,7 @@ public class ChecklistQuestionOption : Entity
 
 
     #region Navigation
-    public ChecklistQuestion ChecklistQuestion { get; set; }
+    public virtual ChecklistQuestion ChecklistQuestion { get; set; }
     #endregion
 
 

@@ -9,6 +9,5 @@ public sealed record CreateChecklistCommand(
     DateTime lastModified,
     bool isValid,
     string title,
-    ICollection<ChecklistGroupDto> groups,
-    ICollection<ChecklistQuestionDto> questions
+    ICollection<ChecklistGroupDto> groups
 ) : ICommand<Guid>; 

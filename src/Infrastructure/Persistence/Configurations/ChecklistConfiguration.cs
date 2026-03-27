@@ -8,23 +8,29 @@ namespace Infrastructure.Persistence.Configurations;
 public class ChecklistConfiguration : IEntityTypeConfiguration<Checklist>
 {
     public void Configure(EntityTypeBuilder<Checklist> builder)
-    {
-        //builder.ToTable("Checklists");
+    {   
+        builder.Property(c => c.Title)
+            .IsRequired()
+            .HasMaxLength(255);
+          
+        // Versioning
+        builder.Property(c => c.Version)
+            .IsRequired()
+            .HasDefaultValue(1);
 
-        //builder.HasKey(c => c.Id);
+        builder.Property(c => c.LastModified)
+            .IsRequired()
+            .HasDefaultValueSql("GETUTCDATE()");
 
-        //builder.Property(c => c.Name)
-        //    .IsRequired()
-        //    .HasMaxLength(200);
+        // Relationships
+        builder.HasMany(c => c.Groups)
+            .WithOne(g => g.Checklist)
+            .HasForeignKey(g => g.ChecklistId)
+            .OnDelete(DeleteBehavior.Restrict);
 
-        //builder.Property(c => c.Email)
-        //    .IsRequired()
-        //    .HasMaxLength(256);
+        // Indexes
+        builder.HasIndex(c => c.Title); 
 
-        //builder.HasIndex(c => c.Email)
-        //    .IsUnique()
-        //    ;
- 
     }
 }
 

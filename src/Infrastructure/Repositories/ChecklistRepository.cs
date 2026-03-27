@@ -1,12 +1,23 @@
 ﻿using Application.Abstractions.Interfaces.Checklists;
+using AutoMapper;
 using Domain.Checklists;
 using Infrastructure.Persistence;
+using Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public class ChecklistRepository(ApplicationDbContext _context) : IChecklistRepository
+public class ChecklistRepository : BaseRepository<Checklist>, IChecklistRepository
 {
+    private readonly ApplicationDbContext _context;
+    private readonly IMapper _mapper;
+
+    public ChecklistRepository(ApplicationDbContext context, IMapper mapper) :
+        base(context, mapper)
+    {
+        _context = context;
+        _mapper = mapper;
+    }
 
     public async Task<Checklist> GetByIdAsync(Guid id, bool includeGroups = true)
     {
@@ -72,7 +83,4 @@ public class ChecklistRepository(ApplicationDbContext _context) : IChecklistRepo
             await _context.SaveChangesAsync();
         }
     }
-
-
-
 }

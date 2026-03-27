@@ -28,6 +28,7 @@ internal static class FileControllerBuilder
         var str =
 @$"using Application.Abstractions.Messaging;
 using Application.Common.DTOs; 
+using MediatR;
 using Application.{MyPath.EntityName}s.Create;
 using Application.{MyPath.EntityName}s.Delete;
 using Application.{MyPath.EntityName}s.GetAll;

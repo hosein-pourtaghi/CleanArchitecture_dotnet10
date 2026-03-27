@@ -1,13 +1,9 @@
-﻿using System;
-using Domain.Checklists;
-using SharedKernel;
-
-namespace Application.Common.DTOs;
+﻿namespace Application.Common.DTOs;
 
 
 public class ChecklistGroupDto
 {
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
     public bool IsActive { get; set; } = true;
 
     /// <summary>
@@ -17,7 +13,7 @@ public class ChecklistGroupDto
     /// <summary>
     /// ایدی چکلیست
     /// </summary>
-    public Guid ChecklistId { get; set; }
+    public Guid? ChecklistId { get; set; }
     /// <summary>
     /// ایدی پدر
     /// </summary>
@@ -30,5 +26,7 @@ public class ChecklistGroupDto
     /// نمایش/عدم نمایش
     /// </summary>
     public bool IsShow { get; set; } = true;
-     
+    public List<ChecklistQuestionDto> Questions { get; set; } = new List<ChecklistQuestionDto>();
+    public List<ChecklistGroupDto> Children { get; set; } = new List<ChecklistGroupDto>();
+
 }

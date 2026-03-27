@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -73,6 +73,23 @@ namespace Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Carts", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Checklists",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    Version = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
+                    LastModified = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    IsValid = table.Column<bool>(type: "bit", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Checklists", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -287,6 +304,147 @@ namespace Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Assessments",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ChecklistId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ChecklistVersion = table.Column<int>(type: "int", nullable: false),
+                    AssessmentDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    TotalScore = table.Column<float>(type: "real", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Assessments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Assessments_Checklists_ChecklistId",
+                        column: x => x.ChecklistId,
+                        principalSchema: "dbo",
+                        principalTable: "Checklists",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ChecklistGroup",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ChecklistId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ParentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Priority = table.Column<int>(type: "int", nullable: false),
+                    IsShow = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChecklistGroup", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ChecklistGroup_ChecklistGroup_ParentId",
+                        column: x => x.ParentId,
+                        principalSchema: "dbo",
+                        principalTable: "ChecklistGroup",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ChecklistGroup_Checklists_ChecklistId",
+                        column: x => x.ChecklistId,
+                        principalSchema: "dbo",
+                        principalTable: "Checklists",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ChecklistQuestion",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    GroupId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Score = table.Column<float>(type: "real", nullable: true),
+                    Priority = table.Column<int>(type: "int", nullable: false),
+                    IsRequiredAnswer = table.Column<bool>(type: "bit", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    ChecklistId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChecklistQuestion", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ChecklistQuestion_ChecklistGroup_GroupId",
+                        column: x => x.GroupId,
+                        principalSchema: "dbo",
+                        principalTable: "ChecklistGroup",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ChecklistQuestion_Checklists_ChecklistId",
+                        column: x => x.ChecklistId,
+                        principalSchema: "dbo",
+                        principalTable: "Checklists",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AssessmentAnswer",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AssessmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    QuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AnswerText = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SelectedOptionIds = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AssessmentAnswer", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AssessmentAnswer_Assessments_AssessmentId",
+                        column: x => x.AssessmentId,
+                        principalSchema: "dbo",
+                        principalTable: "Assessments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AssessmentAnswer_ChecklistQuestion_QuestionId",
+                        column: x => x.QuestionId,
+                        principalSchema: "dbo",
+                        principalTable: "ChecklistQuestion",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ChecklistQuestionOption",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    ChecklistQuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChecklistQuestionOption", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ChecklistQuestionOption_ChecklistQuestion_ChecklistQuestionId",
+                        column: x => x.ChecklistQuestionId,
+                        principalSchema: "dbo",
+                        principalTable: "ChecklistQuestion",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 schema: "dbo",
@@ -334,10 +492,76 @@ namespace Infrastructure.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AssessmentAnswer_AssessmentId",
+                schema: "dbo",
+                table: "AssessmentAnswer",
+                column: "AssessmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssessmentAnswer_QuestionId",
+                schema: "dbo",
+                table: "AssessmentAnswer",
+                column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Assessments_AssessmentDate",
+                schema: "dbo",
+                table: "Assessments",
+                column: "AssessmentDate");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Assessments_ChecklistId",
+                schema: "dbo",
+                table: "Assessments",
+                column: "ChecklistId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Assessments_ChecklistVersion",
+                schema: "dbo",
+                table: "Assessments",
+                column: "ChecklistVersion");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CartItems_CartId",
                 schema: "dbo",
                 table: "CartItems",
                 column: "CartId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChecklistGroup_ChecklistId",
+                schema: "dbo",
+                table: "ChecklistGroup",
+                column: "ChecklistId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChecklistGroup_ParentId",
+                schema: "dbo",
+                table: "ChecklistGroup",
+                column: "ParentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChecklistQuestion_ChecklistId",
+                schema: "dbo",
+                table: "ChecklistQuestion",
+                column: "ChecklistId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChecklistQuestion_GroupId",
+                schema: "dbo",
+                table: "ChecklistQuestion",
+                column: "GroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChecklistQuestionOption_ChecklistQuestionId",
+                schema: "dbo",
+                table: "ChecklistQuestionOption",
+                column: "ChecklistQuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Checklists_Title",
+                schema: "dbo",
+                table: "Checklists",
+                column: "Title");
         }
 
         /// <inheritdoc />
@@ -364,7 +588,15 @@ namespace Infrastructure.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
+                name: "AssessmentAnswer",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
                 name: "CartItems",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "ChecklistQuestionOption",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
@@ -384,7 +616,23 @@ namespace Infrastructure.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
+                name: "Assessments",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
                 name: "Carts",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "ChecklistQuestion",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "ChecklistGroup",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "Checklists",
                 schema: "dbo");
         }
     }

@@ -1,4 +1,5 @@
-﻿using Application;
+﻿using System.Data;
+using Application;
 using Application.Common.Mappings;
 using FluentValidation;
 using HealthChecks.UI.Client;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Serilog;
+using Serilog.Sinks.MSSqlServer;
 using WebApi;
 using WebApi.Extensions;
 using WebApi.Middleware;
@@ -36,13 +38,13 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Application", "MyAspireApp")
     .CreateLogger();
 
-builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddOpenTelemetry()
     .WithTracing(tracerProviderBuilder =>
     {
         tracerProviderBuilder
             .AddSource("WebApi")
+            //.AddConsoleExporter()
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
             .AddOtlpExporter();
@@ -51,9 +53,42 @@ builder.Services.AddOpenTelemetry()
     {
         meterProviderBuilder
             .AddRuntimeInstrumentation()
+            //.AddConsoleExporter()
             .AddOtlpExporter();
     });
- 
+builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configuration(context.Configuration));
+
+//// Configure Serilog for SQL logging
+//builder.Host.UseSerilog((context, services, configuration) =>
+//    configuration
+//        .Enrich.FromLogContext()
+//        .Enrich.WithEnvironmentName()
+//        .Enrich.WithMachineName()
+//        .WriteTo.Console()
+//        .WriteTo.MSSqlServer(
+//            connectionString: builder.Configuration.GetConnectionString("DefaultConnection"),
+//            tableName: "RequestLogs",
+//            autoCreateSqlTable: true,
+//            columnOptions: new ColumnOptions
+//            {
+//                AdditionalColumns = new List<SqlColumn>
+//                {
+//                    new SqlColumn { ColumnName = "CorrelationId", DataType = SqlDbType.NVarChar, DataLength = 50 },
+//                    new SqlColumn { ColumnName = "HttpMethod", DataType = SqlDbType.NVarChar, DataLength = 10 },
+//                    new SqlColumn { ColumnName = "HttpPath", DataType = SqlDbType.NVarChar, DataLength = 255 },
+//                    new SqlColumn { ColumnName = "HttpStatus", DataType = SqlDbType.Int },
+//                    new SqlColumn { ColumnName = "ResponseTimeMs", DataType = SqlDbType.Int }
+//                }
+//            },
+//            sinkOptions: new MSSqlServerSinkOptions
+//            {
+//                BatchPostingLimit = 100,
+//                BatchPeriod = TimeSpan.FromSeconds(5)
+//            }
+//        )
+//);
+
+
 //builder.Services.AddEndpointsApiExplorer();
 
 builder.Services

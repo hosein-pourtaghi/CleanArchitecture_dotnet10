@@ -1,4 +1,5 @@
 ﻿using Application.Abstractions.Data;
+using Domain.Assessments;
 using Domain.Carts;
 using Domain.Checklists;
 using Domain.Customers;

@@ -6,7 +6,7 @@ namespace Application.Common.DTOs;
  
 public class ChecklistQuestionDto
 {
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
     public bool IsActive { get; set; } = true;
 
 
@@ -17,7 +17,7 @@ public class ChecklistQuestionDto
     /// <summary>
     /// ایدی گروه سوال
     /// </summary>
-    public Guid ChecklistGroupId { get; set; }
+    public Guid GroupId { get; set; }
     /// <summary>
     /// بارم سوال
     /// </summary>
