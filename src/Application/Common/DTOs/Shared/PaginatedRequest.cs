@@ -10,9 +10,8 @@ public class PaginatedRequest
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 10;
     public string? SearchTerm { get; set; }
-    public List<SortExpression> SortExpressions { get; set; } = new List<SortExpression>();
-    public List<FilterCondition> FilterConditions { get; set; } = new List<FilterCondition>();
-
+    public List<SortExpression> SortExpressions { get; set; } = new List<SortExpression>();     
+    public FilterGroup Filters { get; set; } = new FilterGroup();
     public PaginatedRequest()
     {
         Validate();
@@ -30,30 +29,7 @@ public class PaginatedRequest
     public DateTime? FromDate { get; set; }
     public DateTime? ToDate { get; set; }
 
-    // ===== ADVANCED FILTERING (CONDITIONS) =====
-    public PaginatedRequest And(string property, object value, FilterOperator op = FilterOperator.Equal)
-    {
-        FilterConditions.Add(new FilterCondition
-        {
-            Property = property,
-            Value = value,
-            Operator = op,
-            Logic = FilterLogic.And
-        });
-        return this;
-    }
 
-    public PaginatedRequest Or(string property, object value, FilterOperator op = FilterOperator.Equal)
-    {
-        FilterConditions.Add(new FilterCondition
-        {
-            Property = property,
-            Value = value,
-            Operator = op,
-            Logic = FilterLogic.Or
-        });
-        return this;
-    }
 }
 
 public class SortExpression
@@ -62,21 +38,30 @@ public class SortExpression
     public bool IsAscending { get; set; } = true;
 }
 
-public class FilterCondition
+// Represents a group of conditions (either a single condition or a list of sub-groups)
+public class FilterGroup
 {
-    public string Property { get; set; }
-    public object Value { get; set; }
-    public FilterOperator Operator { get; set; } = FilterOperator.Equal;
     public FilterLogic Logic { get; set; } = FilterLogic.And;
+
+    public List<FilterNode> Nodes { get; set; } = new List<FilterNode>();
 }
+
+// A node can be either a Condition OR another Group (Recursive)
+public class FilterNode
+{
+    public string? Property { get; set; } = string.Empty;
+    public FilterOperator Operator { get; set; }
+    public object? Value { get; set; }
+    public FilterGroup? Group { get; set; }
+}
+  
 
 public enum FilterOperator
 {
     Equal,
     Contains,
     GreaterThan,
-    LessThan,
-    In
+    LessThan
 }
 
 public enum FilterLogic
@@ -84,17 +69,3 @@ public enum FilterLogic
     And,
     Or
 }
-
-
-
-
-
-
-
-
-// Application/Checklists/ChecklistFilter.cs
-//public class ChecklistFilter : BaseFilter
-//{
-//    public bool? IsActive { get; set; }
-//    public string? Title { get; set; }
-//}

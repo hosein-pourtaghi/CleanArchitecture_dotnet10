@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.OpenApi.Models;
 using WebApi.Http;
-using WebApi.Models.Binders;
+//using WebApi.Models.Binders;
 using WebApi.Telemetry;
 
 
@@ -115,7 +115,7 @@ public static class DependencyInjection
             .AddControllersAsServices()
             ; 
 
-        services.AddSingleton<IModelBinderProvider, GenericFilterModelBinderProvider>();
+        //services.AddSingleton<IModelBinderProvider, GenericFilterModelBinderProvider>();
 
 
         services.AddProblemDetails();

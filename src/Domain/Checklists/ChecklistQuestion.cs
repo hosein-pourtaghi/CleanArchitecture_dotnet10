@@ -45,6 +45,11 @@ public class ChecklistQuestion : Entity
     #endregion
 
 
+
+    /// <summary>
+    /// Standard Clone
+    /// </summary>
+    /// <returns></returns>
     public ChecklistQuestion Clone()
     {
         return new ChecklistQuestion
@@ -55,8 +60,34 @@ public class ChecklistQuestion : Entity
             Priority = Priority,
             IsRequiredAnswer = IsRequiredAnswer,
             Type = Type,
-            // Deep clone options
-            Options = Options.Select(o => o.Clone()).ToList()
+            Options = Options?.Select(o => o.Clone()).ToList()
         };
     }
+
+    /// <summary>
+    /// Update Clone
+    /// </summary>
+    /// <param name="updatedTemplate"></param>
+    /// <returns></returns>
+    public ChecklistQuestion Clone(ChecklistQuestion updatedTemplate)
+    {
+        return new ChecklistQuestion
+        {
+            Id = Guid.NewGuid(),
+            Title = updatedTemplate.Title,
+            Score = updatedTemplate.Score,
+            Priority = updatedTemplate.Priority,
+            IsRequiredAnswer = updatedTemplate.IsRequiredAnswer,
+            Type = updatedTemplate.Type,
+            GroupId = this.GroupId,
+
+            // Deep clone options
+            Options = updatedTemplate.Options?.Select(newOpt =>
+            {
+                var oldOpt = this.Options?.FirstOrDefault(o => o.Id == newOpt.Id);
+                return oldOpt?.Clone(newOpt) ?? newOpt;
+            }).ToList()
+        };
+    }
+
 }

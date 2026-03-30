@@ -1,5 +1,6 @@
 using Application.Abstractions.Data;
 using Application.Abstractions.Interfaces;
+using Application.Abstractions.Interfaces.Checklists;
 using Application.Abstractions.Messaging;
 using Application.Common.DTOs;
 using Application.Common.DTOs.Shared;
@@ -11,7 +12,7 @@ namespace Application.Checklists.GetAll;
 
 internal sealed class GetAllChecklistQueryHandler(
     IApplicationDbContext context,
-    IBaseRepository<Checklist> repository,
+    IChecklistRepository repository,
     IMapper mapper)
     : IQueryHandler<GetAllChecklistQuery, PaginatedResult<ChecklistDto>>
 {

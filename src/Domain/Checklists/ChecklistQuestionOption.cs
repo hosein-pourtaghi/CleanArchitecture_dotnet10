@@ -22,14 +22,30 @@ public class ChecklistQuestionOption : Entity
     #endregion
 
 
+    /// <summary>
+    /// Standard Clone
+    /// </summary>
+    /// <returns></returns>
     public ChecklistQuestionOption Clone()
     {
         return new ChecklistQuestionOption
         {
             Id = Guid.NewGuid(),
-            Title = Title,
-            Description = Description,
-            IsActive = IsActive
+            Title = Title
+        };
+    }
+
+    /// <summary>
+    /// Update Clone
+    /// </summary>
+    /// <param name="updatedTemplate"></param>
+    /// <returns></returns>
+    public ChecklistQuestionOption Clone(ChecklistQuestionOption updatedTemplate)
+    {
+        return new ChecklistQuestionOption
+        {
+            Id = Guid.NewGuid(),
+            Title = updatedTemplate.Title
         };
     }
 

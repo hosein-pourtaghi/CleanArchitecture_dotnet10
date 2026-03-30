@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using SharedKernel;
+﻿using SharedKernel;
 
 namespace Domain.Checklists;
 
@@ -10,37 +9,26 @@ public class Checklist : Entity
 {
     public Guid Id { get; set; }
     public bool IsActive { get; set; } = true;
-    public int Version { get; private set; } = 1; // Version counter
+    public int Version { get; private set; } = 1;
     public DateTime LastModified { get; private set; } = DateTime.UtcNow;
-    /// <summary>
-    /// اعتبار سنجی چکلیست/کاربرگ انجام شده واماده استفاده است
-    /// </summary>
     public bool IsValid { get; set; }
-
     public string Title { get; set; } = string.Empty;
-    /// <summary>
-    /// بارم کلی
-    /// </summary>
-    public float TotalScore => Groups
-       .SelectMany(g => g.Questions)
-       .Sum(q => q.Score ?? 0);
+
+    public float TotalScore => Groups?
+       .SelectMany(g => g.Questions) //     .SelectMany(g => g.Questions ?? new List<ChecklistQuestion>())
+       .Sum(q => q.Score ?? 0) ?? 0;
 
 
     #region Navigation
     public virtual ICollection<ChecklistGroup> Groups { get; set; } = new List<ChecklistGroup>();
-    /// <summary>
-    /// لیست ستون های اضافی
-    /// </summary>
-    public virtual ICollection<ChecklistQuestion> Questions { get; set; } = new List<ChecklistQuestion>();
     #endregion
 
 
-    // DOMAIN METHODS (ENFORCE AGGREGATE INTEGRITY)
+    #region Domain Methods
     public void AddGroup(ChecklistGroup group)
     {
-        if (group.ChecklistId != Id)
-            throw new InvalidOperationException("Group must belong to this checklist");
-
+        // Ensure the group knows who its parent is
+        group.ChecklistId = this.Id;
         Groups.Add(group);
     }
 
@@ -53,18 +41,62 @@ public class Checklist : Entity
         group.Questions.Add(question);
     }
 
-    // DOMAIN METHOD: Update structure with versioning
+    /// <summary>
+    /// Update structure with versioning
+    /// This method increments checklist.Version and swaps Groups with new versions
+    /// </summary>
+    /// <param name="newStructure"></param>
     public void UpdateStructure(Checklist newStructure)
     {
-        // Only increment version if structure changed
-        if (HasStructureChanged(newStructure))
+        var oldGroups = Groups.ToList(); // Materialize current groups
+        var resultingGroups = new List<ChecklistGroup>();
+        bool structureChanged = false;
+
+        // 1. Process Groups sent from Client
+        foreach (var newGroup in newStructure.Groups.OrderBy(g => g.Priority))
+        {
+            var existingGroup = oldGroups.FirstOrDefault(g => g.Id == newGroup.Id);
+
+            if (existingGroup != null)
+            {
+                // Group exists. Check if content changed.
+                if (HasGroupStructureChanged(existingGroup, newGroup))
+                {
+                    structureChanged = true;
+                    // Create a new version of the group
+                    var versionedGroup = existingGroup.Clone(newGroup);
+                    resultingGroups.Add(versionedGroup);
+                }
+                else
+                {
+                    // No change, keep the existing group
+                    resultingGroups.Add(existingGroup);
+                }
+            }
+            else
+            {
+                // Brand new group
+                structureChanged = true;
+                newGroup.ChecklistId = this.Id;
+                resultingGroups.Add(newGroup);
+            }
+        }
+
+        // 2. Handle Deleted Groups
+        var deletedGroupIds = oldGroups.Select(g => g.Id).Except(newStructure.Groups.Select(g => g.Id));
+        if (deletedGroupIds.Any())
+        {
+            structureChanged = true;
+            // Groups not in the new list are simply omitted (deleted from active list)
+        }
+
+        // 3. Apply Changes
+        if (structureChanged)
         {
             Version++;
             LastModified = DateTime.UtcNow;
+            Groups = resultingGroups;
         }
-
-        // Replace all groups (deep clone to prevent reference issues)
-        Groups = newStructure.Groups.Select(g => g.Clone()).ToList();
     }
 
     // DOMAIN METHOD: Create new version for historical assessments
@@ -72,7 +104,8 @@ public class Checklist : Entity
     {
         var newVersion = new Checklist
         {
-            Id = Id,
+            // Generate a NEW ID. You cannot have two rows with the same PK.
+            Id = Guid.NewGuid(),
             Title = Title,
             Version = Version + 1,
             LastModified = DateTime.UtcNow,
@@ -82,60 +115,102 @@ public class Checklist : Entity
 
         // Deep clone groups (preserves structure at time of version)
         newVersion.Groups = Groups.Select(g => g.Clone()).ToList();
+
+        //// Important: Update the ChecklistId in the cloned groups to point to the NEW version
+        foreach (var group in newVersion.Groups)
+        {
+            group.ChecklistId = newVersion.Id;
+        }
+
         return newVersion;
     }
 
     private bool HasStructureChanged(Checklist newStructure)
     {
-        // Compare top-level groups
-        if (Groups.Count != newStructure.Groups.Count)
+        var oldGroups = Groups ?? new List<ChecklistGroup>();
+        var newGroups = newStructure.Groups ?? new List<ChecklistGroup>();
+
+        // 1. Check if count changed
+        if (oldGroups.Count != newGroups.Count)
             return true;
 
-        // Check if all groups exist in new structure
-        foreach (var group in Groups)
-        {
-            var newGroup = newStructure.Groups.FirstOrDefault(g => g.Id == group.Id);
-            if (newGroup == null)
-                return true; // Group removed
+        // 2. Sort by Priority to ensure we compare the first item with the first item, etc.
+        var sortedOld = oldGroups.OrderBy(g => g.Priority).ToList();
+        var sortedNew = newGroups.OrderBy(g => g.Priority).ToList();
 
-            // Deep check group's children and questions
-            if (!HasGroupStructureChanged(group, newGroup))
+        for (int i = 0; i < sortedOld.Count; i++)
+        {
+            // 3. Deep compare each group
+            if (HasGroupStructureChanged(sortedOld[i], sortedNew[i]))
                 return true;
         }
+
         return false;
     }
 
-    private bool HasGroupStructureChanged(ChecklistGroup oldGroup, ChecklistGroup newGroup)
+    private static bool HasGroupStructureChanged(ChecklistGroup oldGroup, ChecklistGroup newGroup)
     {
-        // Compare group's questions
-        if (oldGroup.Questions.Count != newGroup.Questions.Count)
+        // 1. Compare Group Properties (Title, Priority, IsShow)
+        if (oldGroup.Title != newGroup.Title ||
+            oldGroup.Priority != newGroup.Priority ||
+            oldGroup.IsShow != newGroup.IsShow)
+        {
+            return true;
+        }
+
+        // 2. Compare Children (Recursive)
+        // Since the frontend sends the same IDs, we can match by ID or just by Index/Order.
+        // Matching by Index is safer here to detect if a child was moved/removed.
+        var oldChildren = oldGroup.Children?.OrderBy(c => c.Priority).ToList() ?? new List<ChecklistGroup>();
+        var newChildren = newGroup.Children?.OrderBy(c => c.Priority).ToList() ?? new List<ChecklistGroup>();
+         
+        if (oldChildren.Count != newChildren.Count)
             return true;
 
-        // Check if all questions exist
-        foreach (var question in oldGroup.Questions)
+        for (int i = 0; i < oldChildren.Count; i++)
         {
-            if (!newGroup.Questions.Any(q => q.Id == question.Id))
+            if (HasGroupStructureChanged(oldChildren[i], newChildren[i]))
                 return true;
         }
 
-        // Compare options for each question (if applicable)
-        foreach (var question in oldGroup.Questions)
+        // 3. Compare Questions
+        var oldQuestions = oldGroup.Questions?.OrderBy(q => q.Priority).ToList() ?? new List<ChecklistQuestion>();
+        var newQuestions = newGroup.Questions?.OrderBy(q => q.Priority).ToList() ?? new List<ChecklistQuestion>();
+
+        if (oldQuestions.Count != newQuestions.Count)
+            return true;
+
+        for (int i = 0; i < oldQuestions.Count; i++)
         {
-            var newQuestion = newGroup.Questions.FirstOrDefault(q => q.Id == question.Id);
-            if (newQuestion == null)
-                continue;
+            var oldQ = oldQuestions[i];
+            var newQ = newQuestions[i];
 
-            if (question.Options.Count != newQuestion.Options.Count)
+            // Compare Question Properties
+            if (oldQ.Title != newQ.Title ||
+                oldQ.Score != newQ.Score ||
+                oldQ.Type != newQ.Type ||
+                oldQ.IsRequiredAnswer != newQ.IsRequiredAnswer)
+            {
+                return true;
+            }
+
+            // 4. Compare Options
+            var oldOptions = oldQ.Options?.OrderBy(o => o.Title).ToList() ?? new List<ChecklistQuestionOption>();
+            var newOptions = newQ.Options?.OrderBy(o => o.Title).ToList() ?? new List<ChecklistQuestionOption>();
+
+            if (oldOptions.Count != newOptions.Count)
                 return true;
 
-            // Check option titles (simplified)
-            if (!question.Options.All(o =>
-                newQuestion.Options.Any(n => n.Title == o.Title)))
-                return true;
+            for (int j = 0; j < oldOptions.Count; j++)
+            {
+                if (oldOptions[j].Title != newOptions[j].Title)
+                    return true;
+            }
         }
+
         return false;
     }
-
+    #endregion
 
 
 }

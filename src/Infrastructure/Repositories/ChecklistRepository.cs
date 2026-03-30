@@ -27,10 +27,10 @@ public class ChecklistRepository : BaseRepository<Checklist>, IChecklistReposito
 
         if (includeGroups)
         {
-            query = query.Include(c => c.Groups)
-                         .ThenInclude(g => g.Children)
-                         .ThenInclude(g => g.Questions)
-                         .ThenInclude(q => q.Options);
+            query = query
+                .Include(c => c.Groups).ThenInclude(g => g.Questions).ThenInclude(q => q.Options)
+                .Include(c => c.Groups).ThenInclude(g => g.Children).ThenInclude(g => g.Questions).ThenInclude(q => q.Options)
+                ;
         }
 
         return await query.FirstOrDefaultAsync()
@@ -39,10 +39,8 @@ public class ChecklistRepository : BaseRepository<Checklist>, IChecklistReposito
     public async Task<Checklist> GetByVersionAsync(Guid checklistId, int version)
     {
         return await _context.Checklists
-            .Include(c => c.Groups)
-                .ThenInclude(g => g.Children)
-                .ThenInclude(g => g.Questions)
-                .ThenInclude(q => q.Options)
+            .Include(c => c.Groups).ThenInclude(g => g.Questions).ThenInclude(q => q.Options)
+            .Include(c => c.Groups).ThenInclude(g => g.Children).ThenInclude(g => g.Questions).ThenInclude(q => q.Options)
             .FirstOrDefaultAsync(c =>
                 c.Id == checklistId &&
                 c.Version == version
@@ -61,15 +59,10 @@ public class ChecklistRepository : BaseRepository<Checklist>, IChecklistReposito
     {
         var checklist = await GetByIdAsync(id, true);
 
-        // Create new version BEFORE updating
-        var newVersion = checklist.CreateNewVersion();
-
         // Update current checklist with new structure
         checklist.UpdateStructure(newStructure);
 
-        // Save both versions
-        _context.Checklists.Update(checklist);
-        _context.Checklists.Add(newVersion);
+        //_context.Checklists.Update(checklist);
 
         await _context.SaveChangesAsync();
         return checklist;

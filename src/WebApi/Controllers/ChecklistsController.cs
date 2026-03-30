@@ -17,10 +17,10 @@ namespace WebApi.Controllers;
 public class ChecklistsController(IMediator mediator) : ApiController
 {
 
-    [HttpGet]
+    [HttpPost]
     [ProducesResponseType(typeof(List<ChecklistDto>), StatusCodes.Status200OK)]
     [Produces("application/json")]
-    public async Task<IActionResult> GetAll([FromQuery] PaginatedRequest filter)
+    public async Task<IActionResult> GetAll([FromBody] PaginatedRequest filter)
     {
         // Client uses filter parameter for ALL conditions:
         // ?filter=IsActive,true,Equal,And&filter=Title,Security,Contains,And

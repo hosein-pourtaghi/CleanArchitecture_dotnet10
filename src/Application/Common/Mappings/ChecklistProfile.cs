@@ -22,10 +22,16 @@ public class ChecklistProfile : Profile
         CreateMap<ChecklistGroupDto, ChecklistGroup>()
             .ForMember(dest => dest.Checklist, opt => opt.Ignore())
             .ForMember(dest => dest.Parent, opt => opt.Ignore())
+            .ReverseMap()
             ;
         CreateMap<ChecklistQuestionDto, ChecklistQuestion>()
             .ForMember(dest => dest.Group, opt => opt.Ignore())
+            .ReverseMap()
             ;
+        CreateMap<ChecklistQuestionOption, ChecklistQuestion>()
+            .ReverseMap()
+            ;
+
 
     }
 }
