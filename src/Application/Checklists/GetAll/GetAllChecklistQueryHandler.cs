@@ -18,7 +18,7 @@ internal sealed class GetAllChecklistQueryHandler(
 {
     public async Task<Result<PaginatedResult<ChecklistDto>>> Handle(GetAllChecklistQuery query, CancellationToken cancellationToken)
     {
-        var res = await repository.GetAllAsync<ChecklistDto>(query.Request);
+        var res = await repository.GetAllAsync<ChecklistDto>(query.Request,cancellationToken);
         return res;
     }
 }

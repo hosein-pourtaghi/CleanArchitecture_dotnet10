@@ -79,9 +79,9 @@ public class GenericFilterModelBinder : IModelBinder
 
         // ===== 3. Handle Sorting from Query String =====
         // Only use query string sorting if body doesn't have any
-        if (filter.SortExpressions == null || filter.SortExpressions.Count == 0)
+        if (filter.Sorts == null || filter.Sorts.Count == 0)
         {
-            filter.SortExpressions = ParseSortFromQuery(bindingContext.ValueProvider);
+            filter.Sorts = ParseSortFromQuery(bindingContext.ValueProvider);
         }
 
         // ===== 4. Handle Simple Filters from Query String =====
