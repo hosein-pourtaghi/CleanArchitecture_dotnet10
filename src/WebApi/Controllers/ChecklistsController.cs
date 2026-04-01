@@ -170,31 +170,7 @@ public class ChecklistsController(IMediator mediator, IChecklistRepository _chec
 
 
 
-
-
-
-    //[HttpGet("stream")]
-    //public async Task GetStream()
-    //{
-    //    HttpContext.Response.ContentType = "text/event-stream";
-    //    HttpContext.Response.Headers.Add("Cache-Control", "no-cache");
-    //    HttpContext.Response.Headers.Add("Connection", "keep-alive");
-
-    //    while (true)
-    //    {
-    //        var checklist = await _checklistRepository.StreamAllAsync(new PaginatedRequest { Page = 1, PageSize = 100 },default) ;
-    //        if (checklist != null)
-    //        {
-    //            string data = $"data: {JsonSerializer.Serialize(checklist)}\n\n";
-    //            await HttpContext.Response.WriteAsync(data);
-    //            await HttpContext.Response.Body.FlushAsync();
-    //        }
-
-    //        // You can control the frequency of updates here
-    //        await Task.Delay(100); // Update every 5 seconds
-    //    }
-    //}
-
+     
 
 }
 
