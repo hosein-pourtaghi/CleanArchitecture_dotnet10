@@ -24,10 +24,12 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngularApp",
         builder =>
         {
-            builder.WithOrigins("http://localhost:4200") // Your Angular app URL
+            builder.AllowAnyOrigin()
+            //.WithOrigins("http://localhost:4200") // Your Angular app URL
                    .AllowAnyHeader()
                    .AllowAnyMethod()
-                   .AllowCredentials(); // If you're using cookies/auth
+                   //.AllowCredentials() // If you're using cookies/auth
+                   ;
         });
 });
 
@@ -98,6 +100,17 @@ builder.Services
  
 WebApplication app = builder.Build();
 
+// just for test
+//app.Use(async (context, next) => 
+//{
+//    var authorizationHeader = context.Request.Headers["Authorization"];
+//    if (!string.IsNullOrEmpty(authorizationHeader))
+//    {
+//        // Log the token for debugging purposes
+//        Console.WriteLine("Authorization Header: " + authorizationHeader);
+//    }
+//    await next();
+//});
 // Use CORS (cart matters - should be before MapControllers)
 app.UseCors("AllowAngularApp");
 

@@ -2,6 +2,9 @@
 using Application.Abstractions.Behaviors;
 using Application.Abstractions.Interfaces;
 using Application.Abstractions.Messaging;
+using Application.Common.DTOs;
+using Application.Streams.GetLargeData;
+using Domain.Checklists;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,12 +21,13 @@ public static class DependencyInjection
         // Register MediatR with all handlers from this assembly
         services.AddMediatR(config =>
         {
-            config.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
+            //config.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
+            config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
             
             // Register custom pipeline behaviors
             config.AddOpenBehavior(typeof(ValidationBehavior<,>));
             config.AddOpenBehavior(typeof(LoggingBehavior<,>));
-        });
+        }); 
 
         // Add FluentValidation validators
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);

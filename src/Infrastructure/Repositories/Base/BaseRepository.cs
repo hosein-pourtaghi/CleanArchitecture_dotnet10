@@ -173,7 +173,7 @@ public class BaseRepository<T>(ApplicationDbContext _context, IMapper _mapper) :
         );
     }
     private static object? ConvertValue(PropertyInfo property, object? value)
-    {
+    { 
         if (value == null)
             return null;
 
@@ -306,26 +306,26 @@ public class BaseRepository<T>(ApplicationDbContext _context, IMapper _mapper) :
     #endregion
 
 
-    public virtual async Task<T> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public virtual async Task<T> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.Set<T>().FindAsync([id], cancellationToken: cancellationToken)
             ?? throw new KeyNotFoundException($"Entity with ID {id} not found");
     }
 
-    public virtual async Task<T> CreateAsync(T entity, CancellationToken cancellationToken)
+    public virtual async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
     {
         _context.Set<T>().Add(entity);
         await _context.SaveChangesAsync(cancellationToken);
         return entity;
     }
-    public virtual async Task<List<T>> CreateRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default)
+    public virtual async Task<List<T>> AddRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default)
     {
         var entityList = entities.ToList();
         await _context.Set<T>().AddRangeAsync(entityList, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
         return entityList;
     }
-    public virtual async Task UpdateAsync(T entity, CancellationToken cancellationToken)
+    public virtual async Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
     {
         _context.Set<T>().Update(entity);
         await _context.SaveChangesAsync(cancellationToken);
@@ -337,7 +337,7 @@ public class BaseRepository<T>(ApplicationDbContext _context, IMapper _mapper) :
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public virtual async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
+    public virtual async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var entity = await _context.Set<T>().FindAsync([id], cancellationToken: cancellationToken);
         if (entity != null)
@@ -441,17 +441,17 @@ public class BaseRepository<T>(ApplicationDbContext _context, IMapper _mapper) :
     /// <summary>
     /// Stream results for very large datasets - memory efficient
     /// </summary>
-    public async IAsyncEnumerable<T> StreamAllAsync<TDto>(
+    public async IAsyncEnumerable<T> StreamAllAsync(
         PaginatedRequest filter,
-        Expression<Func<T, bool>>? additionalFilter = null,
+        //Expression<Func<T, bool>>? additionalFilter = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var query = _context.Set<T>().AsQueryable();
 
         query = ApplyFiltering(query, filter);
 
-        if (additionalFilter != null)
-            query = query.Where(additionalFilter);
+        //if (additionalFilter != null)
+        //    query = query.Where(additionalFilter);
 
         query = ApplySorting(query, filter);
 
@@ -466,21 +466,20 @@ public class BaseRepository<T>(ApplicationDbContext _context, IMapper _mapper) :
     /// Stream DTO results for very large datasets
     /// </summary>
     public async IAsyncEnumerable<TDto> StreamAllAsync<TDto>(
-        PaginatedRequest filter,
-        Func<IQueryable<T>, IQueryable<TDto>> projector,
-        Expression<Func<T, bool>>? additionalFilter = null,
+        PaginatedRequest filter, 
+        //Expression<Func<T, bool>>? additionalFilter = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var query = _context.Set<T>().AsQueryable();
 
         query = ApplyFiltering(query, filter);
 
-        if (additionalFilter != null)
-            query = query.Where(additionalFilter);
+        //if (additionalFilter != null)
+        //    query = query.Where(additionalFilter);
 
         query = ApplySorting(query, filter);
 
-        var dtoQuery = projector(query);
+        var dtoQuery = _mapper.ProjectTo<TDto>(query);
 
         await foreach (var item in dtoQuery.AsAsyncEnumerable().WithCancellation(cancellationToken))
         {

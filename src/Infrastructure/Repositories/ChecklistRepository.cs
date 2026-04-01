@@ -48,13 +48,7 @@ public class ChecklistRepository : BaseRepository<Checklist>, IChecklistReposito
                 $"Checklist version {version} not found for checklist {checklistId}"
             );
     }
-    public async Task<Checklist> AddAsync(Checklist checklist)
-    {
-        _context.Checklists.Add(checklist);
-        await _context.SaveChangesAsync();
-        return checklist;
 
-    }
     public async Task<Checklist> UpdateAsync(Guid id, Checklist newStructure)
     {
         var checklist = await GetByIdAsync(id, true);

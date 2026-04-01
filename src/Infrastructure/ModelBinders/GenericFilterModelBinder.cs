@@ -86,10 +86,7 @@ public class GenericFilterModelBinder : IModelBinder
 
         // ===== 4. Handle Simple Filters from Query String =====
         // These override body filters if provided
-        ApplySimpleFiltersFromQuery(filter, bindingContext.ValueProvider);
 
-        // ===== 5. Validate =====
-        filter.Validate();
 
         bindingContext.Result = ModelBindingResult.Success(filter);
     }
@@ -119,34 +116,4 @@ public class GenericFilterModelBinder : IModelBinder
         return sortExpressions;
     }
 
-    private static void ApplySimpleFiltersFromQuery(PaginatedRequest filter, IValueProvider valueProvider)
-    {
-        // ChecklistId
-        var checklistIdValue = valueProvider.GetValue("checklistId").FirstOrDefault();
-        if (Guid.TryParse(checklistIdValue, out var checklistId))
-        {
-            filter.ChecklistId = checklistId;
-        }
-
-        // ChecklistVersion
-        var versionValue = valueProvider.GetValue("checklistVersion").FirstOrDefault();
-        if (int.TryParse(versionValue, out var version))
-        {
-            filter.ChecklistVersion = version;
-        }
-
-        // FromDate
-        var fromDateValue = valueProvider.GetValue("fromDate").FirstOrDefault();
-        if (DateTime.TryParse(fromDateValue, out var fromDate))
-        {
-            filter.FromDate = fromDate;
-        }
-
-        // ToDate
-        var toDateValue = valueProvider.GetValue("toDate").FirstOrDefault();
-        if (DateTime.TryParse(toDateValue, out var toDate))
-        {
-            filter.ToDate = toDate;
-        }
-    }
 }

@@ -41,7 +41,7 @@ public class ChecklistQuestion : Entity
     /// list of options based on question type
     /// if question has no option assessment is a simple string
     /// </summary>
-    public virtual ICollection<ChecklistQuestionOption>? Options{ get; set; }
+    public virtual ICollection<ChecklistQuestionOption>? Options{ get; set; } = new HashSet<ChecklistQuestionOption>();
     #endregion
 
 
