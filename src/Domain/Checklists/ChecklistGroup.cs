@@ -6,13 +6,11 @@ public class ChecklistGroup : Entity
 {
     public Guid Id { get; set; }
     public bool IsActive { get; set; } = true;
-
     public string? Title { get; set; }
     public Guid ChecklistId { get; set; }
     public Guid? ParentId { get; set; }
     public int Priority { get; set; } = 1;
     public bool IsShow { get; set; } = true;
-
 
     #region Navigation
     public virtual Checklist Checklist { get; set; }
@@ -21,80 +19,104 @@ public class ChecklistGroup : Entity
     public virtual ICollection<ChecklistGroup> Children { get; set; } = new HashSet<ChecklistGroup>();
     #endregion
 
-
     #region Domain Methods
+
     /// <summary>
-    /// Standard Clone (Used for CreateNewVersion)
+    /// Create new version of this group with updated data
     /// </summary>
-    /// <returns></returns>
-    public ChecklistGroup Clone()
+    public ChecklistGroup CreateNewVersion(ChecklistGroup updatedTemplate)
     {
         var newId = Guid.NewGuid();
-        return new ChecklistGroup
-        {
-            // 1. Generate a NEW ID for this version
-            Id = newId,
 
-            // 2. Copy values from the Client's Input (updatedTemplate)
-            Title = this.Title,
-            Priority = this.Priority,
-            IsShow = this.IsShow,
-            IsActive = this.IsActive,
-
-            // 3. Keep the OLD relationships
-            ParentId = this.ParentId,
-            ChecklistId = this.ChecklistId,
-
-            // 4. Deep clone children (Recursive)
-            // We need to match children by ID to update them correctly
-            Children = this.Children.Select(newChild =>
-            {
-                var oldChild = this.Children.FirstOrDefault(c => c.Id == newChild.Id);
-                return oldChild?.Clone(newChild, newId) ?? newChild; // Clone if exists, else add new
-            }).ToList(),
-
-            // 5. Deep clone questions
-            Questions = this.Questions.Select(newQuestion =>
-            {
-                var oldQuestion = this.Questions.FirstOrDefault(q => q.Id == newQuestion.Id);
-                return oldQuestion?.Clone() ?? newQuestion; // Clone if exists, else add new
-            }).ToList()
-        };
-
-    }
-    /// <summary>
-    /// Update Clone (Used for UpdateStructure)
-    /// </summary>
-    /// <param name="updatedTemplate"></param>
-    /// <returns></returns>
-    public ChecklistGroup Clone(ChecklistGroup updatedTemplate, Guid? parentId)
-    {
-        var newId = Guid.NewGuid();
         return new ChecklistGroup
         {
             Id = newId,
             Title = updatedTemplate.Title,
             Priority = updatedTemplate.Priority,
-            IsShow = updatedTemplate.IsShow,
+            IsShow = true, // New version is always visible
             IsActive = updatedTemplate.IsActive,
-            ParentId = parentId,
+            ParentId = this.ParentId,
             ChecklistId = this.ChecklistId,
 
-            // Deep clone children
-            Children = updatedTemplate.Children.Select(newChild =>
-            {
-                var oldChild = this.Children.FirstOrDefault(c => c.Id == newChild.Id);
-                return oldChild?.Clone(newChild, newId) ?? newChild;
-            }).ToList(),
+            // Deep clone children with versioning
+            Children = (updatedTemplate.Children ?? Enumerable.Empty<ChecklistGroup>())
+                .Select(newChild =>
+                {
+                    var oldChild = this.Children.FirstOrDefault(c => c.Id == newChild.Id);
+                    return oldChild?.CreateNewVersion(newChild) ?? CreateNewGroupFromTemplate(newChild, newId);
+                })
+                .ToList(),
 
-            // Deep clone questions
-            Questions = updatedTemplate.Questions.Select(newQuestion =>
-            {
-                var oldQuestion = this.Questions.FirstOrDefault(q => q.Id == newQuestion.Id);
-                return oldQuestion?.Clone(newQuestion, newId) ?? newQuestion;
-            }).ToList()
+            // Deep clone questions with versioning
+            Questions = (updatedTemplate.Questions ?? Enumerable.Empty<ChecklistQuestion>())
+                .Select(newQuestion =>
+                {
+                    var oldQuestion = this.Questions.FirstOrDefault(q => q.Id == newQuestion.Id);
+                    return oldQuestion?.CreateNewVersion(newQuestion, newId) ?? CreateNewQuestionFromTemplate(newQuestion, newId);
+                })
+                .ToList()
         };
     }
-    #endregion
 
+    /// <summary>
+    /// Create new version for CreateNewVersion of checklist
+    /// </summary>
+    public ChecklistGroup CreateNewVersion()
+    {
+        var newId = Guid.NewGuid();
+
+        return new ChecklistGroup
+        {
+            Id = newId,
+            Title = this.Title,
+            Priority = this.Priority,
+            IsShow = this.IsShow,
+            IsActive = this.IsActive,
+            ParentId = this.ParentId,
+            ChecklistId = this.ChecklistId,
+            Children = this.Children.Select(c => c.CreateNewVersion()).ToList(),
+            Questions = this.Questions.Select(q => q.CreateNewVersion(newId)).ToList()
+        };
+    }
+
+    private static ChecklistGroup CreateNewGroupFromTemplate(ChecklistGroup template, Guid parentId)
+    {
+        var newId = Guid.NewGuid();
+        return new ChecklistGroup
+        {
+            Id = newId,
+            Title = template.Title,
+            Priority = template.Priority,
+            IsShow = true,
+            IsActive = template.IsActive,
+            ParentId = parentId,
+            ChecklistId = template.ChecklistId,
+            Children = (template.Children ?? Enumerable.Empty<ChecklistGroup>())
+                .Select(c => CreateNewGroupFromTemplate(c, newId))
+                .ToList(),
+            Questions = (template.Questions ?? Enumerable.Empty<ChecklistQuestion>())
+                .Select(q => CreateNewQuestionFromTemplate(q, newId))
+                .ToList()
+        };
+    }
+
+    private static ChecklistQuestion CreateNewQuestionFromTemplate(ChecklistQuestion template, Guid groupId)
+    {
+        var newId = Guid.NewGuid();
+        return new ChecklistQuestion
+        {
+            Id = newId,
+            Title = template.Title,
+            Score = template.Score,
+            Priority = template.Priority,
+            IsRequiredAnswer = template.IsRequiredAnswer,
+            Type = template.Type,
+            GroupId = groupId,
+            Options = (template.Options ?? Enumerable.Empty<ChecklistQuestionOption>())
+                .Select(o => o.CreateNewVersion(newId))
+                .ToList()
+        };
+    }
+
+    #endregion
 }

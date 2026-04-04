@@ -14,7 +14,7 @@ public class ChecklistQuestionOptionDto
     /// input type for answer
     /// </summary>
     public InputType Type { get; set; }
-    public Guid ChecklistQuestionId { get; set; }
+    public Guid QuestionId { get; set; }
 
  
 }

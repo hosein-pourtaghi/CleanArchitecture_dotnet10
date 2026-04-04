@@ -6,48 +6,48 @@ public class ChecklistQuestionOption : Entity
 {
     public Guid Id { get; set; }
     public bool IsActive { get; set; } = true;
-
-
     public string? Title { get; set; }
     public string? Description { get; set; }
-    /// <summary>
-    /// input type for answer
-    /// </summary>
     public InputType Type { get; set; }
-    public Guid ChecklistQuestionId { get; set; }
-
+    public Guid QuestionId { get; set; }
 
     #region Navigation
     public virtual ChecklistQuestion ChecklistQuestion { get; set; }
     #endregion
 
+    #region Domain Methods
 
     /// <summary>
-    /// Standard Clone
+    /// Create new version with updated data
     /// </summary>
-    /// <returns></returns>
-    public ChecklistQuestionOption Clone()
-    {
-        return new ChecklistQuestionOption
-        {
-            Id = Guid.NewGuid(),
-            Title = Title
-        };
-    }
-
-    /// <summary>
-    /// Update Clone
-    /// </summary>
-    /// <param name="updatedTemplate"></param>
-    /// <returns></returns>
-    public ChecklistQuestionOption Clone(ChecklistQuestionOption updatedTemplate, Guid questionId)
+    public ChecklistQuestionOption CreateNewVersion(ChecklistQuestionOption updatedTemplate, Guid questionId)
     {
         return new ChecklistQuestionOption
         {
             Id = Guid.NewGuid(),
             Title = updatedTemplate.Title,
-            ChecklistQuestionId = questionId
+            Description = updatedTemplate.Description,
+            Type = updatedTemplate.Type,
+            IsActive = updatedTemplate.IsActive,
+            QuestionId = questionId
         };
     }
 
+    /// <summary>
+    /// Create new version for checklist versioning
+    /// </summary>
+    public ChecklistQuestionOption CreateNewVersion(Guid questionId)
+    {
+        return new ChecklistQuestionOption
+        {
+            Id = Guid.NewGuid(),
+            Title = this.Title,
+            Description = this.Description,
+            Type = this.Type,
+            IsActive = this.IsActive,
+            QuestionId = questionId
+        };
+    }
+
+    #endregion
 }

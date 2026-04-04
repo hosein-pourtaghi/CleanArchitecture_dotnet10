@@ -26,7 +26,7 @@ public class ChecklistConfiguration : IEntityTypeConfiguration<Checklist>
         builder.HasMany(c => c.Groups)
             .WithOne(g => g.Checklist)
             .HasForeignKey(g => g.ChecklistId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
         builder.HasIndex(c => c.Title); 

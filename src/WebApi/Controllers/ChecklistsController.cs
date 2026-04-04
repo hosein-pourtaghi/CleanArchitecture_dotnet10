@@ -158,7 +158,7 @@ public class ChecklistsController(IMediator mediator, IChecklistRepository _chec
                         Title = MockDataGenerator.Instance.GenerateTitle(100),
                         Description = MockDataGenerator.Instance.GenerateTitle(200),
                         Type = optionType,
-                        ChecklistQuestionId = question.Id
+                        QuestionId = question.Id
                     };
 
                     // Add the option to the question's options collection

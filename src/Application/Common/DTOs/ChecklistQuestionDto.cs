@@ -33,7 +33,9 @@ public class ChecklistQuestionDto
     /// <summary>
     /// question Type
     /// </summary>
-    public ChecklistQuestionType Type { get; set; }
+    public ChecklistQuestionType Type { get; set; } 
 
-     
+    public List<ChecklistQuestionOptionDto> Options { get; set; } = new List<ChecklistQuestionOptionDto>();
+
+
 }

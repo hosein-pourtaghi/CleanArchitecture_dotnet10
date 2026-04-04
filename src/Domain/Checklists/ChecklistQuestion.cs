@@ -6,72 +6,27 @@ public class ChecklistQuestion : Entity
 {
     public Guid Id { get; set; }
     public bool IsActive { get; set; } = true;
-
-
-    /// <summary>
-    /// سوال
-    /// </summary>
     public required string Title { get; set; }
-    /// <summary>
-    /// ایدی گروه سوال
-    /// </summary>
     public Guid GroupId { get; set; }
-    /// <summary>
-    /// بارم سوال
-    /// </summary>
     public float? Score { get; set; }
-    /// <summary>
-    /// اولویت
-    /// </summary>
     public int Priority { get; set; } = 1;
-    /// <summary>
-    /// is answer required or not
-    /// </summary>
     public bool IsRequiredAnswer { get; set; }
-    /// <summary>
-    /// question Type
-    /// </summary>
     public ChecklistQuestionType Type { get; set; }
-
-
 
     #region Navigation
     public virtual ChecklistGroup Group { get; set; }
-    /// <summary>
-    /// list of options based on question type
-    /// if question has no option assessment is a simple string
-    /// </summary>
     public virtual ICollection<ChecklistQuestionOption>? Options { get; set; } = new HashSet<ChecklistQuestionOption>();
     #endregion
 
-
-
-    /// <summary>
-    /// Standard Clone
-    /// </summary>
-    /// <returns></returns>
-    public ChecklistQuestion Clone()
-    {
-        return new ChecklistQuestion
-        {
-            Id = Guid.NewGuid(),
-            Title = Title,
-            Score = Score,
-            Priority = Priority,
-            IsRequiredAnswer = IsRequiredAnswer,
-            Type = Type,
-            Options = Options?.Select(o => o.Clone()).ToList()
-        };
-    }
+    #region Domain Methods
 
     /// <summary>
-    /// Update Clone
+    /// Create new version with updated data
     /// </summary>
-    /// <param name="updatedTemplate"></param>
-    /// <returns></returns>
-    public ChecklistQuestion Clone(ChecklistQuestion updatedTemplate, Guid groupId)
+    public ChecklistQuestion CreateNewVersion(ChecklistQuestion updatedTemplate, Guid groupId)
     {
         var newId = Guid.NewGuid();
+
         return new ChecklistQuestion
         {
             Id = newId,
@@ -81,14 +36,50 @@ public class ChecklistQuestion : Entity
             IsRequiredAnswer = updatedTemplate.IsRequiredAnswer,
             Type = updatedTemplate.Type,
             GroupId = groupId,
-
-            // Deep clone options
-            Options = updatedTemplate.Options?.Select(newOpt =>
-            {
-                var oldOpt = this.Options?.FirstOrDefault(o => o.Id == newOpt.Id);
-                return oldOpt?.Clone(newOpt, newId) ?? newOpt;
-            }).ToList()
+            IsActive = updatedTemplate.IsActive,
+            Options = (updatedTemplate.Options ?? Enumerable.Empty<ChecklistQuestionOption>())
+                .Select(newOpt =>
+                {
+                    var oldOpt = this.Options?.FirstOrDefault(o => o.Id == newOpt.Id);
+                    return oldOpt?.CreateNewVersion(newOpt, newId) ?? CreateNewOptionFromTemplate(newOpt, newId);
+                })
+                .ToList()
         };
     }
 
+    /// <summary>
+    /// Create new version for checklist versioning
+    /// </summary>
+    public ChecklistQuestion CreateNewVersion(Guid groupId)
+    {
+        var newId = Guid.NewGuid();
+
+        return new ChecklistQuestion
+        {
+            Id = newId,
+            Title = this.Title,
+            Score = this.Score,
+            Priority = this.Priority,
+            IsRequiredAnswer = this.IsRequiredAnswer,
+            Type = this.Type,
+            GroupId = groupId,
+            IsActive = this.IsActive,
+            Options = this.Options?.Select(o => o.CreateNewVersion(newId)).ToList()
+        };
+    }
+
+    private static ChecklistQuestionOption CreateNewOptionFromTemplate(ChecklistQuestionOption template, Guid questionId)
+    {
+        return new ChecklistQuestionOption
+        {
+            Id = Guid.NewGuid(),
+            Title = template.Title,
+            Description = template.Description,
+            Type = template.Type,
+            IsActive = template.IsActive,
+            QuestionId = questionId
+        };
+    }
+
+    #endregion
 }

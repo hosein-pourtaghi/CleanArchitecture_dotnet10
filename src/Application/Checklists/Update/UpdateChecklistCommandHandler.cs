@@ -17,15 +17,19 @@ internal sealed class UpdateChecklistCommandHandler(
 {
     public async Task<Result> Handle(UpdateChecklistCommand command, CancellationToken cancellationToken)
     {
-        //var checklist = await repository.GetByIdAsync(command.Id, cancellationToken);
-        //if (checklist is null)
+        //var checklist = await repository.GetByIdAsync(command.Id, true, true);
+
+        //if (checklist == null)
         //{
         //    return Result.Failure(ChecklistErrors.NotFound(command.Id));
         //}
 
-        var newChecklist = mapper.Map<Checklist>(command);
-        await repository.UpdateAsync(command.Id, newChecklist);
+        // Map command to new structure (without tracking)
+        var newStructure = mapper.Map<Checklist>(command);
 
+        // Update with versioning
+        await repository.UpdateAsync(command.Id, newStructure);
+ 
         //// Publish comprehensive domain event with all updated data for auditing and message bus
         //checklist.Raise(new ChecklistUpdatedDomainEvent(
         //    checklistId: checklist.Id,
@@ -36,5 +40,5 @@ internal sealed class UpdateChecklistCommandHandler(
 
         return Result.Success();
     }
+    
 }
-

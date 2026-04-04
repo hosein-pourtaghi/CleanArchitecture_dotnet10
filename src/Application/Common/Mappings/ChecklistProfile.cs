@@ -34,14 +34,7 @@ public class ChecklistProfile : Profile
             ;
         CreateMap<ChecklistQuestionOption, ChecklistQuestionOptionDto>()
             .ReverseMap()
-            ;
-
-        CreateMap<Checklist, Checklist>();
-        CreateMap<ChecklistGroup, ChecklistGroup>();
-        CreateMap<ChecklistQuestion, ChecklistQuestion>();
-        CreateMap<ChecklistQuestionOption, ChecklistQuestionOption>();
-
-
+            ; 
 
     }
 }
