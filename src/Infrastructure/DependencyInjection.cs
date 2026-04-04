@@ -3,6 +3,7 @@ using Application.Abstractions.Authentication;
 using Application.Abstractions.Data;
 using Application.Abstractions.Interfaces;
 using Application.Abstractions.Interfaces.Checklists;
+using Domain.Checklists;
 using Domain.Users;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization;
@@ -20,6 +21,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using StackExchange.Redis;
 
 namespace Infrastructure;
 
@@ -29,17 +31,28 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration) =>
         services
-            .AddServices()
+            .AddServices(configuration)
             .AddDatabase(configuration)
             .AddHealthChecks(configuration)
             .AddAuthenticationInternal(configuration)
             .AddAuthorizationInternal();
 
-    private static IServiceCollection AddServices(this IServiceCollection services)
+    private static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
+        #region Advanced Repository Injection  
+        services.AddScoped(typeof(IAdvancedRepository<,>), typeof(AdvancedRepository<,>));
+
+        //services.Scan(scan => scan
+        //    .FromAssembliesOf(typeof(ApplicationDbContext))
+        //    .AddClasses(classes => classes.AssignableTo(typeof(IAdvancedRepository<,>)))
+        //    .AsImplementedInterfaces()
+        //    .WithScopedLifetime());
+        #endregion
+
         services.AddScoped<IChecklistRepository, ChecklistRepository>();
+        services.AddScoped<IChecklistRepository2, ChecklistRepository2>();
 
         services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
         services.AddScoped<IAuthService, AuthService>();
