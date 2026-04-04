@@ -40,12 +40,13 @@ public class ChecklistQuestionOption : Entity
     /// </summary>
     /// <param name="updatedTemplate"></param>
     /// <returns></returns>
-    public ChecklistQuestionOption Clone(ChecklistQuestionOption updatedTemplate)
+    public ChecklistQuestionOption Clone(ChecklistQuestionOption updatedTemplate, Guid questionId)
     {
         return new ChecklistQuestionOption
         {
             Id = Guid.NewGuid(),
-            Title = updatedTemplate.Title
+            Title = updatedTemplate.Title,
+            ChecklistQuestionId = questionId
         };
     }
 

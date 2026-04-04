@@ -1,30 +1,30 @@
 
 using Application.Abstractions.Data;
+using Application.Abstractions.Interfaces.Checklists;
 using Application.Abstractions.Messaging;
 using AutoMapper;
 using Domain.Checklists;
-using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
 namespace Application.Checklists.Update;
- 
+
 internal sealed class UpdateChecklistCommandHandler(
     IApplicationDbContext context,
+    IChecklistRepository repository,
     IMapper mapper
     )
     : ICommandHandler<UpdateChecklistCommand>
 {
     public async Task<Result> Handle(UpdateChecklistCommand command, CancellationToken cancellationToken)
     {
-        var checklist = await context.Checklists.SingleOrDefaultAsync(c => c.Id == command.Id, cancellationToken);
-        if (checklist is null)
-        {
-            return Result.Failure(ChecklistErrors.NotFound(command.Id));
-        }
+        //var checklist = await repository.GetByIdAsync(command.Id, cancellationToken);
+        //if (checklist is null)
+        //{
+        //    return Result.Failure(ChecklistErrors.NotFound(command.Id));
+        //}
 
-        // Update entity with new values 
-        checklist = mapper.Map<Checklist>(command);
-
+        var newChecklist = mapper.Map<Checklist>(command);
+        await repository.UpdateAsync(command.Id, newChecklist);
 
         //// Publish comprehensive domain event with all updated data for auditing and message bus
         //checklist.Raise(new ChecklistUpdatedDomainEvent(
@@ -33,8 +33,6 @@ internal sealed class UpdateChecklistCommandHandler(
         //    email: checklist.Email,
         //    phone: checklist.Phone,
         //    address: checklist.Address));
-
-        await context.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
     }

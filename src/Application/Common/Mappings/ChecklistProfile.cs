@@ -17,6 +17,10 @@ public class ChecklistProfile : Profile
         CreateMap<CreateChecklistCommand, Checklist>()
             ;
         CreateMap<UpdateChecklistCommand, Checklist>()
+            .ForMember(dest => dest.IsActive, opt => opt.Ignore())
+            .ForMember(dest => dest.Version, opt => opt.Ignore())
+            .ForMember(dest => dest.LastModified, opt => opt.Ignore())
+            .ForMember(dest => dest.IsValid, opt => opt.Ignore())
             ;
 
         CreateMap<ChecklistGroupDto, ChecklistGroup>()
@@ -28,9 +32,15 @@ public class ChecklistProfile : Profile
             .ForMember(dest => dest.Group, opt => opt.Ignore())
             .ReverseMap()
             ;
-        CreateMap<ChecklistQuestionOption, ChecklistQuestion>()
+        CreateMap<ChecklistQuestionOption, ChecklistQuestionOptionDto>()
             .ReverseMap()
             ;
+
+        CreateMap<Checklist, Checklist>();
+        CreateMap<ChecklistGroup, ChecklistGroup>();
+        CreateMap<ChecklistQuestion, ChecklistQuestion>();
+        CreateMap<ChecklistQuestionOption, ChecklistQuestionOption>();
+
 
 
     }

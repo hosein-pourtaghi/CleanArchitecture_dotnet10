@@ -1,9 +1,9 @@
 using Application.Abstractions.Data;
+using Application.Abstractions.Interfaces.Checklists;
 using Application.Abstractions.Messaging;
 using Application.Common.DTOs;
 using AutoMapper;
 using Domain.Checklists;
-using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
 namespace Application.Checklists.GetById;
@@ -15,6 +15,7 @@ namespace Application.Checklists.GetById;
 /// </summary>
 internal sealed class GetByIdChecklistQueryHandler(
     IApplicationDbContext context,
+    IChecklistRepository repository,
     IMapper mapper)
     : IQueryHandler<GetByIdChecklistQuery, ChecklistDto>
 {
@@ -22,10 +23,7 @@ internal sealed class GetByIdChecklistQueryHandler(
         GetByIdChecklistQuery query,
         CancellationToken cancellationToken)
     {
-        var checklist = await context.Checklists
-            .AsNoTracking()
-            .SingleOrDefaultAsync(c => c.Id == query.Id, cancellationToken);
-
+        var checklist = await repository.GetByIdAsync(query.Id);
         if (checklist is null)
         {
             return Result.Failure<ChecklistDto>(

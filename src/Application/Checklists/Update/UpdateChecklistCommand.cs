@@ -6,10 +6,7 @@ namespace  Application.Checklists.Update;
 public sealed record UpdateChecklistCommand(
     Guid Id,
     bool isActive,
-    int version,
-    DateTime lastModified,
     bool isValid,
     string title,
-    ICollection<ChecklistGroupDto> groups,
-    ICollection<ChecklistQuestionDto> questions
+    ICollection<ChecklistGroupDto> groups
 ) : ICommand; 

@@ -57,7 +57,9 @@ public static class DependencyInjection
         //    );
 
         services.AddDbContext<ApplicationDbContext>(
-            options => options
+            options =>
+            {
+                options
                 .UseSqlServer(connectionString, options =>
                 {
                     options.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default);
@@ -65,7 +67,13 @@ public static class DependencyInjection
                     options.CommandTimeout(minutes);
                     options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(10), null);
 
-                }));
+                });
+
+                // فقط برای محیط توسعه!
+                options.EnableSensitiveDataLogging();
+                options.EnableDetailedErrors();
+
+            });
 
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 

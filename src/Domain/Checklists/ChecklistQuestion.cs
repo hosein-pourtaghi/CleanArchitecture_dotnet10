@@ -41,7 +41,7 @@ public class ChecklistQuestion : Entity
     /// list of options based on question type
     /// if question has no option assessment is a simple string
     /// </summary>
-    public virtual ICollection<ChecklistQuestionOption>? Options{ get; set; } = new HashSet<ChecklistQuestionOption>();
+    public virtual ICollection<ChecklistQuestionOption>? Options { get; set; } = new HashSet<ChecklistQuestionOption>();
     #endregion
 
 
@@ -69,23 +69,24 @@ public class ChecklistQuestion : Entity
     /// </summary>
     /// <param name="updatedTemplate"></param>
     /// <returns></returns>
-    public ChecklistQuestion Clone(ChecklistQuestion updatedTemplate)
+    public ChecklistQuestion Clone(ChecklistQuestion updatedTemplate, Guid groupId)
     {
+        var newId = Guid.NewGuid();
         return new ChecklistQuestion
         {
-            Id = Guid.NewGuid(),
+            Id = newId,
             Title = updatedTemplate.Title,
             Score = updatedTemplate.Score,
             Priority = updatedTemplate.Priority,
             IsRequiredAnswer = updatedTemplate.IsRequiredAnswer,
             Type = updatedTemplate.Type,
-            GroupId = this.GroupId,
+            GroupId = groupId,
 
             // Deep clone options
             Options = updatedTemplate.Options?.Select(newOpt =>
             {
                 var oldOpt = this.Options?.FirstOrDefault(o => o.Id == newOpt.Id);
-                return oldOpt?.Clone(newOpt) ?? newOpt;
+                return oldOpt?.Clone(newOpt, newId) ?? newOpt;
             }).ToList()
         };
     }

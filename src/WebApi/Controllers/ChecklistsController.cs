@@ -55,7 +55,7 @@ public class ChecklistsController(IMediator mediator, IChecklistRepository _chec
             return HandleResult<Guid>(result);
         }
 
-        return CreatedAtAction(nameof(GetById), new { id = result.Value }, new { id = result.Value });
+        return CreatedAtAction(nameof(Create), new { id = result.Value }, new { id = result.Value });
     }
 
     [HttpPut("{id:guid}")]

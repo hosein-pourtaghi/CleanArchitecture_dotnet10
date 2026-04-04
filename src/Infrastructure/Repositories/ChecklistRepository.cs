@@ -19,11 +19,15 @@ public class ChecklistRepository : BaseRepository<Checklist>, IChecklistReposito
         _mapper = mapper;
     }
 
-    public async Task<Checklist> GetByIdAsync(Guid id, bool includeGroups = true)
+    public async Task<Checklist> GetByIdAsync(Guid id, bool includeGroups = true, bool asNoTracking = true)
     {
         var query = _context.Checklists
             .Where(c => c.Id == id)
-            .AsNoTracking();
+            ;
+        if (asNoTracking == true)
+        {
+            query = query.AsNoTracking();
+        }
 
         if (includeGroups)
         {
@@ -51,15 +55,24 @@ public class ChecklistRepository : BaseRepository<Checklist>, IChecklistReposito
 
     public async Task<Checklist> UpdateAsync(Guid id, Checklist newStructure)
     {
-        var checklist = await GetByIdAsync(id, true);
+        try
+        {
+            var checklist = await GetByIdAsync(id, true, false);
+             
+            // Update current checklist with new structure
+            checklist.UpdateStructure(newStructure);
+             
+            //_context.Checklists.Update(checklist);
 
-        // Update current checklist with new structure
-        checklist.UpdateStructure(newStructure);
+            await _context.SaveChangesAsync();
 
-        //_context.Checklists.Update(checklist);
+            return checklist;
+        }
+        catch (Exception e)
+        {
 
-        await _context.SaveChangesAsync();
-        return checklist;
+            throw;
+        }
     }
     public async Task DeleteAsync(Guid id)
     {

@@ -15,7 +15,7 @@ public class Checklist : Entity
     public string Title { get; set; } = string.Empty;
 
     public float TotalScore => Groups?
-       .SelectMany(g => g.Questions) //     .SelectMany(g => g.Questions ?? new List<ChecklistQuestion>())
+       .SelectMany(g => g.Questions)
        .Sum(q => q.Score ?? 0) ?? 0;
 
 
@@ -48,6 +48,10 @@ public class Checklist : Entity
     /// <param name="newStructure"></param>
     public void UpdateStructure(Checklist newStructure)
     {
+        Title = newStructure.Title;
+        IsActive = newStructure.IsActive;
+        IsValid = newStructure.IsValid;
+
         var oldGroups = Groups.ToList(); // Materialize current groups
         var resultingGroups = new List<ChecklistGroup>();
         bool structureChanged = false;
@@ -64,7 +68,7 @@ public class Checklist : Entity
                 {
                     structureChanged = true;
                     // Create a new version of the group
-                    var versionedGroup = existingGroup.Clone(newGroup);
+                    var versionedGroup = existingGroup.Clone(newGroup, newGroup.ParentId);
                     resultingGroups.Add(versionedGroup);
                 }
                 else
@@ -80,14 +84,18 @@ public class Checklist : Entity
                 newGroup.ChecklistId = this.Id;
                 resultingGroups.Add(newGroup);
             }
+
         }
 
         // 2. Handle Deleted Groups
-        var deletedGroupIds = oldGroups.Select(g => g.Id).Except(newStructure.Groups.Select(g => g.Id));
-        if (deletedGroupIds.Any())
+        var deletedGroups = oldGroups.Where(x => resultingGroups.All(l => l.Id != x.Id)).ToList();
+        if (deletedGroups.Any())
         {
             structureChanged = true;
-            // Groups not in the new list are simply omitted (deleted from active list)
+            foreach (var group in deletedGroups)
+            {
+                group.IsShow = false;
+            }
         }
 
         // 3. Apply Changes
@@ -95,7 +103,20 @@ public class Checklist : Entity
         {
             Version++;
             LastModified = DateTime.UtcNow;
-            Groups = resultingGroups;
+            //Groups = resultingGroups.Concat(oldGroups).ToList();
+           
+            // به جای تخصیص مستقیم، ابتدا collection را پاک کنید و سپس اضافه کنید
+            Groups.Clear();
+            foreach (var group in resultingGroups)
+            {
+                Groups.Add(group);
+            }
+            foreach (var oldGroup in oldGroups)
+            {
+                Groups.Add(oldGroup);
+            }
+
+
         }
     }
 
@@ -163,7 +184,7 @@ public class Checklist : Entity
         // Matching by Index is safer here to detect if a child was moved/removed.
         var oldChildren = oldGroup.Children?.OrderBy(c => c.Priority).ToList() ?? new List<ChecklistGroup>();
         var newChildren = newGroup.Children?.OrderBy(c => c.Priority).ToList() ?? new List<ChecklistGroup>();
-         
+
         if (oldChildren.Count != newChildren.Count)
             return true;
 

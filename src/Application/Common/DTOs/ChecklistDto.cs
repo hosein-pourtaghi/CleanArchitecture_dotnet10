@@ -11,5 +11,4 @@ public class ChecklistDto
     public bool IsValid { get; set; }
     public string Title { get; set; }
     public ICollection<ChecklistGroupDto> Groups { get; set; }
-    public ICollection<ChecklistQuestionDto> Questions { get; set; }
 }
