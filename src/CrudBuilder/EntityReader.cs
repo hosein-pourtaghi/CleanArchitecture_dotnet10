@@ -1,14 +1,10 @@
-﻿using Domain.Carts;
-using System.Globalization;
-using System;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
+﻿using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CrudBuilder;
+
 public class EntityReader
 {
     public record EntityProperty(string Type, string Name, bool IsNullable);
@@ -110,7 +106,7 @@ public class EntityReader
             var propName = prop.Identifier.Text;
 
             Properties.Add(new EntityProperty(typeName, propName, isNullable));
-        } 
+        }
     }
 
     /// <summary>
@@ -158,13 +154,14 @@ public class EntityReader
 
     private static string ToCamelCase(string name)
     {
-        if (string.IsNullOrEmpty(name) || name.Length == 1) return name.ToLower(CultureInfo.CurrentCulture);
+        if (string.IsNullOrEmpty(name) || name.Length == 1)
+            return name.ToLower(CultureInfo.CurrentCulture);
         return char.ToLower(name[0], CultureInfo.CurrentCulture) + name.Substring(1);
     }
 
     public void CreateClassFromType()
     {
-        string className = "Domain.Carts.Cart";  //MyPath.EntityName; // named class string
+        string className = MyPath.EntityName; // named class string
 
         Type type = Type.GetType(className);
 

@@ -1,4 +1,4 @@
-using Application.Abstractions.Messaging;
+using Application.Common.Messaging;
 
 namespace Application.Customers.Update;
 

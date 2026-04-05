@@ -1,11 +1,11 @@
-﻿using SharedKernel;
+﻿using SharedKernel.BaseEntities;
 
 namespace Domain.Checklists;
 
 /// <summary>
 /// checklist aggregate root
 /// </summary>
-public class Checklist : Entity
+public class Checklist : Entity 
 {
     public Guid Id { get; set; }
     public bool IsActive { get; set; } = true;

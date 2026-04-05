@@ -25,10 +25,6 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
 
         builder.Property(c => c.Address)
             .HasMaxLength(500);
-
-        builder.Property(c => c.CreatedAt)
-            .IsRequired();
-
-        builder.Property(c => c.UpdatedAt);
+         
     }
 }

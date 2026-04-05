@@ -1,7 +1,6 @@
-
+using Application.Common.DTOs;
 using Application.Checklists.Create;
 using Application.Checklists.Update;
-using Application.Common.DTOs;
 using AutoMapper;
 using Domain.Checklists;
 

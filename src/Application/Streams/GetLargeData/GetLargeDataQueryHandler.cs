@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using System.Runtime.CompilerServices;
-using Application.Abstractions.Interfaces;
-using Application.Abstractions.Messaging;
 using Application.Common.DTOs;
+using Application.Common.Interfaces;
+using Application.Common.Messaging;
 using AutoMapper;
 using Domain.Checklists;
 using SharedKernel;

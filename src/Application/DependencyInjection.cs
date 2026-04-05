@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
-using Application.Abstractions.Behaviors;
-using Application.Abstractions.Interfaces;
-using Application.Abstractions.Messaging;
+using Application.Common.Behaviors;
+using Application.Common.Interfaces;
+using Application.Common.Messaging;
 using Application.Common.DTOs;
 using Application.Streams.GetLargeData;
 using Domain.Checklists;

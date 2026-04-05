@@ -1,6 +1,6 @@
-using Application.Abstractions.Data;
-using Application.Abstractions.Interfaces.Checklists;
-using Application.Abstractions.Messaging;
+using Application.Common.Data;
+using Application.Common.Interfaces.Checklists;
+using Application.Common.Messaging;
 using SharedKernel;
 
 namespace Application.Checklists.Delete;

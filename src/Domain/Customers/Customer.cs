@@ -1,14 +1,12 @@
-using SharedKernel;
+using SharedKernel.BaseEntities;
 
 namespace Domain.Customers;
 
-public sealed class Customer : Entity
+public sealed class Customer : AuditableEntity
 {
     public Guid Id { get; set; }
     public string Name { get; set; }
     public string Email { get; set; }
     public string? Phone { get; set; }
     public string? Address { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime? UpdatedAt { get; set; }
 }

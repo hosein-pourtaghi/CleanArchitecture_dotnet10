@@ -1,5 +1,5 @@
 
-using Application.Abstractions.Messaging;
+using Application.Common.Messaging;
 using Application.Common.DTOs;
 
 namespace  Application.Assessments.Delete;

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Domain.Checklists;
-using SharedKernel;
+using SharedKernel.BaseEntities;
 
 namespace Domain.Assessments;
 

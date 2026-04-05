@@ -51,7 +51,7 @@ internal static class CreateBuilder
         var paramSection = string.IsNullOrWhiteSpace(parameters) ? string.Empty : $"\n    {parameters}\n";
 
         var str =
-@$"using Application.Abstractions.Messaging;
+@$"using Application.Common.Messaging;
 using Application.Common.DTOs;
 
 namespace  Application.{MyPath.EntityName}s.Create;
@@ -65,8 +65,8 @@ public sealed record Create{MyPath.EntityName}Command({paramSection}) : ICommand
     {
         var str =
 @$"
-using Application.Abstractions.Data;
-using Application.Abstractions.Messaging;
+using Application.Common.Data;
+using Application.Common.Messaging;
 using AutoMapper;
 using Domain.{MyPath.EntityName}s;
 using Microsoft.EntityFrameworkCore;

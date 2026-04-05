@@ -1,5 +1,5 @@
-using Application.Abstractions.Data;
-using Application.Abstractions.Messaging;
+using Application.Common.Data;
+using Application.Common.Messaging;
 using Domain.Customers;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
@@ -38,15 +38,14 @@ internal sealed class UpdateCustomerCommandHandler(IApplicationDbContext context
         customer.Email = command.Email;
         customer.Phone = command.Phone;
         customer.Address = command.Address;
-        customer.UpdatedAt = DateTime.UtcNow;
 
-        // Publish comprehensive domain event with all updated data for auditing and message bus
-        customer.Raise(new CustomerUpdatedDomainEvent(
-            customerId: customer.Id,
-            name: customer.Name,
-            email: customer.Email,
-            phone: customer.Phone,
-            address: customer.Address));
+        //// Publish comprehensive domain event with all updated data for auditing and message bus
+        //customer.Raise(new CustomerUpdatedDomainEvent(
+        //    customerId: customer.Id,
+        //    name: customer.Name,
+        //    email: customer.Email,
+        //    phone: customer.Phone,
+        //    address: customer.Address));
 
         await context.SaveChangesAsync(cancellationToken);
 

@@ -1,5 +1,5 @@
-using Application.Abstractions.Data;
-using Application.Abstractions.Messaging;
+using Application.Common.Data;
+using Application.Common.Messaging;
 using Domain.Assessments;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;

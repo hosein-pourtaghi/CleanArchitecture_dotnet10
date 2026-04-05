@@ -46,7 +46,7 @@ internal static class DeleteBuilder
     {
         var str =
 @$"
-using Application.Abstractions.Messaging;
+using Application.Common.Messaging;
 using Application.Common.DTOs;
 
 namespace  Application.{MyPath.EntityName}s.Delete;
@@ -59,8 +59,8 @@ public sealed record Delete{MyPath.EntityName}Command(Guid Id) : ICommand;
     internal static string DeleteCommandHandlerFileBuilder()
     {
         var str =
-@$"using Application.Abstractions.Data;
-using Application.Abstractions.Messaging;
+@$"using Application.Common.Data;
+using Application.Common.Messaging;
 using Domain.{MyPath.EntityName}s;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;

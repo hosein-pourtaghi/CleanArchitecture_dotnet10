@@ -1,14 +1,10 @@
-﻿using System.Data;
-using Application;
-using Application.Common.Mappings;
-using FluentValidation;
+﻿using Application;
 using HealthChecks.UI.Client;
 using Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Serilog;
-using Serilog.Sinks.MSSqlServer;
 using WebApi;
 using WebApi.Extensions;
 using WebApi.Middleware;
@@ -97,8 +93,19 @@ builder.Services
     .AddApplication()
     .AddPresentation()
     .AddInfrastructure(builder.Configuration);
- 
-WebApplication app = builder.Build();
+
+WebApplication app; 
+try
+{
+      app = builder.Build();
+
+}
+catch (Exception e)
+{
+
+    throw;
+}
+
 
 // just for test
 //app.Use(async (context, next) => 

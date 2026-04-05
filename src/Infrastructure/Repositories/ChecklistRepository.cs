@@ -1,9 +1,9 @@
-﻿using Application.Abstractions.Interfaces;
-using Application.Abstractions.Interfaces.Checklists;
+﻿using Application.Common.Interfaces;
+using Application.Common.Interfaces.Checklists;
 using AutoMapper;
 using Domain.Checklists;
 using Infrastructure.Persistence;
-using Infrastructure.Repositories.Base;
+using Infrastructure.Repositories.Core;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;

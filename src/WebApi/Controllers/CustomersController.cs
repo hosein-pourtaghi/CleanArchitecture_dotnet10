@@ -1,5 +1,4 @@
 using Application.Common.DTOs;
-using Application.Customers.Copy;
 using Application.Customers.Create;
 using Application.Customers.Delete;
 using Application.Customers.Get;
@@ -239,29 +238,7 @@ public class CustomersController(IMediator mediator) : ApiController
         var result = await mediator.Send(command, cancellationToken);
         return HandleResult(result);
     }
-
-    /// <summary>
-    /// Copies an existing customer.
-    /// </summary>
-    /// <remarks>
-    /// Creates a copy of an existing customer with all the same details.
-    /// </remarks>
-    /// <param name="id">The customer ID to copy</param>
-    /// <param name="request">The customer data to copy</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Success status</returns>
-    [HttpPost("{id:guid}/copy")]
-    public async Task<IActionResult> Copy(
-        [FromRoute] Guid id,
-        [FromBody] CreateCustomerRequest request,
-        CancellationToken cancellationToken)
-    {
-        var command = new CopyCustomerCommand(request.Name, request.Email, request.Phone, request.Address);
-        var result = await mediator.Send(command, cancellationToken);
-        return HandleResult(result);
-    }
 }
-
 
 /// <summary>
 /// Request model for creating a new customer.

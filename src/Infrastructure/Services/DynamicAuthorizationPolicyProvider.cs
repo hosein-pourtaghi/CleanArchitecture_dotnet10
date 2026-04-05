@@ -1,4 +1,4 @@
-using Application.Abstractions.Interfaces;
+using Application.Common.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 

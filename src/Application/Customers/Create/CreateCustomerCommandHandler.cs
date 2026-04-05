@@ -1,5 +1,5 @@
-using Application.Abstractions.Data;
-using Application.Abstractions.Messaging;
+using Application.Common.Data;
+using Application.Common.Messaging;
 using Domain.Customers;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
@@ -32,17 +32,16 @@ internal sealed class CreateCustomerCommandHandler(IApplicationDbContext context
             Name = command.Name,
             Email = command.Email,
             Phone = command.Phone,
-            Address = command.Address,
-            CreatedAt = DateTime.UtcNow
+            Address = command.Address
         };
 
-        // Publish comprehensive domain event for audit logging and async operations (message bus)
-        customer.Raise(new CustomerCreatedDomainEvent(
-            customerId: customer.Id,
-            name: customer.Name,
-            email: customer.Email,
-            phone: customer.Phone,
-            address: customer.Address));
+        //// Publish comprehensive domain event for audit logging and async operations (message bus)
+        //customer.AddDomainEvent(new CustomerCreatedDomainEvent(
+        //    customerId: customer.Id,
+        //    name: customer.Name,
+        //    email: customer.Email,
+        //    phone: customer.Phone,
+        //    address: customer.Address));
 
         // Persist to database
         context.Customers.Add(customer);

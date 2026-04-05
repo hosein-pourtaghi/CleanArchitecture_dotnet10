@@ -1,4 +1,4 @@
-﻿using SharedKernel;
+﻿using SharedKernel.BaseEntities;
 
 namespace Domain.Checklists;
 

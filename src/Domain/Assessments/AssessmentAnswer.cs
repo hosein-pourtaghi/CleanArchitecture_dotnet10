@@ -1,5 +1,5 @@
 ﻿using Domain.Checklists;
-using SharedKernel;
+using SharedKernel.BaseEntities;
 
 namespace Domain.Assessments;
 

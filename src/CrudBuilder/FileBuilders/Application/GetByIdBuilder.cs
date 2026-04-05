@@ -26,7 +26,7 @@ internal static class GetByIdBuilder
     internal static string GetByIdQueryFileBuilder()
     {
         var str =
-@$"using Application.Abstractions.Messaging;
+@$"using Application.Common.Messaging;
 using Application.Common.DTOs;
 
 namespace Application.{MyPath.EntityName}s.GetById;
@@ -64,8 +64,8 @@ public sealed record GetById{MyPath.EntityName}Query(Guid Id) : IQuery<{MyPath.E
     internal static string GetByIdQueryHandlerFileBuilder()
     {
         var str =
-@$"using Application.Abstractions.Data;
-using Application.Abstractions.Messaging;
+@$"using Application.Common.Data;
+using Application.Common.Messaging;
 using Application.Common.DTOs;
 using AutoMapper;
 using Domain.{MyPath.EntityName}s;

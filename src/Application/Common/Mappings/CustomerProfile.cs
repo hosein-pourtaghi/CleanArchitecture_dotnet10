@@ -1,7 +1,7 @@
 using Application.Common.DTOs;
 using AutoMapper;
 using Domain.Customers;
-using CommonDTOs = Application.Common.DTOs; 
+using CommonDTOs = Application.Common.DTOs;
 
 namespace Application.Common.Mappings;
 
@@ -18,8 +18,7 @@ public class CustomerProfile : Profile
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
             .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Phone))
-            .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
-            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
-            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => src.UpdatedAt));
+            .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address)) 
+            ;
     }
 }

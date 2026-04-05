@@ -1,6 +1,6 @@
-using Application.Abstractions.Data;
-using Application.Abstractions.Messaging;
+using Application.Common.Data;
 using Application.Common.DTOs;
+using Application.Common.Messaging;
 using AutoMapper;
 using Domain.Assessments;
 using Microsoft.EntityFrameworkCore;

@@ -1,5 +1,5 @@
-using Application.Abstractions.Data;
-using Application.Abstractions.Messaging;
+using Application.Common.Data;
+using Application.Common.Messaging;
 using Domain.Customers;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
@@ -29,7 +29,7 @@ internal sealed class DeleteCustomerCommandHandler(IApplicationDbContext context
             phone: customer.Phone,
             address: customer.Address);
 
-        customer.Raise(deletedEvent);
+        //customer.Raise(deletedEvent);
 
         // Remove from database
         context.Customers.Remove(customer);

@@ -1,8 +1,8 @@
 ﻿using System.Text;
-using Application.Abstractions.Authentication;
-using Application.Abstractions.Data;
-using Application.Abstractions.Interfaces;
-using Application.Abstractions.Interfaces.Checklists;
+using Application.Common.Authentication;
+using Application.Common.Data;
+using Application.Common.Interfaces;
+using Application.Common.Interfaces.Checklists;
 using Domain.Checklists;
 using Domain.Users;
 using Infrastructure.Authentication;
@@ -10,7 +10,7 @@ using Infrastructure.Authorization;
 using Infrastructure.DomainEvents;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories;
-using Infrastructure.Repositories.Base;
+using Infrastructure.Repositories.Core;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -20,6 +20,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using RabbitMQ.Client;
 using Serilog;
 using StackExchange.Redis;
 
@@ -41,8 +42,10 @@ public static class DependencyInjection
     {
         services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+
         #region Advanced Repository Injection  
-        services.AddScoped(typeof(IAdvancedRepository<,>), typeof(AdvancedRepository<,>));
+        //services.AddScoped(typeof(IAdvancedRepository<>), typeof(AdvancedRepository<>));
 
         //services.Scan(scan => scan
         //    .FromAssembliesOf(typeof(ApplicationDbContext))
@@ -51,8 +54,7 @@ public static class DependencyInjection
         //    .WithScopedLifetime());
         #endregion
 
-        services.AddScoped<IChecklistRepository, ChecklistRepository>();
-        services.AddScoped<IChecklistRepository2, ChecklistRepository2>();
+        services.AddScoped<IChecklistRepository, ChecklistRepository>(); 
 
         services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
         services.AddScoped<IAuthService, AuthService>();
@@ -76,10 +78,13 @@ public static class DependencyInjection
                 .UseSqlServer(connectionString, options =>
                 {
                     options.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default);
-                    var minutes = (int)TimeSpan.FromMinutes(3).TotalSeconds;
-                    options.CommandTimeout(minutes);
-                    options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(10), null);
+                    var seconds = (int)TimeSpan.FromMinutes(3).TotalSeconds;
+                    options.CommandTimeout(seconds);
+                    options.EnableRetryOnFailure(maxRetryCount:3, maxRetryDelay:TimeSpan.FromSeconds(10), errorNumbersToAdd:null);
 
+                    // 🔥 BULK OPERATIONS: Minimize logging overhead
+                    options.MinBatchSize(10);
+                    options.MaxBatchSize(100);
                 });
 
                 // فقط برای محیط توسعه!

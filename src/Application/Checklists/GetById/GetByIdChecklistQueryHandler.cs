@@ -1,7 +1,7 @@
-using Application.Abstractions.Data;
-using Application.Abstractions.Interfaces.Checklists;
-using Application.Abstractions.Messaging;
+using Application.Common.Data;
 using Application.Common.DTOs;
+using Application.Common.Interfaces.Checklists;
+using Application.Common.Messaging;
 using AutoMapper;
 using Domain.Checklists;
 using SharedKernel;

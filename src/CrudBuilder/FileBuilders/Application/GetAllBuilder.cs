@@ -46,7 +46,7 @@ internal static class GetAllBuilder
     {
         var str =
 @$"
-using Application.Abstractions.Messaging;
+using Application.Common.Messaging;
 using Application.Common.DTOs;
 
 namespace  Application.{MyPath.EntityName}s.GetAll;
@@ -60,8 +60,8 @@ public sealed record GetAll{MyPath.EntityName}Query() : IQuery<List<{MyPath.Enti
     internal static string GetAllQueryHandlerFileBuilder()
     {
         var str =
-@$"using Application.Abstractions.Data;
-using Application.Abstractions.Messaging;
+@$"using Application.Common.Data;
+using Application.Common.Messaging;
 using Application.Common.DTOs;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
