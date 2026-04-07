@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using Application.Common.Authentication;
 using Application.Common.DTOs;
+using Application.Common.DTOs.Identities;
 using Application.Common.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,209 +15,59 @@ namespace WebApi.Controllers;
 /// Provides JWT token-based authentication with comprehensive documentation and error handling.
 /// </summary>
 [ApiController]
-[Route("api/[controller]/[action]")]
-[Tags("Authentication")]
-[Produces("application/json")]
-[Consumes("application/json")]
-public class AuthController(IAuthService auth, ILogger<AuthController> logger) : ControllerBase
-{
-    private readonly IAuthService _auth = auth;
+[Route("api/[controller]/[action]")] 
+public class AuthController(IAuthService _authService, IUserContext _userContext, ILogger<AuthController> _logger) : ControllerBase
+{ 
 
-    /// <summary>
-    /// Registers a new user account.
-    /// </summary>
-    /// <remarks>
-    /// ## Authentication Flow
-    /// 1. User provides email and password
-    /// 2. System validates input and checks for existing account
-    /// 3. Password is hashed and stored securely
-    /// 4. JWT token is generated with user claims
-    /// 5. Token is returned to client for immediate API access
-    /// 
-    /// ## Token Usage
-    /// Include the returned token in the Authorization header for subsequent requests:
-    /// ```
-    /// Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-    /// ```
-    /// 
-    /// ## Password Requirements
-    /// - Minimum 8 characters
-    /// - At least one uppercase letter
-    /// - At least one lowercase letter
-    /// - At least one digit
-    /// - At least one special character
-    /// 
-    /// ## Error Handling
-    /// - 400: Invalid email format or weak password
-    /// - 409: Email already registered
-    /// - 500: Server error
-    /// </remarks>
-    /// <param name="dto">Registration credentials including email and password</param>
-    /// <returns>JWT token with user details</returns>
-    /// <response code="200">Registration successful, JWT token returned</response>
-    /// <response code="400">Invalid input - validation error</response>
-    /// <response code="409">Email already exists</response>
-    /// <response code="500">Internal server error</response>
-    [HttpPost]
+    [HttpPost("login")]
     [AllowAnonymous]
-    [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var operationName = "AuthController.Register";
-        var stopwatch = Stopwatch.StartNew();
+        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var userAgent = Request.Headers.UserAgent.ToString();
 
-        using (var activity = logger.StartOperationSpan(operationName))
-        {
-            var traceId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
-            try
-            {
-                activity?.SetTag("user.email", dto.Email);
-                activity?.SetTag("operation.type", "registration");
+        var result = await _authService.LoginAsync(request, ipAddress, userAgent);
 
-                logger.LogInformation(
-                    "User registration attempt. Email: {Email}, TraceId: {TraceId}",
-                    dto.Email,
-                    traceId);
+        if (result.IsFailure)
+            return Unauthorized(new { error = result.Error });
 
-                string token = await _auth.RegisterAsync(dto);
-                var expiresAt = DateTime.UtcNow.AddHours(24); // Assuming 24-hour token validity
-
-                stopwatch.Stop();
-                logger.LogOperationSuccess(operationName, stopwatch.ElapsedMilliseconds);
-
-                var response = new RegisterResponse
-                {
-                    Token = token,
-                    TokenType = "Bearer",
-                    ExpiresIn = 86400, // 24 hours in seconds
-                    ExpiresAt = expiresAt
-                };
-
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                stopwatch.Stop();
-                logger.LogOperationError(ex, operationName);
-                
-                var errorResponse = new ApiErrorResponse
-                {
-                    Status = StatusCodes.Status500InternalServerError,
-                    Title = "Registration Failed",
-                    Detail = ex.Message,
-                    TraceId = traceId
-                };
-
-                return StatusCode(StatusCodes.Status500InternalServerError, errorResponse);
-            }
-        }
+        return Ok(result.Value);
     }
 
-    /// <summary>
-    /// Authenticates a user and returns a JWT token.
-    /// </summary>
-    /// <remarks>
-    /// ## Authentication Flow
-    /// 1. User provides email and password
-    /// 2. System validates credentials against stored user
-    /// 3. Password is compared with securely stored hash
-    /// 4. If valid, JWT token is generated with user claims
-    /// 5. Token is returned to client for API access
-    /// 
-    /// ## Token Format
-    /// JWT (JSON Web Token) structure:
-    /// - **Header**: Contains algorithm and token type
-    /// - **Payload**: Contains user claims (email, roles, permissions)
-    /// - **Signature**: Validates token integrity
-    /// 
-    /// ## Token Lifetime
-    /// - **Access Token**: 24 hours (configurable)
-    /// - Tokens cannot be revoked; user must wait for expiration
-    /// - Request a new token before expiration
-    /// 
-    /// ## Usage Example
-    /// ```bash
-    /// # 1. Get token
-    /// curl -X POST https://api.example.com/api/auth/login \
-    ///   -H "Content-Type: application/json" \
-    ///   -d '{"email":"user@example.com","password":"SecurePass123!"}'
-    /// 
-    /// # 2. Use token in requests
-    /// curl https://api.example.com/api/customers \
-    ///   -H "Authorization: Bearer {token}"
-    /// ```
-    /// 
-    /// ## Error Responses
-    /// - 401: Invalid credentials
-    /// - 404: User not found
-    /// - 500: Server error
-    /// </remarks>
-    /// <param name="dto">Login credentials (email and password)</param>
-    /// <returns>JWT token with user email</returns>
-    /// <response code="200">Login successful, JWT token returned</response>
-    /// <response code="401">Invalid email or password</response>
-    /// <response code="404">User not found</response>
-    /// <response code="500">Internal server error</response>
-    [HttpPost]
+    [HttpPost("refresh")]
     [AllowAnonymous]
-    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Login([FromBody] LoginDto dto)
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
     {
-        var operationName = "AuthController.Login";
-        var stopwatch = Stopwatch.StartNew();
+        var result = await _authService.RefreshTokenAsync(request);
 
-        using (var activity = logger.StartOperationSpan(operationName))
-        {
-            var traceId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
-            try
-            {
-                activity?.SetTag("user.email", dto.Email);
-                activity?.SetTag("operation.type", "authentication");
+        if (result.IsFailure)
+            return Unauthorized(new { error = result.Error });
 
-                logger.LogInformation(
-                    "User login attempt. Email: {Email}, TraceId: {TraceId}",
-                    dto.Email,
-                    traceId);
+        return Ok(result.Value);
+    }
 
-                string token = await _auth.LoginAsync(dto);
-                var expiresAt = DateTime.UtcNow.AddHours(24); // Assuming 24-hour token validity
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
+    {
+        var tokenId = User.FindFirst("jti")?.Value;
+        var result = await _authService.LogoutAsync(_userContext.UserId, request, tokenId);
 
-                stopwatch.Stop();
-                logger.LogOperationSuccess(operationName, stopwatch.ElapsedMilliseconds);
+        if (result.IsFailure)
+            return BadRequest(new { error = result.Error });
 
-                var response = new LoginResponse
-                {
-                    Token = token,
-                    TokenType = "Bearer",
-                    ExpiresIn = 86400, // 24 hours in seconds
-                    ExpiresAt = expiresAt,
-                    Email = dto.Email
-                };
+        return Ok(new { message = "Logged out successfully" });
+    }
 
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                stopwatch.Stop();
-                logger.LogOperationError(ex, operationName);
-                
-                var errorResponse = new ApiErrorResponse
-                {
-                    Status = StatusCodes.Status500InternalServerError,
-                    Title = "Login Failed",
-                    Detail = ex.Message,
-                    TraceId = traceId
-                };
+    [HttpPost("validate")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ValidateToken([FromBody] string token)
+    {
+        var result = await _authService.ValidateTokenAsync(token);
 
-                return StatusCode(StatusCodes.Status500InternalServerError, errorResponse);
-            }
-        }
+        if (result.IsFailure)
+            return Unauthorized(new { error = result.Error });
+
+        return Ok(new { valid = true });
     }
 }
-

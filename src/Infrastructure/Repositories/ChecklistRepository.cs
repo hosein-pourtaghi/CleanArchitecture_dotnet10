@@ -1,7 +1,6 @@
-﻿using Application.Common.Interfaces;
-using Application.Common.Interfaces.Checklists;
+﻿using Application.Common.Interfaces.Checklists;
 using AutoMapper;
-using Domain.Checklists;
+using Domain.Entities.Checklists;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories.Core;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +19,7 @@ public class ChecklistRepository : BaseRepository<Checklist>, IChecklistReposito
     }
 
     public async Task<Checklist> GetByIdAsync(Guid id, bool includeGroups = true, bool asNoTracking = true)
-    {
+    { 
         var query = _context.Checklists
             .Where(c => c.Id == id)
             ;
@@ -118,7 +117,7 @@ public class ChecklistRepository : BaseRepository<Checklist>, IChecklistReposito
     }
 
     private void MarkGroupAndChildrenAsAdded(ChecklistGroup group)
-    {
+    { 
         _context.Entry(group).State = EntityState.Added;
 
         foreach (var question in group.Questions)

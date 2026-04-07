@@ -1,6 +1,6 @@
 using Application.Common.DTOs;
 using AutoMapper;
-using Domain.Assessments;
+using Domain.Entities.Assessments;
 
 namespace Application.Common.Mappings;
  

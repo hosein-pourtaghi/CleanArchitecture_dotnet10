@@ -1,5 +1,5 @@
 ﻿using System;
-using Domain.Checklists;
+using Domain.Entities.Checklists;
 using SharedKernel;
 
 namespace Application.Common.DTOs;

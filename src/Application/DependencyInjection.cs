@@ -1,12 +1,6 @@
 ﻿using System.Reflection;
 using Application.Common.Behaviors;
-using Application.Common.Interfaces;
-using Application.Common.Messaging;
-using Application.Common.DTOs;
-using Application.Streams.GetLargeData;
-using Domain.Checklists;
 using FluentValidation;
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel;
 
@@ -23,11 +17,11 @@ public static class DependencyInjection
         {
             //config.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
             config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-            
+
             // Register custom pipeline behaviors
             config.AddOpenBehavior(typeof(ValidationBehavior<,>));
             config.AddOpenBehavior(typeof(LoggingBehavior<,>));
-        }); 
+        });
 
         // Add FluentValidation validators
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);

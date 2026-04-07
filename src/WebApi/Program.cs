@@ -1,7 +1,10 @@
 ﻿using Application;
+using Domain.Entities.Identities;
 using HealthChecks.UI.Client;
 using Infrastructure;
+using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Identity;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Serilog;
@@ -163,3 +166,57 @@ namespace WebApi
 {
     public partial class Program;
 }
+
+
+
+
+
+
+
+
+//static async Task SeedDataAsync(ApplicationDbContext context, RoleManager<ApplicationRole> roleManager)
+//{
+//    // Create default roles
+//    var roles = new[]
+//    {
+//        ("Admin", "System Administrator", 1, true),
+//        ("User", "Regular User", 2, false),
+//        ("Manager", "Manager Role", 3, false)
+//    };
+
+//    foreach (var (name, description, priority, isSystem) in roles)
+//    {
+//        if (!await roleManager.RoleExistsAsync(name))
+//        {
+//            var role = new ApplicationRole(name)
+//            {
+//                Description = description,
+//                Priority = priority,
+//                IsSystemRole = isSystem
+//            };
+//            await roleManager.CreateAsync(role);
+//        }
+//    }
+
+//    // Assign all permissions to Admin role
+//    var adminRole = await roleManager.FindByNameAsync("Admin");
+//    if (adminRole != null)
+//    {
+//        var allPermissions = await context.Permissions.ToListAsync();
+//        foreach (var permission in allPermissions)
+//        {
+//            var exists = await context.RolePermissions
+//                .AnyAsync(rp => rp.RoleId == adminRole.Id && rp.PermissionId == permission.Id);
+
+//            if (!exists)
+//            {
+//                context.RolePermissions.Add(new RolePermission
+//                {
+//                    RoleId = adminRole.Id,
+//                    PermissionId = permission.Id
+//                });
+//            }
+//        }
+//        await context.SaveChangesAsync();
+//    }
+//}

@@ -14,6 +14,12 @@ public record Error
         Description = description;
         Type = type;
     }
+    public Error(string description)
+    {
+        Code = "";
+        Description = description;
+        Type = ErrorType.Failure;
+    }
 
     public string Code { get; }
 

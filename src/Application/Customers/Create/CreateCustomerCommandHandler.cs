@@ -1,6 +1,6 @@
 using Application.Common.Data;
 using Application.Common.Messaging;
-using Domain.Customers;
+using Domain.Entities.Customers;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 

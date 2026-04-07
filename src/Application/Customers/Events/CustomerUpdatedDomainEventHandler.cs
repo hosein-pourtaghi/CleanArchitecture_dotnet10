@@ -1,4 +1,4 @@
-using Domain.Customers;
+using Domain.Entities.Customers;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 

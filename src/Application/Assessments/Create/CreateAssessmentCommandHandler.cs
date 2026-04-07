@@ -2,7 +2,7 @@
 using Application.Common.Data;
 using Application.Common.Messaging;
 using AutoMapper;
-using Domain.Assessments;
+using Domain.Entities.Assessments;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 

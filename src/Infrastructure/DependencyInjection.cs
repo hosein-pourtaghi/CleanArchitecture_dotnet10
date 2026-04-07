@@ -1,17 +1,20 @@
-﻿using System.Text;
+﻿using System;
+using System.Security.Claims;
+using System.Text;
 using Application.Common.Authentication;
 using Application.Common.Data;
 using Application.Common.Interfaces;
 using Application.Common.Interfaces.Checklists;
-using Domain.Checklists;
-using Domain.Users;
+using Domain.Entities.Identities;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization;
 using Infrastructure.DomainEvents;
 using Infrastructure.Persistence;
+using Infrastructure.Persistence.Interceptors;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.Core;
 using Infrastructure.Services;
+using Infrastructure.Services.Identities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -19,10 +22,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using RabbitMQ.Client;
 using Serilog;
-using StackExchange.Redis;
 
 namespace Infrastructure;
 
@@ -36,7 +40,7 @@ public static class DependencyInjection
             .AddDatabase(configuration)
             .AddHealthChecks(configuration)
             .AddAuthenticationInternal(configuration)
-            .AddAuthorizationInternal();
+            .AddAuthorization();
 
     private static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
@@ -54,16 +58,28 @@ public static class DependencyInjection
         //    .WithScopedLifetime());
         #endregion
 
-        services.AddScoped<IChecklistRepository, ChecklistRepository>(); 
+        services.AddScoped<IChecklistRepository, ChecklistRepository>();
 
         services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
+        // Auth & Token Services
+        services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ISessionService, SessionService>();
+        services.AddScoped<IRolePermissionService, RolePermissionService>();
+
+        // Authorization
+        services.AddSingleton<PermissionProvider>();
+        services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 
         return services;
     }
 
     private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
+        // Register diagnostic service FIRST (before DbContext)
+        //services.AddSingleton<IQueryDiagnosticsService, QueryDiagnosticsService>();
+
         string? connectionString = configuration["ConnectionString"];
 
         //services.AddDbContext<ApplicationDbContext>(options => options
@@ -72,20 +88,26 @@ public static class DependencyInjection
         //    );
 
         services.AddDbContext<ApplicationDbContext>(
-            options =>
+            (serviceProvider, options) =>
+            //options =>
             {
-                options
-                .UseSqlServer(connectionString, options =>
+                options.UseSqlServer(connectionString, options =>
                 {
                     options.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default);
                     var seconds = (int)TimeSpan.FromMinutes(3).TotalSeconds;
                     options.CommandTimeout(seconds);
-                    options.EnableRetryOnFailure(maxRetryCount:3, maxRetryDelay:TimeSpan.FromSeconds(10), errorNumbersToAdd:null);
+                    options.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null);
 
                     // 🔥 BULK OPERATIONS: Minimize logging overhead
                     options.MinBatchSize(10);
                     options.MaxBatchSize(100);
                 });
+
+                //// Add interceptors
+                //var diagnosticsService = serviceProvider.GetRequiredService<IQueryDiagnosticsService>();
+                //var logger = serviceProvider.GetRequiredService<ILogger<QueryLoggingInterceptor>>();
+
+                //options.AddInterceptors(new QueryLoggingInterceptor(diagnosticsService, logger));
 
                 // فقط برای محیط توسعه!
                 options.EnableSensitiveDataLogging();
@@ -98,9 +120,16 @@ public static class DependencyInjection
         services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
             {
                 options.User.RequireUniqueEmail = true;
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequiredLength = 8;
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddRoleManager<RoleManager<ApplicationRole>>()
+            ;
         return services;
     }
 
@@ -117,8 +146,6 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-
-
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -127,7 +154,7 @@ public static class DependencyInjection
         .AddJwtBearer(o =>
             {
                 o.RequireHttpsMetadata = false;
-
+                o.SaveToken = true;
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
 
@@ -140,7 +167,9 @@ public static class DependencyInjection
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
                     ValidIssuer = configuration["Jwt:Issuer"],
                     ValidAudience = configuration["Jwt:Audience"],
-                    ClockSkew = TimeSpan.Zero
+                    ClockSkew = TimeSpan.Zero,
+                    RoleClaimType = ClaimTypes.Role,
+                    NameClaimType = JwtRegisteredClaimNames.Sub
                 };
 
                 o.Events = new JwtBearerEvents
@@ -170,9 +199,20 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddAuthorizationInternal(this IServiceCollection services)
+    private static IServiceCollection AddAuthorization(this IServiceCollection services)
     {
-        services.AddAuthorization();
+        //PolicyServiceCollectionExtensions.AddAuthorization(services);
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("Permission:users.read", policy =>
+                policy.Requirements.Add(new PermissionRequirement("users.read")));
+
+            options.AddPolicy("Permission:users.create", policy =>
+                policy.Requirements.Add(new PermissionRequirement("users.create")));
+
+            // Add more policies as needed
+        });
 
         services.AddScoped<PermissionProvider>();
 

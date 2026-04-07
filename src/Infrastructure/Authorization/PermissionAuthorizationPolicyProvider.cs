@@ -3,31 +3,33 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Authorization;
 
-internal sealed class PermissionAuthorizationPolicyProvider : DefaultAuthorizationPolicyProvider
+internal sealed class PermissionAuthorizationPolicyProvider
+    : DefaultAuthorizationPolicyProvider
 {
-    private readonly AuthorizationOptions _authorizationOptions;
-
-    public PermissionAuthorizationPolicyProvider(IOptions<AuthorizationOptions> options)
+    public PermissionAuthorizationPolicyProvider(
+        IOptions<AuthorizationOptions> options)
         : base(options)
     {
-        _authorizationOptions = options.Value;
     }
 
     public override async Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
     {
-        AuthorizationPolicy? policy = await base.GetPolicyAsync(policyName);
-
-        if (policy is not null)
+        // Check if policy starts with "Permission:"
+        if (policyName.StartsWith("Permission:", StringComparison.OrdinalIgnoreCase))
         {
+            var permissions = policyName
+                .Substring("Permission:".Length)
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(p => p.Trim())
+                .ToArray();
+
+            var policy = new AuthorizationPolicyBuilder()
+                .AddRequirements(new PermissionRequirement(permissions))
+                .Build();
+
             return policy;
         }
 
-        AuthorizationPolicy permissionPolicy = new AuthorizationPolicyBuilder()
-            .AddRequirements(new PermissionRequirement(policyName))
-            .Build();
-
-        _authorizationOptions.AddPolicy(policyName, permissionPolicy);
-
-        return permissionPolicy;
+        return await base.GetPolicyAsync(policyName);
     }
 }

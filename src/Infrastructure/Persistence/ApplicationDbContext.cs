@@ -1,12 +1,11 @@
 ﻿using System.Data;
 using System.Linq.Expressions;
-using System.Reflection;
 using Application.Common.Data;
 using Application.Common.Interfaces;
-using Domain.Assessments;
-using Domain.Checklists;
-using Domain.Customers;
-using Domain.Users;
+using Domain.Entities.Assessments;
+using Domain.Entities.Checklists;
+using Domain.Entities.Customers;
+using Domain.Entities.Identities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +17,28 @@ using SharedKernel.BaseEntities;
 
 namespace Infrastructure.Persistence;
 
-public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, IApplicationDbContext
+
+//public sealed class ApplicationDbContext : IdentityDbContext<
+//    ApplicationUser,
+//    ApplicationRole,
+//    Guid,
+//    ApplicationUserClaim,
+//    ApplicationUserRole,
+//    ApplicationUserLogin,
+//    ApplicationRoleClaim,
+//    ApplicationUserToken>
+
+
+//public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, IApplicationDbContext
+public sealed class ApplicationDbContext : IdentityDbContext<
+ApplicationUser,
+ApplicationRole,
+Guid,
+ApplicationUserClaim,
+ApplicationUserRole,
+ApplicationUserLogin,
+ApplicationRoleClaim,
+ApplicationUserToken>, IApplicationDbContext
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IDomainEventsDispatcher _domainEventsDispatcher;
@@ -34,7 +54,7 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Ap
         _domainEventsDispatcher = domainEventsDispatcher;
 
         // 🔥 PERFORMANCE: Disable auto-detect changes for bulk operations
-        ChangeTracker.AutoDetectChangesEnabled = false;
+        //ChangeTracker.AutoDetectChangesEnabled = false;
 
         // 🔥 PERFORMANCE: Enable detailed errors in development
         if (Database.IsSqlServer())
@@ -44,9 +64,18 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Ap
     }
 
 
-    #region DbSets 
+    #region Identity
     public DbSet<ApplicationUser> Users => Set<ApplicationUser>();
-    public DbSet<ApplicationRole> ApplicationRoles => Set<ApplicationRole>();
+    public DbSet<ApplicationRole> Roles => Set<ApplicationRole>();
+    public DbSet<ApplicationUserRole> UserRoles => Set<ApplicationUserRole>();
+    public DbSet<Permission> Permissions => Set<Permission>();
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+    public DbSet<UserSession> UserSessions => Set<UserSession>();
+    public DbSet<TokenBlacklist> TokenBlacklist => Set<TokenBlacklist>();
+    #endregion
+
+
+    #region DbSets  
 
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<Checklist> Checklists => Set<Checklist>();
@@ -57,6 +86,7 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Ap
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // it should be placed here, otherwise it will rewrite the following settings!
         base.OnModelCreating(modelBuilder);
 
         // 🔥 SCHEMA

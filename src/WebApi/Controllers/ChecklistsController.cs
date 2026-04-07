@@ -7,11 +7,11 @@ using Application.Checklists.Delete;
 using Application.Checklists.GetAll;
 using Application.Checklists.GetById;
 using Application.Checklists.Update;
-using Domain.Checklists;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Utilities;
+using Domain.Entities.Checklists;
 
 namespace WebApi.Controllers;
 

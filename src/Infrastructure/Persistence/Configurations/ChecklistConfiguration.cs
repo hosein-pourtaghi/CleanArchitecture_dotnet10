@@ -1,5 +1,4 @@
-
-using Domain.Checklists;
+using Domain.Entities.Checklists;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

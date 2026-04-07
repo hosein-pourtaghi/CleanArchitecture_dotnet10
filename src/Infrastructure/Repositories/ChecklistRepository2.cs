@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Application.Common.Data;
 using Application.Common.Interfaces.Checklists;
 using AutoMapper;
-using Domain.Checklists;
+using Domain.Entities.Checklists;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories.Core;
 using Microsoft.EntityFrameworkCore;

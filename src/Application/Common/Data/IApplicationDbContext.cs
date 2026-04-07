@@ -1,8 +1,8 @@
 ﻿using System.Data;
-using Domain.Assessments;
-using Domain.Checklists;
-using Domain.Customers;
-using Domain.Users;
+using Domain.Entities.Assessments;
+using Domain.Entities.Checklists;
+using Domain.Entities.Customers;
+using Domain.Entities.Identities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -14,10 +14,18 @@ public interface IApplicationDbContext
 {
 
 
-    #region DbSets
+    #region Identity
     DbSet<ApplicationUser> Users { get; }
-    DbSet<ApplicationRole> ApplicationRoles { get; }
+    DbSet<ApplicationRole> Roles { get; }
+    DbSet<ApplicationUserRole> UserRoles { get; }
+    DbSet<Permission> Permissions { get; }
+    DbSet<RolePermission> RolePermissions { get; }
+    DbSet<UserSession> UserSessions { get; }
+    DbSet<TokenBlacklist> TokenBlacklist { get; }
+    #endregion
 
+
+    #region DbSets 
     DbSet<Customer> Customers { get; }
     DbSet<Checklist> Checklists { get; }
     DbSet<Assessment> Assessments { get; }

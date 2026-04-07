@@ -2,7 +2,7 @@ using Application.Common.DTOs;
 using Application.Checklists.Create;
 using Application.Checklists.Update;
 using AutoMapper;
-using Domain.Checklists;
+using Domain.Entities.Checklists;
 
 namespace Application.Common.Mappings;
 

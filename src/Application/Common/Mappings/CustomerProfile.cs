@@ -1,6 +1,6 @@
 using Application.Common.DTOs;
 using AutoMapper;
-using Domain.Customers;
+using Domain.Entities.Customers;
 using CommonDTOs = Application.Common.DTOs;
 
 namespace Application.Common.Mappings;

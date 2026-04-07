@@ -1,5 +1,4 @@
-
-using Domain.Assessments;
+using Domain.Entities.Assessments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

@@ -1,5 +1,5 @@
 ﻿using Application.Common.Data;
-using Domain.Checklists;
+using Domain.Entities.Checklists;
 
 namespace Application.Common.Interfaces.Checklists;
  

@@ -5,7 +5,7 @@ using Application.Common.Interfaces;
 using Application.Common.Interfaces.Checklists;
 using Application.Common.Messaging;
 using AutoMapper;
-using Domain.Checklists;
+using Domain.Entities.Checklists;
 using SharedKernel;
 
 namespace Application.Checklists.GetAll;

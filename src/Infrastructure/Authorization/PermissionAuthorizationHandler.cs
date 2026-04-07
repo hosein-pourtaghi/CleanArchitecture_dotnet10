@@ -4,33 +4,36 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Authorization;
 
-internal sealed class PermissionAuthorizationHandler(IServiceScopeFactory serviceScopeFactory)
-    : AuthorizationHandler<PermissionRequirement>
+internal sealed class PermissionAuthorizationHandler : AuthorizationHandler<PermissionRequirement>
 {
-    protected override async Task HandleRequirementAsync(
+    private readonly PermissionProvider _permissionProvider;
+
+    public PermissionAuthorizationHandler(PermissionProvider permissionProvider)
+    {
+        _permissionProvider = permissionProvider;
+    }
+
+    protected override Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)
     {
-        // TODO: You definitely want to reject unauthenticated users here.
-        if (context.User is { Identity.IsAuthenticated: true })
+        if (context.User == null || !context.User.Identity?.IsAuthenticated == true)
         {
-            // TODO: Remove this call when you implement the PermissionProvider.GetForUserIdAsync
-            context.Succeed(requirement);
-
-            return;
+            return Task.CompletedTask;
         }
 
-        using IServiceScope scope = serviceScopeFactory.CreateScope();
+        if (requirement.Permissions == null || !requirement.Permissions.Any())
+        {
+            // No specific permissions required, allow if authenticated
+            context.Succeed(requirement);
+            return Task.CompletedTask;
+        }
 
-        PermissionProvider permissionProvider = scope.ServiceProvider.GetRequiredService<PermissionProvider>();
-
-        Guid userId = context.User.GetUserId();
-
-        HashSet<string> permissions = await permissionProvider.GetForUserIdAsync(userId);
-
-        if (permissions.Contains(requirement.Permission))
+        if (_permissionProvider.HasAnyPermission(requirement.Permissions))
         {
             context.Succeed(requirement);
         }
+
+        return Task.CompletedTask;
     }
 }
