@@ -1,5 +1,5 @@
 using System.Text;
-using Domain.Users;
+using Domain.Entities.Identities;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
 

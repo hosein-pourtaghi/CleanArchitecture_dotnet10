@@ -21,7 +21,7 @@ public class SessionsController : ControllerBase
     }
 
     [HttpGet("online")]
-    [Authorize(Policy = "Permission:sessions.read")]
+    [Authorize]
     public async Task<IActionResult> GetOnlineUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
         var result = await _sessionService.GetOnlineUsersAsync(page, pageSize);
@@ -44,7 +44,7 @@ public class SessionsController : ControllerBase
     }
 
     [HttpDelete("{sessionId:guid}")]
-    [Authorize(Policy = "Permission:sessions.terminate")]
+    [Authorize]
     public async Task<IActionResult> TerminateSession(Guid sessionId)
     {
         var result = await _sessionService.TerminateSessionAsync(_userContext.UserId, sessionId);
@@ -56,7 +56,7 @@ public class SessionsController : ControllerBase
     }
 
     [HttpDelete("terminate-all")]
-    [Authorize(Policy = "Permission:sessions.terminate")]
+    [Authorize]
     public async Task<IActionResult> TerminateAllSessions([FromQuery] Guid? userId)
     {
         var targetUserId = userId ?? _userContext.UserId;

@@ -1,26 +1,20 @@
-using System.Globalization;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Application.Common.Data;
-using Application.Common.DTOs;
 using Application.Common.DTOs.Identities;
 using Application.Common.Interfaces;
 using Domain.Entities.Identities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using SharedKernel;
 
 namespace Infrastructure.Services.Identities;
 
 
- 
+
 
 public class AuthService : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly ITokenService _tokenService;
     private readonly ISessionService _sessionService;
@@ -29,18 +23,123 @@ public class AuthService : IAuthService
 
     public AuthService(
         UserManager<ApplicationUser> userManager,
+        RoleManager<ApplicationRole> roleManager,
         SignInManager<ApplicationUser> signInManager,
         ITokenService tokenService,
         ISessionService sessionService,
         IRolePermissionService rolePermissionService,
-        IApplicationDbContext context)
+        IApplicationDbContext context
+        )
     {
         _userManager = userManager;
+        _roleManager = roleManager;
         _signInManager = signInManager;
         _tokenService = tokenService;
         _sessionService = sessionService;
         _rolePermissionService = rolePermissionService;
         _context = context;
+    }
+
+
+    public async Task<Result<LoginResponse>> RegisterAsync(RegisterRequest request, string ipAddress, string? userAgent)
+    {
+        // Validate password match
+        if (request.Password != request.ConfirmPassword)
+            return Result.Failure<LoginResponse>("Passwords do not match");
+
+        // Check if email exists
+        var existingUser = await _userManager.FindByEmailAsync(request.Email);
+        if (existingUser != null)
+            return Result.Failure<LoginResponse>("Email is already registered");
+
+        // Create new user
+        var user = new ApplicationUser
+        {
+            Email = request.Email,
+            UserName = request.Email,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            IsActive = true,
+            TokenVersion = 1,
+            RefreshTokenVersion = 1,
+            AllowMultipleSessions = true,
+            MaxConcurrentSessions = 5
+        };
+
+        var result = await _userManager.CreateAsync(user, request.Password);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            return Result.Failure<LoginResponse>($"Failed to create user: {errors}");
+        }
+
+        // Assign default role (User)
+        var defaultRole = await _roleManager.FindByNameAsync("User");
+        if (defaultRole != null)
+        {
+            await _userManager.AddToRoleAsync(user, "User");
+        }
+
+        // Get user roles and permissions
+        var rolesResult = await _rolePermissionService.GetUserRolesAsync(user.Id);
+        var permissionsResult = await _rolePermissionService.GetUserPermissionsAsync(user.Id);
+
+        var roles = rolesResult.IsSuccess ? rolesResult.Value.Select(r => r.Name).ToList() : new List<string>();
+        var permissions = permissionsResult.IsSuccess ? permissionsResult.Value.Select(p => p.Name).ToList() : new List<string>();
+
+        // Generate tokens
+        var tokens = _tokenService.GenerateTokens(
+            user.Id,
+            user.TokenVersion,
+            user.RefreshTokenVersion,
+            permissions,
+            roles
+        );
+
+        // Create session
+        var session = new UserSession
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            TokenVersion = tokens.TokenVersion.ToString(),
+            RefreshTokenVersion = tokens.RefreshTokenVersion.ToString(),
+            DeviceInfo = "Registration",
+            IpAddress = ipAddress,
+            UserAgent = userAgent,
+            LoginTime = DateTime.UtcNow,
+            LastActivityTime = DateTime.UtcNow,
+            ExpiresAt = tokens.RefreshTokenExpiresAt,
+            IsActive = true
+        };
+
+        _context.UserSessions.Add(session);
+
+        user.LastLoginAt = DateTime.UtcNow;
+        user.LastActivityAt = DateTime.UtcNow;
+        user.IsOnline = true;
+
+        await _context.SaveChangesAsync();
+
+        var userDto = new UserDto(
+            user.Id,
+            user.Email!,
+            user.FirstName,
+            user.LastName,
+            user.DisplayName,
+            user.IsOnline,
+            user.LastLoginAt,
+            roles,
+            permissions
+        );
+
+        return Result.Success(new LoginResponse(
+            tokens.AccessToken,
+            tokens.RefreshToken,
+            tokens.ExpiresAt,
+            tokens.RefreshTokenExpiresAt,
+            userDto
+        ));
     }
 
     public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, string ipAddress, string? userAgent)

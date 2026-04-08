@@ -29,6 +29,12 @@ internal sealed class PermissionAuthorizationHandler : AuthorizationHandler<Perm
             return Task.CompletedTask;
         }
 
+        // Uses PermissionProvider.GetPermissions() - queries from DB with cache
+        if (_permissionProvider.HasAnyPermission(requirement.Permissions))
+        {
+            context.Succeed(requirement);
+        }
+
         if (_permissionProvider.HasAnyPermission(requirement.Permissions))
         {
             context.Succeed(requirement);

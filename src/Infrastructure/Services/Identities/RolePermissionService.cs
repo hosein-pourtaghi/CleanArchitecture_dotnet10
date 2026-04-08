@@ -2,6 +2,7 @@
 using Application.Common.DTOs.Identities;
 using Application.Common.Interfaces;
 using Domain.Entities.Identities;
+using Infrastructure.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
@@ -15,13 +16,15 @@ public class RolePermissionService : IRolePermissionService
 {
     private readonly IApplicationDbContext _context;
     private readonly RoleManager<ApplicationRole> _roleManager;
-
+    private readonly PermissionProvider _permissionProvider;
     public RolePermissionService(
         IApplicationDbContext context,
-        RoleManager<ApplicationRole> roleManager)
+        RoleManager<ApplicationRole> roleManager,
+        PermissionProvider permissionProvider)
     {
         _context = context;
         _roleManager = roleManager;
+        _permissionProvider = permissionProvider;
     }
 
     #region Permissions
@@ -332,6 +335,17 @@ public class RolePermissionService : IRolePermissionService
             }
         }
 
+        // Clear cache for all users with this role
+        var userIds = await _context.UserRoles
+            .Where(ur => ur.RoleId == roleId)
+            .Select(ur => ur.UserId)
+            .ToListAsync();
+
+        foreach (var uid in userIds)
+        {
+            _permissionProvider.ClearCache(uid);
+        }
+
         await _context.SaveChangesAsync();
         return Result.Success();
     }
@@ -385,6 +399,17 @@ public class RolePermissionService : IRolePermissionService
             _context.RolePermissions.Add(rolePermission);
         }
 
+        // Clear cache for all users with this role
+        var userIds = await _context.UserRoles
+       .Where(ur => ur.RoleId == roleId)
+       .Select(ur => ur.UserId)
+       .ToListAsync();
+
+        foreach (var uid in userIds)
+        {
+            _permissionProvider.ClearCache(uid);
+        }
+
         await _context.SaveChangesAsync();
         return Result.Success();
     }
@@ -417,8 +442,10 @@ public class RolePermissionService : IRolePermissionService
         };
 
         _context.UserRoles.Add(userRole);
-        await _context.SaveChangesAsync();
 
+        _permissionProvider.ClearCache(userId);
+
+        await _context.SaveChangesAsync();
         return Result.Success();
     }
 
@@ -431,8 +458,10 @@ public class RolePermissionService : IRolePermissionService
             return Result.Failure("User does not have this role");
 
         _context.UserRoles.Remove(userRole);
-        await _context.SaveChangesAsync();
 
+        _permissionProvider.ClearCache(userId);
+
+        await _context.SaveChangesAsync();
         return Result.Success();
     }
 
@@ -444,9 +473,8 @@ public class RolePermissionService : IRolePermissionService
 
         var roles = await _context.UserRoles
             .Where(ur => ur.UserId == userId)
+            .Include(r => r.Role.RolePermissions).ThenInclude(rp => rp.Permission)
             .Select(ur => ur.Role)
-            .Include(r => r.RolePermissions)
-                .ThenInclude(rp => rp.Permission)
             .ToListAsync();
 
         var result = roles.Select(r => new RoleDto(

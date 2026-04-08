@@ -1,29 +1,37 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Application.Common.Data;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Infrastructure.Authorization;
 
-public class PermissionProvider
+public class PermissionProvider(IApplicationDbContext _context, IMemoryCache _cache, IHttpContextAccessor _accessor)
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public PermissionProvider(HttpContextAccessor httpContextAccessor)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
+    private const string CacheKeyPrefix = "UserPermissions_";
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(15);
+
 
     public IEnumerable<string> GetPermissions()
     {
-        var context = _httpContextAccessor.HttpContext;
-        if (context?.User == null)
+        var userId = GetUserId();
+        if (userId == Guid.Empty)
             return Enumerable.Empty<string>();
 
-        // Get permissions from claims
-        return context.User
-            .FindAll("permission")
-            .Select(c => c.Value)
-            .Distinct();
+        var cacheKey = $"{CacheKeyPrefix}{userId}";
+
+        // Query from database based on user's roles
+        return _cache.GetOrCreate(cacheKey, entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = CacheDuration;
+
+            return _context.UserRoles
+                .Where(ur => ur.UserId == userId)
+                .SelectMany(ur => ur.Role.RolePermissions)
+                .Select(rp => rp.Permission.Name)
+                .Distinct()
+                .ToList();
+        }) ?? new List<string>();
     }
 
     public bool HasPermission(string permission)
@@ -42,6 +50,36 @@ public class PermissionProvider
         var userPermissions = GetPermissions();
         return permissions.All(p => userPermissions.Contains(p));
     }
+
+    private Guid GetUserId()
+    {
+        var userIdClaim = _accessor.HttpContext?.User
+            .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        return Guid.TryParse(userIdClaim, out var id) ? id : Guid.Empty;
+    }
+
+    public void ClearCache(Guid userId)
+    {
+        _cache.Remove($"{CacheKeyPrefix}{userId}");
+    }
+
+
+    #region Get Permissions from token not DB
+    //public IEnumerable<string> GetPermissions()
+    //{
+    //    var context = _httpContextAccessor().HttpContext;
+    //    if (context?.User == null)
+    //        return Enumerable.Empty<string>();
+
+    //    // Get permissions from claims
+    //    return context.User
+    //        .FindAll("permission")
+    //        .Select(c => c.Value)
+    //        .Distinct();
+    //} 
+    #endregion
+
 }
- 
+
 

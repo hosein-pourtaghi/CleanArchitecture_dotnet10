@@ -56,5 +56,8 @@ public class ApplicationUserRole : IdentityUserRole<Guid>
 // Required Identity types
 public class ApplicationUserClaim : IdentityUserClaim<Guid> { }
 public class ApplicationUserLogin : IdentityUserLogin<Guid> { }
+/// <summary>
+/// this project uses <ref="RolePermission"> instead of this 
+/// </summary>
 public class ApplicationRoleClaim : IdentityRoleClaim<Guid> { }
 public class ApplicationUserToken : IdentityUserToken<Guid> { }

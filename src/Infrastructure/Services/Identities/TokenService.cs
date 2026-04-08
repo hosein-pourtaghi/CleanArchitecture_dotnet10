@@ -76,11 +76,13 @@ public class TokenService : ITokenService
             new("type", "access")
         };
 
-        // Add permissions
-        foreach (var permission in permissions.Distinct())
-        {
-            claims.Add(new Claim("permission", permission));
-        }
+        #region Add Permissions to token
+        //// Add permissions
+        //foreach (var permission in permissions.Distinct())
+        //{
+        //    claims.Add(new Claim("permission", permission));
+        //}
+        #endregion
 
         // Add roles
         foreach (var role in roles.Distinct())
@@ -162,7 +164,7 @@ public class TokenService : ITokenService
             if (type != "access")
                 return (null, null, null);
 
-            var userIdClaim = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var tokenId = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
             var tokenVersionClaim = principal.FindFirst("token_version")?.Value;
 
@@ -219,23 +221,13 @@ public class TokenService : ITokenService
             return (null, null, null);
         }
     }
-
+     
     public async Task<Result> InvalidateTokenAsync(string tokenId, Guid? userId, string? reason = null)
     {
         try
         {
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(handler.WriteToken(
-                new JwtSecurityTokenHandler().ReadToken(
-                    // We need to decode to get expiration
-                    handler.ReadToken(
-                        // This is a workaround - in production, store token expiration separately
-                        "" // Not used for blacklist
-                    )
-                )
-            ));
-
-            // For simplicity, we'll use a default expiration
+            // Simply blacklist the token by its ID (JTI)
+            // Store for 1 day or until the token naturally expires, whichever is longer
             var blacklistEntry = new TokenBlacklist
             {
                 Id = Guid.NewGuid(),

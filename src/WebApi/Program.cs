@@ -2,6 +2,7 @@
 using Domain.Entities.Identities;
 using HealthChecks.UI.Client;
 using Infrastructure;
+using Infrastructure.Authorization;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
@@ -97,6 +98,8 @@ builder.Services
     .AddPresentation()
     .AddInfrastructure(builder.Configuration);
 
+builder.Services.AddScoped<IPolicyDiscoveryService, PolicyDiscoveryService>();
+
 WebApplication app; 
 try
 {
@@ -110,6 +113,18 @@ catch (Exception e)
 }
 
 
+// Discover and register policies on startup
+using (var scope = app.Services.CreateScope())
+{
+    var policyService = scope.ServiceProvider.GetRequiredService<IPolicyDiscoveryService>();
+    var result = await policyService.DiscoverAndRegisterPoliciesAsync();
+
+    if (result.IsSuccess && result.Value > 0)
+    {
+        Console.WriteLine($"Registered {result.Value} authorization policies");
+    }
+}
+
 // just for test
 //app.Use(async (context, next) => 
 //{
@@ -121,9 +136,10 @@ catch (Exception e)
 //    }
 //    await next();
 //});
+
+
 // Use CORS (cart matters - should be before MapControllers)
 app.UseCors("AllowAngularApp");
-
 
 app.MapHealthChecks("health", new HealthCheckOptions
 {
@@ -138,6 +154,7 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
+
 app.UseMiddleware<OpenTelemetryLoggingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseRequestContextLogging();
@@ -145,6 +162,9 @@ app.UseExceptionHandler();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+// Add our custom middleware AFTER authentication but BEFORE controllers
+app.UseTokenValidation();
+
 app.MapControllers();
 
 try

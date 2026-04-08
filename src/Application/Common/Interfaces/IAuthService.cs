@@ -7,6 +7,7 @@ namespace Application.Common.Interfaces;
 
 public interface IAuthService
 {
+    Task<Result<LoginResponse>> RegisterAsync(RegisterRequest request, string ipAddress, string? userAgent);
     Task<Result<LoginResponse>> LoginAsync(LoginRequest request, string ipAddress, string? userAgent);
     Task<Result<LoginResponse>> RefreshTokenAsync(RefreshTokenRequest request);
     Task<Result> LogoutAsync(Guid userId, LogoutRequest request, string? tokenId);

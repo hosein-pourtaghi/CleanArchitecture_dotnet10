@@ -10,7 +10,6 @@ using Infrastructure.Authentication;
 using Infrastructure.Authorization;
 using Infrastructure.DomainEvents;
 using Infrastructure.Persistence;
-using Infrastructure.Persistence.Interceptors;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.Core;
 using Infrastructure.Services;
@@ -22,8 +21,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -44,6 +41,9 @@ public static class DependencyInjection
 
     private static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddHttpContextAccessor();
+        services.AddMemoryCache();
+
         services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
@@ -61,16 +61,7 @@ public static class DependencyInjection
         services.AddScoped<IChecklistRepository, ChecklistRepository>();
 
         services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
-        // Auth & Token Services
-        services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<ISessionService, SessionService>();
-        services.AddScoped<IRolePermissionService, RolePermissionService>();
 
-        // Authorization
-        services.AddSingleton<PermissionProvider>();
-        services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
-        services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 
         return services;
     }
@@ -156,13 +147,11 @@ public static class DependencyInjection
                 o.RequireHttpsMetadata = false;
                 o.SaveToken = true;
                 o.TokenValidationParameters = new TokenValidationParameters
-                {
-
+                { 
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-
 
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
                     ValidIssuer = configuration["Jwt:Issuer"],
@@ -174,8 +163,53 @@ public static class DependencyInjection
 
                 o.Events = new JwtBearerEvents
                 {
+                    #region Validate token on every request if Custom middleware not Enabled
+                    //OnTokenValidated = async context =>
+                    //{
+                    //    var services = context.HttpContext.RequestServices;
+
+                    //    // 1. Check if token is blacklisted
+                    //    var tokenId = context.Principal?.FindFirst("jti")?.Value;
+                    //    if (!string.IsNullOrEmpty(tokenId))
+                    //    {
+                    //        using var scope = services.CreateScope();
+                    //        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                    //        var isBlacklisted = await dbContext.TokenBlacklist
+                    //            .AnyAsync(t => t.TokenId == tokenId && t.ExpiresAt > DateTime.UtcNow);
+
+                    //        if (isBlacklisted)
+                    //        {
+                    //            context.Fail("Token has been revoked");
+                    //            return;
+                    //        }
+                    //    }
+
+                    //    // 2. Check token version
+                    //    var userIdClaim = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    //    var tokenVersionClaim = context.Principal?.FindFirst("token_version")?.Value;
+
+                    //    if (!string.IsNullOrEmpty(userIdClaim) && !string.IsNullOrEmpty(tokenVersionClaim))
+                    //    {
+                    //        using var scope = services.CreateScope();
+                    //        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                    //        var user = await dbContext.Users.FindAsync(Guid.Parse(userIdClaim));
+                    //        if (user != null && user.TokenVersion != int.Parse(tokenVersionClaim))
+                    //        {
+                    //            context.Fail("Token has been revoked");
+                    //            return;
+                    //        }
+                    //    }
+                    //},
+                    #endregion
+
                     OnAuthenticationFailed = ctx =>
                     {
+                        if (ctx.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                        {
+                            ctx.Response.Headers.Add("Token-Expired", "true");
+                        }
                         Console.WriteLine("JWT FAILED:");
                         Console.WriteLine(ctx.Exception.ToString());
                         Log.Error("JWT FAILED:");
@@ -191,7 +225,6 @@ public static class DependencyInjection
                 };
             });
 
-        services.AddHttpContextAccessor();
         services.AddScoped<IUserContext, UserContext>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<ITokenProvider, TokenProvider>();
@@ -203,22 +236,28 @@ public static class DependencyInjection
     {
         //PolicyServiceCollectionExtensions.AddAuthorization(services);
 
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy("Permission:users.read", policy =>
-                policy.Requirements.Add(new PermissionRequirement("users.read")));
+        //services.AddAuthorization(options =>
+        //{
+        //    options.AddPolicy("Permission:users.read", policy =>
+        //        policy.Requirements.Add(new PermissionRequirement("users.read")));
 
-            options.AddPolicy("Permission:users.create", policy =>
-                policy.Requirements.Add(new PermissionRequirement("users.create")));
+        //    options.AddPolicy("Permission:users.create", policy =>
+        //        policy.Requirements.Add(new PermissionRequirement("users.create")));
 
-            // Add more policies as needed
-        });
+        //    // Add more policies as needed
+        //});
 
+
+        // Auth & Token Services
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ISessionService, SessionService>();
+        services.AddScoped<IRolePermissionService, RolePermissionService>();
+
+        // Authorization
         services.AddScoped<PermissionProvider>();
-
-        services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
-
-        services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+        services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 
         return services;
     }

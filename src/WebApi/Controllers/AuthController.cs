@@ -17,9 +17,24 @@ namespace WebApi.Controllers;
 [ApiController]
 [Route("api/[controller]/[action]")] 
 public class AuthController(IAuthService _authService, IUserContext _userContext, ILogger<AuthController> _logger) : ControllerBase
-{ 
+{
 
-    [HttpPost("login")]
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    {
+        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var userAgent = Request.Headers.UserAgent.ToString();
+
+        var result = await _authService.RegisterAsync(request, ipAddress, userAgent);
+
+        if (result.IsFailure)
+            return BadRequest(new { error = result.Error });
+
+        return CreatedAtAction(nameof(Login), new { email = request.Email }, result.Value);
+    }
+
+    [HttpPost]
     [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
@@ -34,7 +49,7 @@ public class AuthController(IAuthService _authService, IUserContext _userContext
         return Ok(result.Value);
     }
 
-    [HttpPost("refresh")]
+    [HttpPost]
     [AllowAnonymous]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
     {
@@ -46,7 +61,7 @@ public class AuthController(IAuthService _authService, IUserContext _userContext
         return Ok(result.Value);
     }
 
-    [HttpPost("logout")]
+    [HttpPost]
     [Authorize]
     public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
     {
@@ -59,7 +74,7 @@ public class AuthController(IAuthService _authService, IUserContext _userContext
         return Ok(new { message = "Logged out successfully" });
     }
 
-    [HttpPost("validate")]
+    [HttpPost]
     [AllowAnonymous]
     public async Task<IActionResult> ValidateToken([FromBody] string token)
     {

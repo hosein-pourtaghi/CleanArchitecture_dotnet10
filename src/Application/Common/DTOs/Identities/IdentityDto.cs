@@ -1,5 +1,14 @@
 ﻿namespace Application.Common.DTOs.Identities;
 
+ 
+public record RegisterRequest(
+    string Email,
+    string Password,
+    string ConfirmPassword,
+    string? FirstName,
+    string? LastName
+);
+
 public record LoginRequest(string Email, string Password, string? DeviceInfo = null);
 
 public record LoginResponse(
