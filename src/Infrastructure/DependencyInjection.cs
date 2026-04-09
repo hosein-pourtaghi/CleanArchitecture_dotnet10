@@ -1,5 +1,4 @@
-﻿using System;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text;
 using Application.Common.Authentication;
 using Application.Common.Data;
@@ -16,12 +15,12 @@ using Infrastructure.Services;
 using Infrastructure.Services.Identities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
@@ -147,18 +146,17 @@ public static class DependencyInjection
                 o.RequireHttpsMetadata = false;
                 o.SaveToken = true;
                 o.TokenValidationParameters = new TokenValidationParameters
-                { 
+                {
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
                     ValidIssuer = configuration["Jwt:Issuer"],
                     ValidAudience = configuration["Jwt:Audience"],
                     ClockSkew = TimeSpan.Zero,
-                    RoleClaimType = ClaimTypes.Role,
-                    NameClaimType = JwtRegisteredClaimNames.Sub
+                    NameClaimType = ClaimTypes.NameIdentifier,
+                    RoleClaimType = ClaimTypes.Role
                 };
 
                 o.Events = new JwtBearerEvents
@@ -234,20 +232,20 @@ public static class DependencyInjection
 
     private static IServiceCollection AddAuthorization(this IServiceCollection services)
     {
-        //PolicyServiceCollectionExtensions.AddAuthorization(services);
+        // ====================
+        // Authorization
+        // ====================
+        services.AddAuthorization(options =>
+        {
+            // ✅ ADD THIS - Makes [Authorize] check permissions
+            options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .AddRequirements(new PermissionRequirement("__default__"))
+                .Build();
 
-        //services.AddAuthorization(options =>
-        //{
-        //    options.AddPolicy("Permission:users.read", policy =>
-        //        policy.Requirements.Add(new PermissionRequirement("users.read")));
-
-        //    options.AddPolicy("Permission:users.create", policy =>
-        //        policy.Requirements.Add(new PermissionRequirement("users.create")));
-
-        //    // Add more policies as needed
-        //});
-
-
+            // Your existing policies (auto-discovered)
+            // These are added by PolicyDiscoveryService on startup
+        });
         // Auth & Token Services
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IAuthService, AuthService>();
@@ -255,9 +253,15 @@ public static class DependencyInjection
         services.AddScoped<IRolePermissionService, RolePermissionService>();
 
         // Authorization
+
         services.AddScoped<PermissionProvider>();
+        // Evaluates authorization logic
         services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        // Provides / creates policies dynamically
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+
+        // Policy discovery service
+        //services.AddScoped<IPolicyDiscoveryService, PolicyDiscoveryService>();
 
         return services;
     }

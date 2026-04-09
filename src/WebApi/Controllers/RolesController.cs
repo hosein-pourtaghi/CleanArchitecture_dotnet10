@@ -20,7 +20,7 @@ public class RolesController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Policy = "Permission:roles.read")]
+    [Authorize]
     public async Task<IActionResult> GetAll()
     {
         var result = await _rolePermissionService.GetAllRolesAsync();
@@ -32,7 +32,7 @@ public class RolesController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    [Authorize(Policy = "Permission:roles.read")]
+    [Authorize]
     public async Task<IActionResult> GetById(Guid id)
     {
         var result = await _rolePermissionService.GetRoleByIdAsync(id);
@@ -44,7 +44,7 @@ public class RolesController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Policy = "Permission:roles.create")]
+    [Authorize]
     public async Task<IActionResult> Create([FromBody] CreateRoleRequest request)
     {
         var result = await _rolePermissionService.CreateRoleAsync(request);
@@ -56,7 +56,7 @@ public class RolesController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize(Policy = "Permission:roles.update")]
+    [Authorize]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateRoleRequest request)
     {
         var result = await _rolePermissionService.UpdateRoleAsync(id, request);
@@ -68,7 +68,7 @@ public class RolesController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Policy = "Permission:roles.delete")]
+    [Authorize]
     public async Task<IActionResult> Delete(Guid id)
     {
         var result = await _rolePermissionService.DeleteRoleAsync(id);
@@ -80,7 +80,7 @@ public class RolesController : ControllerBase
     }
 
     [HttpPut("{id:guid}/permissions")]
-    [Authorize(Policy = "Permission:permissions.manage")]
+    [Authorize]
     public async Task<IActionResult> SetPermissions(Guid id, [FromBody] List<Guid> permissionIds)
     {
         var result = await _rolePermissionService.SetRolePermissionsAsync(id, permissionIds);

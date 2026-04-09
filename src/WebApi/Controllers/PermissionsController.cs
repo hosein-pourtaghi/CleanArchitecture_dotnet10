@@ -7,7 +7,7 @@ namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+//[Authorize]
 public class PermissionsController : ControllerBase
 {
     private readonly IRolePermissionService _rolePermissionService;
@@ -18,7 +18,6 @@ public class PermissionsController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
     public async Task<IActionResult> GetAll()
     {
         var result = await _rolePermissionService.GetAllPermissionsAsync();
@@ -30,7 +29,6 @@ public class PermissionsController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    [Authorize]
     public async Task<IActionResult> GetById(Guid id)
     {
         var result = await _rolePermissionService.GetPermissionByIdAsync(id);
@@ -41,34 +39,31 @@ public class PermissionsController : ControllerBase
         return Ok(result.Value);
     }
 
-    [HttpPost]
-    [Authorize]
-    public async Task<IActionResult> Create([FromBody] CreatePermissionRequest request)
-    {
-        var result = await _rolePermissionService.CreatePermissionAsync(
-            request.Name, request.Description, request.Category);
+    //[HttpPost]
+    //public async Task<IActionResult> Create([FromBody] CreatePermissionRequest request)
+    //{
+    //    var result = await _rolePermissionService.CreatePermissionAsync(
+    //        request.Name, request.Description, request.Category);
 
-        if (result.IsFailure)
-            return BadRequest(new { error = result.Error });
+    //    if (result.IsFailure)
+    //        return BadRequest(new { error = result.Error });
 
-        return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
-    }
+    //    return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
+    //}
 
-    [HttpPut("{id:guid}")]
-    [Authorize]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePermissionRequest request)
-    {
-        var result = await _rolePermissionService.UpdatePermissionAsync(
-            id, request.Name, request.Description, request.Category);
+    //[HttpPut("{id:guid}")]
+    //public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePermissionRequest request)
+    //{
+    //    var result = await _rolePermissionService.UpdatePermissionAsync(
+    //        id, request.Name, request.Description, request.Category);
 
-        if (result.IsFailure)
-            return BadRequest(new { error = result.Error });
+    //    if (result.IsFailure)
+    //        return BadRequest(new { error = result.Error });
 
-        return Ok(result.Value);
-    }
+    //    return Ok(result.Value);
+    //}
 
     [HttpDelete("{id:guid}")]
-    [Authorize]
     public async Task<IActionResult> Delete(Guid id)
     {
         var result = await _rolePermissionService.DeletePermissionAsync(id);
@@ -80,6 +75,6 @@ public class PermissionsController : ControllerBase
     }
 }
 
-// DTOs for Permissions Controller
-public record CreatePermissionRequest(string Name, string Description, string Category);
-public record UpdatePermissionRequest(string Name, string Description, string Category);
+//// DTOs for Permissions Controller
+//public record CreatePermissionRequest(string Name, string Description, string Category);
+//public record UpdatePermissionRequest(string Name, string Description, string Category);

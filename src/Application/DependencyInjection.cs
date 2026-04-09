@@ -9,8 +9,8 @@ namespace Application;
 public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
-    {
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+    { 
+    services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
         // Register MediatR with all handlers from this assembly
         services.AddMediatR(config =>

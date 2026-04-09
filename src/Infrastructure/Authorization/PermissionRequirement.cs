@@ -8,6 +8,6 @@ public sealed class PermissionRequirement : IAuthorizationRequirement
 
     public PermissionRequirement(params string[] permissions)
     {
-        Permissions = permissions;
+        Permissions = permissions ?? Array.Empty<string>();
     }
 }

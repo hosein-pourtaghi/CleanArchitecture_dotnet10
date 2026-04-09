@@ -1,17 +1,24 @@
 ﻿using Application;
-using Domain.Entities.Identities;
 using HealthChecks.UI.Client;
 using Infrastructure;
 using Infrastructure.Authorization;
-using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Identity;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Serilog;
 using WebApi;
 using WebApi.Extensions;
 using WebApi.Middleware;
+
+
+
+
+
+
+
+
+
+
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -93,17 +100,19 @@ builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configu
 
 //builder.Services.AddEndpointsApiExplorer();
 
+// add this to infra layer to get all webAPI projects
+builder.Services.AddScoped<IPolicyDiscoveryService, PolicyDiscoveryService>();
+
 builder.Services
     .AddApplication()
     .AddPresentation()
     .AddInfrastructure(builder.Configuration);
 
-builder.Services.AddScoped<IPolicyDiscoveryService, PolicyDiscoveryService>();
 
-WebApplication app; 
+WebApplication app;
 try
 {
-      app = builder.Build();
+    app = builder.Build();
 
 }
 catch (Exception e)
@@ -124,20 +133,7 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine($"Registered {result.Value} authorization policies");
     }
 }
-
-// just for test
-//app.Use(async (context, next) => 
-//{
-//    var authorizationHeader = context.Request.Headers["Authorization"];
-//    if (!string.IsNullOrEmpty(authorizationHeader))
-//    {
-//        // Log the token for debugging purposes
-//        Console.WriteLine("Authorization Header: " + authorizationHeader);
-//    }
-//    await next();
-//});
-
-
+ 
 // Use CORS (cart matters - should be before MapControllers)
 app.UseCors("AllowAngularApp");
 
@@ -186,57 +182,3 @@ namespace WebApi
 {
     public partial class Program;
 }
-
-
-
-
-
-
-
-
-//static async Task SeedDataAsync(ApplicationDbContext context, RoleManager<ApplicationRole> roleManager)
-//{
-//    // Create default roles
-//    var roles = new[]
-//    {
-//        ("Admin", "System Administrator", 1, true),
-//        ("User", "Regular User", 2, false),
-//        ("Manager", "Manager Role", 3, false)
-//    };
-
-//    foreach (var (name, description, priority, isSystem) in roles)
-//    {
-//        if (!await roleManager.RoleExistsAsync(name))
-//        {
-//            var role = new ApplicationRole(name)
-//            {
-//                Description = description,
-//                Priority = priority,
-//                IsSystemRole = isSystem
-//            };
-//            await roleManager.CreateAsync(role);
-//        }
-//    }
-
-//    // Assign all permissions to Admin role
-//    var adminRole = await roleManager.FindByNameAsync("Admin");
-//    if (adminRole != null)
-//    {
-//        var allPermissions = await context.Permissions.ToListAsync();
-//        foreach (var permission in allPermissions)
-//        {
-//            var exists = await context.RolePermissions
-//                .AnyAsync(rp => rp.RoleId == adminRole.Id && rp.PermissionId == permission.Id);
-
-//            if (!exists)
-//            {
-//                context.RolePermissions.Add(new RolePermission
-//                {
-//                    RoleId = adminRole.Id,
-//                    PermissionId = permission.Id
-//                });
-//            }
-//        }
-//        await context.SaveChangesAsync();
-//    }
-//}

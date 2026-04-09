@@ -10,10 +10,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SharedKernel;
-//using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
 namespace Infrastructure.Services.Identities;
-
 
 public class TokenService : ITokenService
 {
@@ -68,13 +66,25 @@ public class TokenService : ITokenService
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>
-        {
+        { 
+            // Standard .NET claims
+            new(ClaimTypes.NameIdentifier, userId.ToString()),
+            new(ClaimTypes.Email, string.Empty),
+            // JWT-specific claims
             new(JwtRegisteredClaimNames.Sub, userId.ToString()),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Iat, new DateTimeOffset(now).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+            // Custom claims
             new("token_version", tokenVersion.ToString()),
             new("type", "access")
         };
+
+        #region Add Roles to token
+        foreach (var role in roles.Distinct())
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+        #endregion
 
         #region Add Permissions to token
         //// Add permissions
@@ -84,20 +94,28 @@ public class TokenService : ITokenService
         //}
         #endregion
 
-        // Add roles
-        foreach (var role in roles.Distinct())
-        {
-            claims.Add(new Claim(ClaimTypes.Role, role));
-        }
-
+        // ✅ CORRECT: Create header separately
+        var header = new JwtHeader(creds);
+        header["kid"] = _configuration["Jwt:Key"]!;  // Add kid to header
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
-            claims: claims,
-            notBefore: now,
-            expires: expires,
-            signingCredentials: creds
+            header,  // Pass header as first parameter
+            new JwtPayload(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                notBefore: now,
+                expires: expires,
+                issuedAt: now
+            )
         );
+        //var token = new JwtSecurityToken(
+        //    issuer: _configuration["Jwt:Issuer"],
+        //    audience: _configuration["Jwt:Audience"],
+        //    claims: claims,
+        //    notBefore: now,
+        //    expires: expires,
+        //    signingCredentials: creds       
+        //);
 
         return (new JwtSecurityTokenHandler().WriteToken(token), token.Id);
     }
@@ -118,20 +136,39 @@ public class TokenService : ITokenService
 
         var claims = new List<Claim>
         {
+            // Standard .NET claims
+            new(ClaimTypes.NameIdentifier, userId.ToString()),
+            new(ClaimTypes.Email, string.Empty),
+            // JWT-specific claims
             new(JwtRegisteredClaimNames.Sub, userId.ToString()),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Iat, new DateTimeOffset(now).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+            // Custom claims
             new("token_version", refreshTokenVersion.ToString()),
             new("type", "refresh")
         };
-
+        // ✅ CORRECT: Create header separately
+        var header = new JwtHeader(creds);
+        header["kid"] = _configuration["Jwt:Key"]!;  // Add kid to header
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
-            claims: claims,
-            notBefore: now,
-            expires: expires,
-            signingCredentials: creds
+            header,  // Pass header as first parameter
+            new JwtPayload(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                notBefore: now,
+                expires: expires,
+                issuedAt: now
+            )
         );
+        //var token = new JwtSecurityToken(
+        //    issuer: _configuration["Jwt:Issuer"],
+        //    audience: _configuration["Jwt:Audience"],
+        //    claims: claims,
+        //    notBefore: now,
+        //    expires: expires,
+        //    signingCredentials: creds
+        //);
 
         return (new JwtSecurityTokenHandler().WriteToken(token), token.Id);
     }
@@ -141,18 +178,18 @@ public class TokenService : ITokenService
         try
         {
             var handler = new JwtSecurityTokenHandler();
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
-
             var validationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = key,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!)),
                 ValidIssuer = _configuration["Jwt:Issuer"],
                 ValidAudience = _configuration["Jwt:Audience"],
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.Zero,
+                NameClaimType = ClaimTypes.NameIdentifier,
+                RoleClaimType = ClaimTypes.Role
             };
 
             var principal = handler.ValidateToken(token, validationParameters, out var validatedToken);
@@ -184,18 +221,18 @@ public class TokenService : ITokenService
         try
         {
             var handler = new JwtSecurityTokenHandler();
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
-
             var validationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = key,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!)),
                 ValidIssuer = _configuration["Jwt:Issuer"],
                 ValidAudience = _configuration["Jwt:Audience"],
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.Zero,
+                NameClaimType = ClaimTypes.NameIdentifier,
+                RoleClaimType = ClaimTypes.Role
             };
 
             var principal = handler.ValidateToken(refreshToken, validationParameters, out var validatedToken);
@@ -206,8 +243,8 @@ public class TokenService : ITokenService
             var type = jwtToken.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
             if (type != "refresh")
                 return (null, null, null);
-
-            var userIdClaim = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+             
+            var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var tokenId = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
             var tokenVersionClaim = principal.FindFirst("token_version")?.Value;
 
@@ -221,7 +258,7 @@ public class TokenService : ITokenService
             return (null, null, null);
         }
     }
-     
+
     public async Task<Result> InvalidateTokenAsync(string tokenId, Guid? userId, string? reason = null)
     {
         try

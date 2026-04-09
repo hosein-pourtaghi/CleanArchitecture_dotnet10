@@ -401,9 +401,9 @@ public class RolePermissionService : IRolePermissionService
 
         // Clear cache for all users with this role
         var userIds = await _context.UserRoles
-       .Where(ur => ur.RoleId == roleId)
-       .Select(ur => ur.UserId)
-       .ToListAsync();
+            .Where(ur => ur.RoleId == roleId)
+            .Select(ur => ur.UserId)
+            .ToListAsync();
 
         foreach (var uid in userIds)
         {

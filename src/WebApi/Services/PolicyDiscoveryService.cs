@@ -1,10 +1,18 @@
-﻿using System.Reflection;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Reflection;
+using Domain.Entities.Identities;
+using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
 namespace Infrastructure.Authorization;
 
+/// <summary>
+/// find policies dynamically 
+/// no need to use [Authorize(policy:"xxx")]
+/// </summary>
 public interface IPolicyDiscoveryService
 {
     Task<Result<int>> DiscoverAndRegisterPoliciesAsync();
@@ -24,13 +32,12 @@ public class DiscoveredPolicy
 public class PolicyDiscoveryService : IPolicyDiscoveryService
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<PolicyDiscoveryService> _logger;
 
-    // Filter by namespace pattern (customize this)
-    private const string ApiNamespacePattern = "API.Controllers";
-
-    public PolicyDiscoveryService(IServiceProvider serviceProvider)
+    public PolicyDiscoveryService(IServiceProvider serviceProvider, ILogger<PolicyDiscoveryService> logger)
     {
         _serviceProvider = serviceProvider;
+        _logger = logger;
     }
 
     public List<DiscoveredPolicy> DiscoverPolicies()
@@ -40,6 +47,9 @@ public class PolicyDiscoveryService : IPolicyDiscoveryService
         var controllerTypes = Assembly.GetEntryAssembly()?.GetTypes()
             .Where(t => typeof(ControllerBase).IsAssignableFrom(t) && !t.IsAbstract)
             .ToList();
+
+        _logger.LogDebug("Found {Count} controllers in namespace",
+            controllerTypes?.Count ?? 0);
 
         if (controllerTypes == null)
             return policies;
@@ -67,28 +77,26 @@ public class PolicyDiscoveryService : IPolicyDiscoveryService
                 // Generate policy name from controller + action
                 var policyName = GeneratePolicyName(controllerName, actionName);
 
-                // Check if already has explicit [Authorize] with policy
-                var hasExplicitPolicy = HasExplicitPolicy(method);
-
-                if (!hasExplicitPolicy)
+                //// Check if already has explicit [Authorize] with policy
+                //var hasExplicitPolicy = HasExplicitPolicy(method);
+                //if (!hasExplicitPolicy)
+                //{
+                policies.Add(new DiscoveredPolicy
                 {
-                    policies.Add(new DiscoveredPolicy
-                    {
-                        PolicyName = policyName,
-                        Description = actionName, // Action name as description
-                        Category = category,
-                        Controller = controllerName,
-                        Action = actionName,
-                        HttpMethod = httpMethod
-                    });
-                }
+                    PolicyName = policyName,
+                    Description = actionName, // GetActionDescription(method, actionName)   // Action name as description
+                    Category = category,
+                    Controller = controllerName,
+                    Action = actionName,
+                    HttpMethod = httpMethod
+                });
+                //}
             }
         }
-
         return policies.DistinctBy(p => p.PolicyName).ToList();
     }
 
-    public Task<Result<int>> DiscoverAndRegisterPoliciesAsync()
+    public async Task<Result<int>> DiscoverAndRegisterPoliciesAsync()
     {
         try
         {
@@ -97,19 +105,42 @@ public class PolicyDiscoveryService : IPolicyDiscoveryService
             using var scope = _serviceProvider.CreateScope();
             var services = scope.ServiceProvider;
 
+            // Get DbContext
+            var context = services.GetRequiredService<ApplicationDbContext>();
+
             // Get AuthorizationOptions
             var authorizationOptions = services.GetRequiredService<Microsoft.Extensions.Options.IOptions<AuthorizationOptions>>();
             var options = authorizationOptions.Value;
 
             var registeredCount = 0;
+            var permissionsSavedCount = 0;
 
             foreach (var policy in discoveredPolicies)
             {
-                var policyKey = $"Permission:{policy.PolicyName}";
+                var policyKey = $"permission:{policy.PolicyName}";
 
-                // Check if policy already exists
+                // ✅ 1. Save permission to database if not exists
+                var existingPermission = await context.Permissions
+                    .FirstOrDefaultAsync(p => p.Name == policy.PolicyName);
+                if (existingPermission == null)
+                {
+                    var newPermission = new Permission
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = policy.PolicyName,
+                        Description = policy.Description,
+                        Category = policy.Category,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    context.Permissions.Add(newPermission);
+                    permissionsSavedCount++;
+                    _logger.LogDebug("Saved permission: {PermissionName}", policy.PolicyName);
+                }
+
+                // ✅ 2. Register policy  
                 if (options.GetPolicy(policyKey) == null)
-                { 
+                {
                     options.AddPolicy(policyKey, builder =>
                     {
                         builder.AddRequirements(new PermissionRequirement(policy.PolicyName));
@@ -118,11 +149,16 @@ public class PolicyDiscoveryService : IPolicyDiscoveryService
                 }
             }
 
-            return Task.FromResult(Result.Success(registeredCount));
+            // ✅ 3. Save all permissions to database
+            await context.SaveChangesAsync();
+
+            _logger.LogInformation("Permissions: {PermissionsSaved} saved, Policies: {PoliciesRegistered} registered",
+                permissionsSavedCount, registeredCount);
+            return Result.Success(registeredCount);
         }
         catch (Exception ex)
         {
-            return Task.FromResult(Result.Failure<int>($"Failed to register policies: {ex.Message}"));
+            return Result.Failure<int>($"Failed to register policies: {ex.Message}");
         }
     }
 
@@ -159,23 +195,23 @@ public class PolicyDiscoveryService : IPolicyDiscoveryService
     {
         // Convert to singular: Users -> user, Orders -> order
         var resource = controller;
-        if (resource.EndsWith("s", StringComparison.OrdinalIgnoreCase) &&
-            !resource.EndsWith("ss", StringComparison.OrdinalIgnoreCase))
-        {
-            resource = resource[..^1];
-        }
+        //if (resource.EndsWith("s", StringComparison.OrdinalIgnoreCase) &&
+        //    !resource.EndsWith("ss", StringComparison.OrdinalIgnoreCase))
+        //{
+        //    resource = resource[..^1];
+        //}
+        return $"{resource.ToLower()}:{action.ToLower()}";
 
         // Map action to permission type
-        var actionType = action.ToLower() switch
-        {
-            var a when a.Contains("get") || a.Contains("list") || a.Contains("getall") || a.Contains("getbyid") => "read",
-            var a when a.Contains("create") || a.Contains("post") || a.Contains("add") => "create",
-            var a when a.Contains("update") || a.Contains("put") || a.Contains("patch") || a.Contains("edit") => "update",
-            var a when a.Contains("delete") || a.Contains("remove") => "delete",
-            _ => "manage"
-        };
-
-        return $"{resource.ToLower()}.{actionType}";
+        //var actionType = action.ToLower() switch
+        //{
+        //    var a when a.Contains("get") || a.Contains("list") || a.Contains("getall") || a.Contains("getbyid") => "read",
+        //    var a when a.Contains("create") || a.Contains("post") || a.Contains("add") => "create",
+        //    var a when a.Contains("update") || a.Contains("put") || a.Contains("patch") || a.Contains("edit") => "update",
+        //    var a when a.Contains("delete") || a.Contains("remove") => "delete",
+        //    _ => "manage"
+        //};
+        //return $"{resource.ToLower()}.{actionType}"; 
     }
 
     private static bool HasExplicitPolicy(MethodInfo method)
@@ -185,15 +221,21 @@ public class PolicyDiscoveryService : IPolicyDiscoveryService
     }
     private static string GetCategoryFromController(string controllerName)
     {
-        return controllerName switch
-        {
-            "Auth" => "Authentication",
-            "Users" => "UserManagement",
-            "Roles" => "RoleManagement",
-            "Permissions" => "PermissionManagement",
-            "Sessions" => "SessionManagement",
-            _ => controllerName + "Management"
-        };
+        return controllerName + "Management";
+        //return controllerName switch
+        //{
+        //    "Auth" => "Authentication",
+        //    "Users" => "UserManagement",
+        //    "Roles" => "RoleManagement",
+        //    "Permissions" => "PermissionManagement",
+        //    "Sessions" => "SessionManagement",
+        //    _ => controllerName + "Management"
+        //};
     }
 
+    //private static string GetActionDescription(MethodInfo method, string actionName)
+    //{
+    //    var displayAttr = method.GetCustomAttribute<DisplayAttribute>();
+    //    return displayAttr?.Name ?? displayAttr?.Description ?? actionName;
+    //}
 }

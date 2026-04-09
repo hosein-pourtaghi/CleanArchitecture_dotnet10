@@ -2,53 +2,71 @@
 using Application.Common.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Authorization;
 
-public class PermissionProvider(IApplicationDbContext _context, IMemoryCache _cache, IHttpContextAccessor _accessor)
+public class PermissionProvider(
+    IApplicationDbContext _context, 
+    IMemoryCache _cache, 
+    IHttpContextAccessor _accessor, 
+    ILogger<PermissionProvider> _logger)
 {
-
     private const string CacheKeyPrefix = "UserPermissions_";
     private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(15);
+    public Guid UserId => GetUserId();
 
-
-    public IEnumerable<string> GetPermissions()
+    public IReadOnlyList<string> GetPermissions()
     {
-        var userId = GetUserId();
-        if (userId == Guid.Empty)
-            return Enumerable.Empty<string>();
+        if (UserId == Guid.Empty)
+        {
+            _logger.LogDebug("UserId is empty, no permissions");
+            return Array.Empty<string>();
+        }
 
-        var cacheKey = $"{CacheKeyPrefix}{userId}";
+        var cacheKey = $"{CacheKeyPrefix}{UserId}";
 
-        // Query from database based on user's roles
-        return _cache.GetOrCreate(cacheKey, entry =>
+        // Query from database based on user's roles 
+        var permissions = _cache.GetOrCreate(cacheKey, entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = CacheDuration;
 
-            return _context.UserRoles
-                .Where(ur => ur.UserId == userId)
+            var perms = _context.UserRoles
+                .Where(ur => ur.UserId == UserId)
                 .SelectMany(ur => ur.Role.RolePermissions)
                 .Select(rp => rp.Permission.Name)
                 .Distinct()
-                .ToList();
-        }) ?? new List<string>();
-    }
+                .ToList()
+                .AsReadOnly();
 
+            _logger.LogDebug("Loaded {Count} permissions for user {UserId}", perms.Count, UserId);
+
+            return perms;
+        });
+
+        return permissions ?? Array.Empty<string>().AsReadOnly();
+
+
+    }
+     
     public bool HasPermission(string permission)
     {
-        return GetPermissions().Contains(permission);
+        var perms = GetPermissions();
+        var result = perms.Contains(permission, StringComparer.OrdinalIgnoreCase);
+        _logger.LogDebug("HasPermission({Permission}): {Result}", permission, result);
+        return result;
     }
 
     public bool HasAnyPermission(params string[] permissions)
     {
         var userPermissions = GetPermissions();
-        return permissions.Any(p => userPermissions.Contains(p));
+        return permissions.Any(p => userPermissions.Contains(p, StringComparer.OrdinalIgnoreCase));
     }
 
     public bool HasAllPermissions(params string[] permissions)
     {
         var userPermissions = GetPermissions();
-        return permissions.All(p => userPermissions.Contains(p));
+        return permissions.All(p => userPermissions.Contains(p, StringComparer.OrdinalIgnoreCase));
     }
 
     private Guid GetUserId()
@@ -63,22 +81,6 @@ public class PermissionProvider(IApplicationDbContext _context, IMemoryCache _ca
     {
         _cache.Remove($"{CacheKeyPrefix}{userId}");
     }
-
-
-    #region Get Permissions from token not DB
-    //public IEnumerable<string> GetPermissions()
-    //{
-    //    var context = _httpContextAccessor().HttpContext;
-    //    if (context?.User == null)
-    //        return Enumerable.Empty<string>();
-
-    //    // Get permissions from claims
-    //    return context.User
-    //        .FindAll("permission")
-    //        .Select(c => c.Value)
-    //        .Distinct();
-    //} 
-    #endregion
 
 }
 
