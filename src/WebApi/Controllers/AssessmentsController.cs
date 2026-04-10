@@ -10,7 +10,8 @@ using MediatR;
 using Application.Common.DTOs;
 
 namespace WebApi.Controllers;
- 
+
+[Area("Checklist")]
 [Route("api/[controller]/[action]")]
 [ApiController]
 [Authorize] 
