@@ -1,17 +1,16 @@
-using System.Text.Json;
-using Application.Common.DTOs;
-using Application.Common.DTOs.Shared;
-using Application.Common.Interfaces.Checklists;
 using Application.Checklists.Create;
 using Application.Checklists.Delete;
 using Application.Checklists.GetAll;
 using Application.Checklists.GetById;
 using Application.Checklists.Update;
+using Application.Common.DTOs;
+using Application.Common.DTOs.Shared;
+using Application.Common.Interfaces.Checklists;
+using Domain.Entities.Checklists;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Utilities;
-using Domain.Entities.Checklists;
 
 namespace WebApi.Controllers;
 
@@ -173,7 +172,7 @@ public class ChecklistsController(IMediator mediator, IChecklistRepository _chec
 
 
 
-     
+
 
 }
 

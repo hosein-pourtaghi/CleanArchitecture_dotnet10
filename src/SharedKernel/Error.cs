@@ -9,7 +9,7 @@ public record Error
         "Null value was provided",
         ErrorType.Failure);
 
-    public static Error None2 => new(string.Empty, string.Empty, ErrorType.Failure);
+    //public static Error None2 => new(string.Empty, string.Empty, ErrorType.Failure);
 
     public Error(string code, string description, ErrorType type = ErrorType.Failure)
     {
