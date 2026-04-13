@@ -27,7 +27,7 @@ internal sealed class CreateChecklistCommandHandler(
         //    phone: checklist.Phone,
         //    address: checklist.Address));
 
-        await repository.AddAsync(checklist);
+        await repository.AddAsync(checklist, cancellationToken);
 
         return checklist.Id;
     }

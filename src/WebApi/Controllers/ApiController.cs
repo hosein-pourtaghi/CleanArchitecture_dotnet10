@@ -1,3 +1,4 @@
+using Application.Common.DTOs.Shared;
 using Microsoft.AspNetCore.Mvc;
 using SharedKernel;
 using WebApi.Extensions;
@@ -13,65 +14,68 @@ public abstract class ApiController : ControllerBase
 {
     /// <summary>
     /// Converts a successful Result into a NoContent (204) response.
-    /// If the result is a failure, returns a Problem response with error details.
     /// </summary>
-    protected IActionResult HandleResult(Result result) =>
-        result.ToActionResult();
+    protected IActionResult HandleResult(Result result) => result.ToActionResult();
 
     /// <summary>
-    /// Converts a successful Result<TValue> into an Ok (200) response with the value.
-    /// If the result is a failure, returns a Problem response with error details.
+    /// Converts a successful Result<TValue> into an Ok (200) response.
     /// </summary>
-    protected IActionResult HandleResult<TValue>(Result<TValue> result) =>
-        result.ToActionResult();
+    protected IActionResult HandleResult<TValue>(Result<TValue> result) => result.ToActionResult();
 
     /// <summary>
     /// Converts a successful Result<TValue> into a custom response.
-    /// If the result is a failure, returns a Problem response with error details.
     /// </summary>
-    /// <param name="result">The result to handle</param>
-    /// <param name="onSuccess">Custom handler for success cases</param>
     protected IActionResult HandleResult<TValue>(
         Result<TValue> result,
-        Func<TValue, IActionResult> onSuccess) =>
-        result.ToActionResult(onSuccess);
+        Func<TValue, IActionResult> onSuccess) => result.ToActionResult(onSuccess);
 
     /// <summary>
     /// Converts a Result to a custom response with success and failure handlers.
-    /// Provides maximum flexibility for non-standard response patterns.
     /// </summary>
     protected IActionResult HandleResult(
         Result result,
-        Func<IActionResult> onSuccess) =>
-        result.ToActionResult(onSuccess);
+        Func<IActionResult> onSuccess) => result.ToActionResult(onSuccess);
 
     /// <summary>
     /// Converts a successful Result<TValue> to Created (201) response.
     /// </summary>
     protected IActionResult HandleCreatedResult<TValue>(
         Result<TValue> result,
-        string? routeName = null,
-        object? routeValues = null) =>
-        result.ToActionResult(value =>
-            routeName is not null
-                ? CreatedAtRoute(routeName, routeValues, value)
-                : Created(string.Empty, value));
+        string routeName,
+        object routeValues) =>
+        result.ToActionResult(value => CreatedAtRoute(routeName, routeValues, value));
 
     /// <summary>
-    /// Converts a successful Result<Guid> to Created (201) response with standard route.
+    /// Converts a successful Result<Guid> to Created (201) with standard get-by-id route.
     /// </summary>
     protected IActionResult HandleCreatedResult<TValue>(
         Result<TValue> result,
         string controllerName,
-        Guid id) =>
-        result.ToActionResult(value =>
-            CreatedAtAction(nameof(GetById), new { id }, value));
+        Func<TValue, Guid> idSelector) =>
+        result.ToActionResult(value => CreatedAtAction(
+            "GetById",
+            new { id = idSelector(value) },
+            value));
 
     /// <summary>
-    /// Dummy method to support nameof() in HandleCreatedResult.
-    /// Override this method signature in derived controllers as needed.
+    /// Handle paginated results with X-Pagination header
     /// </summary>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public virtual IActionResult GetById(Guid id) =>
-        NotFound();
+    protected IActionResult HandlePaginatedResult<TDto>(
+        Result<PaginatedResult<TDto>> result)
+    {
+        var actionResult = result.ToActionResult();
+
+        if (result.IsSuccess && result.Value != null)
+        {
+            Response.Headers.Append("X-Pagination", System.Text.Json.JsonSerializer.Serialize(new
+            {
+                result.Value.TotalCount,
+                result.Value.Page,
+                result.Value.PageSize
+            }));
+        }
+
+        return actionResult;
+    }
 }
+
