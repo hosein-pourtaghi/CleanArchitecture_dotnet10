@@ -6,10 +6,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers;
- 
+
 //[Area("Product")]
 //[Route("api/[controller]")]
-//[Authorize]
+//[Authorize] 
+//[ResponseCache(Duration = 0, NoStore = true, VaryByHeader = "*")]
 //public sealed class ProductsController :
 //    CrudController<CreateProductCommand, GetAllProductQuery, ProductDto>,
 //    IHaveGetById

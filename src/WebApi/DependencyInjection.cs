@@ -57,35 +57,7 @@ public static class DependencyInjection
                    },
                    new List<string>()
                }
-           });
-
-           // Optional: Add Basic Authentication (username/password)
-           // Uncomment below to enable username/password authentication in Swagger UI
-           /*
-           options.AddSecurityDefinition("Basic", new OpenApiSecurityScheme
-           {
-               Type = SecuritySchemeType.Http,
-               Scheme = "Basic",
-               Description = "Enter your username and password.",
-               Name = "Authorization",
-               In = ParameterLocation.Header
-           });
-
-           options.AddSecurityRequirement(new OpenApiSecurityRequirement
-           {
-               {
-                   new OpenApiSecurityScheme
-                   {
-                       Reference = new OpenApiReference
-                       {
-                           Type = ReferenceType.SecurityScheme,
-                           Id = "Basic"
-                       }
-                   },
-                   Array.Empty<string>()
-               }
-           });
-           */
+           }); 
 
            // Include XML documentation comments
            var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";

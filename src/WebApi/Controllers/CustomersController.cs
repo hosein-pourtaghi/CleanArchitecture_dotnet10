@@ -15,12 +15,11 @@ namespace WebApi.Controllers;
 /// Provides full CRUD operations with comprehensive documentation and error handling.
 /// All endpoints require JWT authentication.
 /// </summary>
+[Area("Customer")]
 [Route("api/[controller]/[action]")]
 [ApiController]
 [Authorize]
-[Tags("Customers")]
-[Produces("application/json")]
-[Consumes("application/json")]
+[ResponseCache(Duration = 0, NoStore = true, VaryByHeader = "*")]
 public class CustomersController(IMediator mediator) : ApiController
 {
     /// <summary>

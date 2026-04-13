@@ -66,39 +66,7 @@ builder.Services.AddOpenTelemetry()
             .AddOtlpExporter();
     });
 builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configuration(context.Configuration));
-
-//// Configure Serilog for SQL logging
-//builder.Host.UseSerilog((context, services, configuration) =>
-//    configuration
-//        .Enrich.FromLogContext()
-//        .Enrich.WithEnvironmentName()
-//        .Enrich.WithMachineName()
-//        .WriteTo.Console()
-//        .WriteTo.MSSqlServer(
-//            connectionString: builder.Configuration.GetConnectionString("DefaultConnection"),
-//            tableName: "RequestLogs",
-//            autoCreateSqlTable: true,
-//            columnOptions: new ColumnOptions
-//            {
-//                AdditionalColumns = new List<SqlColumn>
-//                {
-//                    new SqlColumn { ColumnName = "CorrelationId", DataType = SqlDbType.NVarChar, DataLength = 50 },
-//                    new SqlColumn { ColumnName = "HttpMethod", DataType = SqlDbType.NVarChar, DataLength = 10 },
-//                    new SqlColumn { ColumnName = "HttpPath", DataType = SqlDbType.NVarChar, DataLength = 255 },
-//                    new SqlColumn { ColumnName = "HttpStatus", DataType = SqlDbType.Int },
-//                    new SqlColumn { ColumnName = "ResponseTimeMs", DataType = SqlDbType.Int }
-//                }
-//            },
-//            sinkOptions: new MSSqlServerSinkOptions
-//            {
-//                BatchPostingLimit = 100,
-//                BatchPeriod = TimeSpan.FromSeconds(5)
-//            }
-//        )
-//);
-
-
-//builder.Services.AddEndpointsApiExplorer();
+ 
 
 // add this to infra layer to get all webAPI projects
 builder.Services.AddScoped<IPolicyDiscoveryService, PolicyDiscoveryService>();

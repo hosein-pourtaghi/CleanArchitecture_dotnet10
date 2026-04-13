@@ -14,7 +14,8 @@ namespace WebApi.Controllers;
 [Area("Checklist")]
 [Route("api/[controller]/[action]")]
 [ApiController]
-[Authorize] 
+[Authorize]
+[ResponseCache(Duration = 0, NoStore = true, VaryByHeader = "*")]
 public class AssessmentsController(IMediator mediator) : ApiController
 {
     
