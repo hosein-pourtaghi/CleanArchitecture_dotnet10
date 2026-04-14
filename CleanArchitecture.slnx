@@ -15,7 +15,6 @@
       <BuildDependency Project="src/Infrastructure/Infrastructure.csproj" />
     </Project>
     <Project Path="src/ProjectSetup.ServiceDefaults/ProjectSetup.ServiceDefaults.csproj" />
-    <Project Path="src/Shared.Logging/Shared.Logging.csproj" Id="4855951b-bfdf-4939-be47-b851f292a73a" />
     <Project Path="src/SharedKernel/SharedKernel.csproj" />
     <Project Path="src/WebApi/WebApi.csproj" />
   </Folder>
