@@ -14,10 +14,7 @@ internal sealed class GetAllAssessmentQueryHandler(
     : IQueryHandler<GetAllAssessmentQuery, List<AssessmentDto>>
 {
     public async Task<Result<List<AssessmentDto>>> Handle(GetAllAssessmentQuery query, CancellationToken cancellationToken)
-    {
-        throw new Exception("sdfsd");
-        //throw new BusinessRuleException("sdf", "sdf");
-
+    {  
         var assessments = await context.Assessments
             .AsNoTracking()
             .ToListAsync(cancellationToken);
