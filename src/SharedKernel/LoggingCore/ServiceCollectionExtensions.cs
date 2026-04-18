@@ -1,6 +1,7 @@
 ﻿// src/LoggingLibrary/Extensions/ServiceCollectionExtensions.cs
 
 using LoggingCore.Configuration;
+using LoggingCore.DependencyInjection;
 using LoggingCore.Services;
 using LoggingLibrary.Middleware;
 using Microsoft.AspNetCore.Builder;
@@ -23,6 +24,21 @@ public static class ServiceCollectionExtensions
         // Core services
         services.AddHttpContextAccessor();
         services.AddScoped<ITraceIdAccessor, TraceIdAccessor>();
+
+        services.AddLoggingServices(options =>
+        {
+            options.EnableApiLogging = true;
+            options.EnableExceptionLogging = true;
+            options.EnablePerformanceLogging = true;
+            options.EnableQueryLogging = true;  // Only in dev
+            options.SlowQueryThresholdMs = 500;  // Log queries > 500ms
+            options.ShowDetailsInProduction = true;
+            options.BatchSize = 100;
+            options.BatchIntervalMs = 1000;
+            options.MaxQueueSize = 10000;
+        });
+
+
 
         return services;
     }

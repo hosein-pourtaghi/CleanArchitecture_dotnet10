@@ -81,19 +81,6 @@ builder.Services.AddLoggingDbContext(builder.Configuration.GetConnectionString("
 
 // ==================== Logging Services ====================
 
-builder.Services.AddLoggingServices(options =>
-{
-    options.EnableApiLogging = true;
-    options.EnableExceptionLogging = true;
-    options.EnablePerformanceLogging = true;
-    options.EnableQueryLogging = builder.Environment.IsDevelopment();  // Only in dev
-    options.SlowQueryThresholdMs = 500;  // Log queries > 500ms
-    options.ShowDetailsInProduction = builder.Environment.IsDevelopment();
-    options.BatchSize = 100;
-    options.BatchIntervalMs = 1000;
-    options.MaxQueueSize = 10000;
-});
-
 
 
 builder.Services.AddLoggingLibrary(builder.Configuration);

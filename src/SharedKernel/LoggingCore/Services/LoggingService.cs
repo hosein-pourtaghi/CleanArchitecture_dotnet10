@@ -89,6 +89,7 @@ public sealed class LoggingService : ILoggingService, IHostedService, IDisposabl
         { await FlushAsync(linkedCts.Token); }
         catch { }
     }
+
     public Task LogApiRequestAsync(ApiLog log, CancellationToken cancellationToken = default)
     {
         if (!_options.EnableApiLogging)
@@ -133,6 +134,7 @@ public sealed class LoggingService : ILoggingService, IHostedService, IDisposabl
         return Task.CompletedTask;
     }
 
+
     public async Task FlushAsync(CancellationToken cancellationToken = default)
     {
         await Task.WhenAll(
@@ -157,7 +159,6 @@ public sealed class LoggingService : ILoggingService, IHostedService, IDisposabl
     public bool IsQueueFull() => false;
 
     #region Private Methods
-
     private async Task ReadApiLogsAsync(CancellationToken cancellationToken)
     {
         try
@@ -178,7 +179,6 @@ public sealed class LoggingService : ILoggingService, IHostedService, IDisposabl
         catch (OperationCanceledException) { }
         catch (Exception ex) { _logger.LogError(ex, "Error reading API logs"); }
     }
-
     private async Task ReadExceptionLogsAsync(CancellationToken cancellationToken)
     {
         try
@@ -199,7 +199,6 @@ public sealed class LoggingService : ILoggingService, IHostedService, IDisposabl
         catch (OperationCanceledException) { }
         catch (Exception ex) { _logger.LogError(ex, "Error reading exception logs"); }
     }
-
     private async Task ReadPerformanceMetricsAsync(CancellationToken cancellationToken)
     {
         try
@@ -219,6 +218,26 @@ public sealed class LoggingService : ILoggingService, IHostedService, IDisposabl
         }
         catch (OperationCanceledException) { }
         catch (Exception ex) { _logger.LogError(ex, "Error reading performance metrics"); }
+    }
+    private async Task ReadQueryLogsAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await foreach (var log in _queryLogChannel.Reader.ReadAllAsync(cancellationToken))
+            {
+                bool shouldFlush;
+                lock (_batchLock)
+                {
+                    _queryLogBatch.Add(log);
+                    shouldFlush = _queryLogBatch.Count >= _options.BatchSize;
+                }
+
+                if (shouldFlush)
+                    _ = FlushQueryLogsAsyncSafe();
+            }
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex) { _logger.LogError(ex, "Error reading query logs"); }
     }
 
     private void ProcessBatches()
@@ -248,20 +267,25 @@ public sealed class LoggingService : ILoggingService, IHostedService, IDisposabl
         { await FlushApiLogsAsync(cancellationToken); }
         catch (Exception ex) { _logger.LogError(ex, "Error flushing API logs"); }
     }
-
     private async Task FlushExceptionLogsAsyncSafe(CancellationToken cancellationToken = default)
     {
         try
         { await FlushExceptionLogsAsync(cancellationToken); }
         catch (Exception ex) { _logger.LogError(ex, "Error flushing exception logs"); }
     }
-
     private async Task FlushPerformanceMetricsAsyncSafe(CancellationToken cancellationToken = default)
     {
         try
         { await FlushPerformanceMetricsAsync(cancellationToken); }
         catch (Exception ex) { _logger.LogError(ex, "Error flushing performance metrics"); }
     }
+    private async Task FlushQueryLogsAsyncSafe(CancellationToken cancellationToken = default)
+    {
+        try
+        { await FlushQueryLogsAsync(cancellationToken); }
+        catch (Exception ex) { _logger.LogError(ex, "Error flushing query logs"); }
+    }
+
 
     private async Task FlushApiLogsAsync(CancellationToken cancellationToken = default)
     {
@@ -289,7 +313,6 @@ public sealed class LoggingService : ILoggingService, IHostedService, IDisposabl
             _logger.LogError(ex, "Failed to flush {Count} API logs", batch.Count);
         }
     }
-
     private async Task FlushExceptionLogsAsync(CancellationToken cancellationToken = default)
     {
         List<ExceptionLog> batch;
@@ -318,7 +341,6 @@ public sealed class LoggingService : ILoggingService, IHostedService, IDisposabl
             _logger.LogError(ex, "Failed to flush {Count} exception logs", batch.Count);
         }
     }
-
     private async Task FlushPerformanceMetricsAsync(CancellationToken cancellationToken = default)
     {
         List<PerformanceMetric> batch;
@@ -345,48 +367,6 @@ public sealed class LoggingService : ILoggingService, IHostedService, IDisposabl
             _logger.LogError(ex, "Failed to flush {Count} performance metrics", batch.Count);
         }
     }
-
-    public void Dispose()
-    {
-        if (_disposed)
-            return;
-        _disposed = true;
-        _batchTimer?.Dispose();
-        _internalCts?.Dispose();
-    }
-
-    #endregion
-
-    #region Query Logs
-
-    private async Task ReadQueryLogsAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await foreach (var log in _queryLogChannel.Reader.ReadAllAsync(cancellationToken))
-            {
-                bool shouldFlush;
-                lock (_batchLock)
-                {
-                    _queryLogBatch.Add(log);
-                    shouldFlush = _queryLogBatch.Count >= _options.BatchSize;
-                }
-
-                if (shouldFlush)
-                    _ = FlushQueryLogsAsyncSafe();
-            }
-        }
-        catch (OperationCanceledException) { }
-        catch (Exception ex) { _logger.LogError(ex, "Error reading query logs"); }
-    }
-
-    private async Task FlushQueryLogsAsyncSafe(CancellationToken cancellationToken = default)
-    {
-        try
-        { await FlushQueryLogsAsync(cancellationToken); }
-        catch (Exception ex) { _logger.LogError(ex, "Error flushing query logs"); }
-    }
-
     private async Task FlushQueryLogsAsync(CancellationToken cancellationToken = default)
     {
         List<QueryLog> batch;
@@ -412,6 +392,16 @@ public sealed class LoggingService : ILoggingService, IHostedService, IDisposabl
         {
             _logger.LogError(ex, "Failed to flush {Count} query logs", batch.Count);
         }
+    }
+
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+        _disposed = true;
+        _batchTimer?.Dispose();
+        _internalCts?.Dispose();
     }
 
     #endregion
