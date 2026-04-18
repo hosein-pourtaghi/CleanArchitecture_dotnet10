@@ -3,12 +3,11 @@ using HealthChecks.UI.Client;
 using Infrastructure;
 using Infrastructure.Authorization;
 using LoggingCore.DependencyInjection;
-using LoggingCore.Middleware;
-using MediatRCore.DependencyInjection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Serilog;
+using SharedKernel.LoggingCore;
 using WebApi;
 using WebApi.Extensions;
 using WebApi.Middleware;
@@ -79,7 +78,7 @@ builder.Services
 // ==================== Database ====================
 
 builder.Services.AddLoggingDbContext(builder.Configuration.GetConnectionString("LoggingConnection")!);
-  
+
 // ==================== Logging Services ====================
 
 builder.Services.AddLoggingServices(options =>
@@ -92,20 +91,13 @@ builder.Services.AddLoggingServices(options =>
     options.ShowDetailsInProduction = builder.Environment.IsDevelopment();
     options.BatchSize = 100;
     options.BatchIntervalMs = 1000;
-    options.MaxQueueSize = 10000; 
+    options.MaxQueueSize = 10000;
 });
 
-// ==================== MediatR ====================
 
-builder.Services.AddMediatRWithBehaviors(
-    typeof(Program).Assembly,
-    typeof(Application.DependencyInjection).Assembly);
 
-builder.Services.AddFluentValidationWithMediatR(
-    typeof(Program).Assembly,
-    typeof(Application.DependencyInjection).Assembly);
+builder.Services.AddLoggingLibrary(builder.Configuration);
 
-// ==================== Other Services ====================
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton(TelemetryActivitySource.Instance);
@@ -146,6 +138,18 @@ app.MapHealthChecks("health", new HealthCheckOptions
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 });
 
+
+// Important: Order matters!
+
+// 1. Exception handling (must be first)
+app.UseLoggingLibrary();  // Single middleware handles everything
+
+// 2. OpenTelemetry
+app.UseMiddleware<OpenTelemetryLoggingMiddleware>();
+
+// 3. Serilog request logging
+app.UseSerilogRequestLogging();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwaggerWithUi();
@@ -153,18 +157,6 @@ if (app.Environment.IsDevelopment())
     app.ApplyMigrations();
     app.UseDeveloperExceptionPage();
 }
-
-// Important: Order matters!
-
-// 1. Exception handling (must be first)
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-
-
-// 2. OpenTelemetry
-app.UseMiddleware<OpenTelemetryLoggingMiddleware>();
-
-// 3. Serilog request logging
-app.UseSerilogRequestLogging();
 
 //app.UseRequestContextLogging();
 app.UseExceptionHandler();

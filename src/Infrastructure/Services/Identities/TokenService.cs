@@ -19,9 +19,8 @@ public class TokenService : ITokenService
     private readonly IRolePermissionService _rolePermissionService;
 
     // Token settings
-    private const int AccessTokenMinutes = 10;           // Initial: 10 minutes
+    private const int AccessTokenMinutes = 600;           // Initial: 10 minutes
     private const int RefreshTokenDays = 7;
-    private const int MaxSlidingWindowHours = 8;        // Max: 8 hours
 
     public TokenService(
         IApplicationDbContext context,

@@ -43,6 +43,10 @@ public static class LoggingServiceExtensions
         // Register as hosted service
         services.AddHostedService(sp => (LoggingService)sp.GetRequiredService<ILoggingService>());
 
+        //// ✅ Register as Singleton - IHostedService is auto-discovered
+        //services.AddSingleton<LoggingService>();
+        //services.AddSingleton<ILoggingService>(sp => sp.GetRequiredService<LoggingService>());
+
         return services;
     }
 

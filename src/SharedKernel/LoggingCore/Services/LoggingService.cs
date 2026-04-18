@@ -101,8 +101,12 @@ public sealed class LoggingService : ILoggingService, IHostedService, IDisposabl
     public Task LogExceptionAsync(ExceptionLog log, CancellationToken cancellationToken = default)
     {
         if (!_options.EnableExceptionLogging)
+        {
+            _logger.LogWarning("Exception logging is DISABLED");
             return Task.CompletedTask;
+        }
 
+        _logger.LogDebug("Queueing exception log: {Message}", log.Message);
         _exceptionLogChannel.Writer.TryWrite(log);
         return Task.CompletedTask;
     }
@@ -293,10 +297,12 @@ public sealed class LoggingService : ILoggingService, IHostedService, IDisposabl
         lock (_batchLock)
         {
             if (_exceptionLogBatch.Count == 0)
-                return;
+                return; // No logs to flush
             batch = new List<ExceptionLog>(_exceptionLogBatch);
             _exceptionLogBatch.Clear();
         }
+
+        _logger.LogDebug("Flushing {Count} exception logs to database", batch.Count);  // ✅ Add this
 
         using var scope = _scopeFactory.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<LoggingDbContext>();
