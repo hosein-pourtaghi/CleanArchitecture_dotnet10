@@ -93,7 +93,7 @@ public static class DependencyInjection
         services.AddProblemDetails();
 
         // Register ActivitySource for dependency injection if needed
-        services.AddSingleton(TelemetryActivitySource.Instance);
+        //services.AddSingleton(TelemetryActivitySource.Instance);
 
         // Configure high-throughput HttpClient(s) using IHttpClientFactory and SocketsHttpHandler
         // - Use typed clients (IExternalHttpClient) for strong typing and testability

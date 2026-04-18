@@ -1,4 +1,5 @@
 ﻿using SharedKernel;
+using SharedKernel.Exceptions;
 
 namespace WebApi.Infrastructure;
 
@@ -59,14 +60,14 @@ public static class CustomResults
 
         static Dictionary<string, object?>? GetErrors(Result result)
         {
-            if (result.Error is not ValidationError validationError)
+            if (result.Error == Error.None )
             {
                 return null;
             }
 
             return new Dictionary<string, object?>
             {
-                { "errors", validationError.Errors }
+                { "errors", "" }
             };
         }
     }

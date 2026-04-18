@@ -16,6 +16,8 @@
     </Project>
     <Project Path="src/ProjectSetup.ServiceDefaults/ProjectSetup.ServiceDefaults.csproj" />
     <Project Path="src/SharedKernel/SharedKernel.csproj" />
-    <Project Path="src/WebApi/WebApi.csproj" />
+    <Project Path="src/WebApi/WebApi.csproj">
+      <BuildDependency Project="src/SharedKernel/SharedKernel.csproj" />
+    </Project>
   </Folder>
 </Solution>

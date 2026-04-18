@@ -2,6 +2,9 @@
 using HealthChecks.UI.Client;
 using Infrastructure;
 using Infrastructure.Authorization;
+using LoggingCore.DependencyInjection;
+using LoggingCore.Middleware;
+using MediatRCore.DependencyInjection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -9,15 +12,7 @@ using Serilog;
 using WebApi;
 using WebApi.Extensions;
 using WebApi.Middleware;
-
-
-
-
-
-
-
-
-
+using WebApi.Telemetry;
 
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -40,20 +35,19 @@ builder.Services.AddCors(options =>
         });
 });
 
-
+// Configure Serilog
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
     .Enrich.WithProperty("Application", "MyAspireApp")
     .CreateLogger();
 
-
+// Configure OpenTelemetry
 builder.Services.AddOpenTelemetry()
     .WithTracing(tracerProviderBuilder =>
     {
         tracerProviderBuilder
             .AddSource("WebApi")
-            //.AddConsoleExporter()
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
             .AddOtlpExporter();
@@ -62,19 +56,59 @@ builder.Services.AddOpenTelemetry()
     {
         meterProviderBuilder
             .AddRuntimeInstrumentation()
-            //.AddConsoleExporter()
             .AddOtlpExporter();
     });
-builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configuration(context.Configuration));
- 
+
+// from appsettings
+//builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configuration(context.Configuration));
+
+builder.Host.UseSerilog();
+
 
 // add this to infra layer to get all webAPI projects
 builder.Services.AddScoped<IPolicyDiscoveryService, PolicyDiscoveryService>();
+
 
 builder.Services
     .AddApplication()
     .AddPresentation()
     .AddInfrastructure(builder.Configuration);
+
+#region add Exception handling LIB
+
+// ==================== Database ====================
+
+builder.Services.AddLoggingDbContext(builder.Configuration.GetConnectionString("LoggingConnection")!);
+  
+// ==================== Logging Services ====================
+
+builder.Services.AddLoggingServices(options =>
+{
+    options.EnableApiLogging = true;
+    options.EnableExceptionLogging = true;
+    options.EnablePerformanceLogging = true;
+    options.ShowDetailsInProduction = builder.Environment.IsDevelopment();
+    options.BatchSize = 100;
+    options.BatchIntervalMs = 1000;
+    options.MaxQueueSize = 10000;
+});
+
+// ==================== MediatR ====================
+
+builder.Services.AddMediatRWithBehaviors(
+    typeof(Program).Assembly,
+    typeof(Application.DependencyInjection).Assembly);
+
+builder.Services.AddFluentValidationWithMediatR(
+    typeof(Program).Assembly,
+    typeof(Application.DependencyInjection).Assembly);
+
+// ==================== Other Services ====================
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton(TelemetryActivitySource.Instance);
+#endregion
+
 
 
 WebApplication app;
@@ -101,7 +135,7 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine($"Registered {result.Value} authorization policies");
     }
 }
- 
+
 // Use CORS (cart matters - should be before MapControllers)
 app.UseCors("AllowAngularApp");
 
@@ -118,11 +152,21 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
+// Important: Order matters!
 
+// 1. Exception handling (must be first)
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+
+// 2. OpenTelemetry
 app.UseMiddleware<OpenTelemetryLoggingMiddleware>();
+
+// 3. Serilog request logging
 app.UseSerilogRequestLogging();
-app.UseRequestContextLogging();
+
+//app.UseRequestContextLogging();
 app.UseExceptionHandler();
+// 4. Routing and authentication
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -130,6 +174,12 @@ app.UseAuthorization();
 app.UseTokenValidation();
 
 app.MapControllers();
+
+
+// ==================== Initialize Logging Database ====================
+app.Services.InitializeLoggingDatabaseAsync();
+
+
 
 try
 {
