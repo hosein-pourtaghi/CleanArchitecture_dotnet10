@@ -2,7 +2,7 @@
 using Application.Common.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Common.Interfaces;
+namespace Application.Common.Interfaces.Core;
 
 /// <summary>
 /// Advanced generic repository interface for aggregate roots

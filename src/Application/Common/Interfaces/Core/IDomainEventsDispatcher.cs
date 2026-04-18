@@ -1,7 +1,7 @@
 ﻿using SharedKernel;
 
 
-namespace Application.Common.Interfaces;
+namespace Application.Common.Interfaces.Core;
 
 public interface IDomainEventsDispatcher
 {

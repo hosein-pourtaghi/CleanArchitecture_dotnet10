@@ -30,6 +30,8 @@ public static class LoggingServiceExtensions
                     options.EnableApiLogging = true;
                     options.EnableExceptionLogging = true;
                     options.EnablePerformanceLogging = true;
+                    options.EnableQueryLogging = true;   
+                    options.SlowQueryThresholdMs = 1000;
                     options.BatchSize = 100;
                     options.BatchIntervalMs = 1000;
                     options.MaxQueueSize = 10000;
@@ -37,9 +39,9 @@ public static class LoggingServiceExtensions
         }
 
         // Register logging service
-        services.AddSingleton<ILoggingService, AsyncLoggingService>();
+        services.AddSingleton<ILoggingService, LoggingService>();
         // Register as hosted service
-        services.AddHostedService(sp => (AsyncLoggingService)sp.GetRequiredService<ILoggingService>());
+        services.AddHostedService(sp => (LoggingService)sp.GetRequiredService<ILoggingService>());
 
         return services;
     }

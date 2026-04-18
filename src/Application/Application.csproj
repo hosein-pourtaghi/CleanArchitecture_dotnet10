@@ -22,9 +22,5 @@
   <ItemGroup>
 	<InternalsVisibleTo Include="Application.UnitTests" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Common\Authorization\" />
-  </ItemGroup>
  
 </Project>

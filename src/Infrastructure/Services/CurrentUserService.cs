@@ -1,40 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using Application.Common.Interfaces;
+﻿using System.Security.Claims;
+using Application.Common.Interfaces.Core;
 using Microsoft.AspNetCore.Http;
 
 namespace Infrastructure.Services;
- 
+
 
 public sealed class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     // 🔥 CACHE: Store claims to avoid repeated lookups
-    private readonly Lazy<string?> _userId;
+    private readonly Lazy<Guid> _userId;
     private readonly Lazy<string?> _email;
     private readonly Lazy<IReadOnlyList<string>> _roles;
-    private readonly Lazy<bool> _isAuthenticated;
 
     public CurrentUserService(IHttpContextAccessor httpContextAccessor)
     {
         _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 
         // 🔥 LAZY LOAD: Only access HttpContext when needed
-        _userId = new Lazy<string?>(GetUserId);
+        _userId = new Lazy<Guid>(GetUserId);
         _email = new Lazy<string?>(GetEmail);
         _roles = new Lazy<IReadOnlyList<string>>(GetRoles);
-        _isAuthenticated = new Lazy<bool>(() => !string.IsNullOrEmpty(UserId));
     }
 
-    public string? UserId => _userId.Value;
+    public Guid UserId => _userId.Value;
     public string? Email => _email.Value;
     public IReadOnlyList<string> Roles => _roles.Value;
-    public bool IsAuthenticated => _isAuthenticated.Value;
 
     public bool HasRole(string role)
     {
@@ -48,17 +40,19 @@ public sealed class CurrentUserService : ICurrentUserService
 
     #region Private Methods
 
-    private string? GetUserId()
+    private Guid GetUserId()
     {
         var context = _httpContextAccessor.HttpContext;
         if (context?.User == null)
-            return null;
+            return Guid.Empty;
 
         // Try to get user ID from different claim types (flexible for different auth schemes)
-        return context.User.FindFirstValue(ClaimTypes.NameIdentifier)
+        var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier)
             ?? context.User.FindFirstValue("sub")
             ?? context.User.FindFirstValue("uid")
             ?? context.User.FindFirstValue(ClaimTypes.Name);
+        var isId = Guid.TryParse(userId, out Guid uId);
+        return isId ? uId : Guid.Empty;
     }
 
     private string? GetEmail()

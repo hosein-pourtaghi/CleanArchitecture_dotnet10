@@ -3,7 +3,7 @@ using Domain.Entities.Assessments;
 using Domain.Entities.Checklists;
 using SharedKernel;
 
-namespace Application.Common.DTOs;
+namespace Application.Common.DTOs.Checklists;
 
 public class AssessmentAnswerDto
 {

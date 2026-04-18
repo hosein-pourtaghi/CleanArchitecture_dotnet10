@@ -1,4 +1,4 @@
-using Application.Common.Data;
+using Application.Common.Interfaces.Core;
 using Application.Common.Messaging;
 using Domain.Entities.Assessments;
 using Microsoft.EntityFrameworkCore;

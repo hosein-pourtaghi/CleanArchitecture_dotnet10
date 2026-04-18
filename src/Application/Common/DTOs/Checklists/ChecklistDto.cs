@@ -1,6 +1,6 @@
 using System;
 
-namespace Application.Common.DTOs;
+namespace Application.Common.DTOs.Checklists;
 
 public class ChecklistDto
 {

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace MediatRCore.Behaviors;
+ 
 
 /// <summary>
 /// MediatR pipeline behavior for logging requests and responses

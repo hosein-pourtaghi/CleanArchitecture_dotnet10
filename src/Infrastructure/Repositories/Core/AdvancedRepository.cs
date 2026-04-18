@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using Application.Common.Data;
-using Application.Common.Interfaces;
+using Application.Common.Interfaces.Core;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 

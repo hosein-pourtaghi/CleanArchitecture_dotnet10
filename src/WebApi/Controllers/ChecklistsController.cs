@@ -3,7 +3,7 @@ using Application.Checklists.Delete;
 using Application.Checklists.GetAll;
 using Application.Checklists.GetById;
 using Application.Checklists.Update;
-using Application.Common.DTOs;
+using Application.Common.DTOs.Checklists;
 using Application.Common.DTOs.Shared;
 using Application.Common.Interfaces.Checklists;
 using Domain.Entities.Checklists;

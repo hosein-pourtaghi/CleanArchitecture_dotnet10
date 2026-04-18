@@ -9,6 +9,7 @@ public interface ILoggingService
     Task LogApiRequestAsync(ApiLog log, CancellationToken cancellationToken = default);
     Task LogExceptionAsync(ExceptionLog log, CancellationToken cancellationToken = default);
     Task LogPerformanceMetricAsync(PerformanceMetric metric, CancellationToken cancellationToken = default);
+    Task LogQueryAsync(QueryLog log, CancellationToken cancellationToken = default);  
 
     // Batch operations for bulk inserts
     Task FlushAsync(CancellationToken cancellationToken = default);

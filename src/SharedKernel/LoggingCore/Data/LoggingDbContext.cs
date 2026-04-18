@@ -12,6 +12,7 @@ public class LoggingDbContext : DbContext
     public DbSet<ApiLog> ApiLogs => Set<ApiLog>();
     public DbSet<ExceptionLog> ExceptionLogs => Set<ExceptionLog>();
     public DbSet<PerformanceMetric> PerformanceMetrics => Set<PerformanceMetric>();
+    public DbSet<QueryLog> QueryLogs => Set<QueryLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,6 +44,16 @@ public class LoggingDbContext : DbContext
             entity.HasIndex(e => e.Timestamp);
             entity.HasIndex(e => e.IsSlowOperation);
         });
+
+        // QueryLog indexes
+        modelBuilder.Entity<QueryLog>(entity =>
+        {
+            entity.HasIndex(e => e.TraceId);
+            entity.HasIndex(e => e.Timestamp);
+            entity.HasIndex(e => e.IsSlowQuery);
+            entity.HasIndex(e => new { e.Database, e.Timestamp });
+        });
+
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

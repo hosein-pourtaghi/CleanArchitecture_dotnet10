@@ -2,7 +2,7 @@ using Application.Common.DTOs;
 using Application.Common.DTOs.Identities;
 using SharedKernel;
 
-namespace Application.Common.Interfaces;
+namespace Application.Common.Interfaces.Core;
  
 
 public interface IAuthService

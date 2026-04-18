@@ -1,5 +1,5 @@
 ﻿using System.Collections.Concurrent;
-using Application.Common.Interfaces;
+using Application.Common.Interfaces.Core;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel;
 

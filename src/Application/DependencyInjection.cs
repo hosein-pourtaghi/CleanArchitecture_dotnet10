@@ -9,8 +9,8 @@ namespace Application;
 public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
-    { 
-    services.AddAutoMapper(Assembly.GetExecutingAssembly());
+    {
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
         // Register MediatR with all handlers from this assembly
         services.AddMediatR(config =>
@@ -20,7 +20,7 @@ public static class DependencyInjection
 
             // Register custom pipeline behaviors
             config.AddOpenBehavior(typeof(ValidationBehavior<,>));
-            config.AddOpenBehavior(typeof(LoggingBehavior<,>));
+            //config.AddOpenBehavior(typeof(LoggingBehavior<,>));
         });
 
         // Add FluentValidation validators

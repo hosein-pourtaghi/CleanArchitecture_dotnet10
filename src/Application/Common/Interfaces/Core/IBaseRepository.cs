@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using Application.Common.DTOs.Shared;
 
-namespace Application.Common.Interfaces;
+namespace Application.Common.Interfaces.Core;
 
 public interface IBaseRepository<T> where T : class
 {

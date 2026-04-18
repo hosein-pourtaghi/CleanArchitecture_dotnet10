@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Runtime.CompilerServices;
-using Application.Common.DTOs;
-using Application.Common.Interfaces;
+using Application.Common.DTOs.Checklists;
+using Application.Common.Interfaces.Core;
 using Application.Common.Messaging;
 using AutoMapper;
 using Domain.Entities.Checklists;

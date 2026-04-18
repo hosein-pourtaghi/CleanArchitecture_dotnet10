@@ -10,19 +10,21 @@ using Microsoft.Extensions.Options;
 
 namespace LoggingCore.Services;
 
-public sealed class AsyncLoggingService : ILoggingService, IHostedService, IDisposable
+public sealed class LoggingService : ILoggingService, IHostedService, IDisposable
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly LoggingOptions _options;
-    private readonly ILogger<AsyncLoggingService> _logger;
+    private readonly ILogger<LoggingService> _logger;
 
     private readonly Channel<ApiLog> _apiLogChannel;
     private readonly Channel<ExceptionLog> _exceptionLogChannel;
     private readonly Channel<PerformanceMetric> _performanceMetricChannel;
+    private readonly Channel<QueryLog> _queryLogChannel;
 
     private readonly List<ApiLog> _apiLogBatch = new();
     private readonly List<ExceptionLog> _exceptionLogBatch = new();
     private readonly List<PerformanceMetric> _performanceMetricBatch = new();
+    private readonly List<QueryLog> _queryLogBatch = new();
 
     private readonly object _batchLock = new();
     private Timer? _batchTimer;
@@ -30,10 +32,10 @@ public sealed class AsyncLoggingService : ILoggingService, IHostedService, IDisp
     private volatile bool _disposed;
     private CancellationTokenSource? _internalCts;
 
-    public AsyncLoggingService(
-        IServiceScopeFactory scopeFactory,  // Changed from DbContext
+    public LoggingService(
+        IServiceScopeFactory scopeFactory,
         IOptions<LoggingOptions> options,
-        ILogger<AsyncLoggingService> logger)
+        ILogger<LoggingService> logger)
     {
         _scopeFactory = scopeFactory;
         _options = options.Value;
@@ -49,21 +51,22 @@ public sealed class AsyncLoggingService : ILoggingService, IHostedService, IDisp
         _apiLogChannel = Channel.CreateBounded<ApiLog>(channelOptions);
         _exceptionLogChannel = Channel.CreateBounded<ExceptionLog>(channelOptions);
         _performanceMetricChannel = Channel.CreateBounded<PerformanceMetric>(channelOptions);
+        _queryLogChannel = Channel.CreateBounded<QueryLog>(channelOptions);
     }
+
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _internalCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-        _batchTimer = new Timer(
-            _ => ProcessBatches(),
-            null,
+        _batchTimer = new Timer(_ => ProcessBatches(), null,
             TimeSpan.FromMilliseconds(_options.BatchIntervalMs),
             TimeSpan.FromMilliseconds(_options.BatchIntervalMs));
 
         _ = ReadApiLogsAsync(_internalCts.Token);
         _ = ReadExceptionLogsAsync(_internalCts.Token);
         _ = ReadPerformanceMetricsAsync(_internalCts.Token);
+        _ = ReadQueryLogsAsync(_internalCts.Token);  // NEW
 
         _logger.LogInformation("Async logging service started");
         return Task.CompletedTask;
@@ -77,19 +80,15 @@ public sealed class AsyncLoggingService : ILoggingService, IHostedService, IDisp
         _apiLogChannel.Writer.TryComplete();
         _exceptionLogChannel.Writer.TryComplete();
         _performanceMetricChannel.Writer.TryComplete();
+        _queryLogChannel.Writer.TryComplete();
 
         using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
 
         try
-        {
-            await FlushAsync(linkedCts.Token);
-        }
+        { await FlushAsync(linkedCts.Token); }
         catch { }
-
-        _logger.LogInformation("Async logging service stopped");
     }
-
     public Task LogApiRequestAsync(ApiLog log, CancellationToken cancellationToken = default)
     {
         if (!_options.EnableApiLogging)
@@ -117,12 +116,26 @@ public sealed class AsyncLoggingService : ILoggingService, IHostedService, IDisp
         return Task.CompletedTask;
     }
 
+    public Task LogQueryAsync(QueryLog log, CancellationToken cancellationToken = default)
+    {
+        if (!_options.EnableQueryLogging)
+            return Task.CompletedTask;
+
+        // Only log slow queries unless enabled for all
+        if (!_options.EnableQueryLogging && !log.IsSlowQuery)
+            return Task.CompletedTask;
+
+        _queryLogChannel.Writer.TryWrite(log);
+        return Task.CompletedTask;
+    }
+
     public async Task FlushAsync(CancellationToken cancellationToken = default)
     {
         await Task.WhenAll(
             FlushApiLogsAsync(cancellationToken),
             FlushExceptionLogsAsync(cancellationToken),
-            FlushPerformanceMetricsAsync(cancellationToken));
+            FlushPerformanceMetricsAsync(cancellationToken),
+            FlushQueryLogsAsync(cancellationToken));
     }
 
     public int GetQueuedCount()
@@ -337,4 +350,64 @@ public sealed class AsyncLoggingService : ILoggingService, IHostedService, IDisp
     }
 
     #endregion
+
+    #region Query Logs
+
+    private async Task ReadQueryLogsAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await foreach (var log in _queryLogChannel.Reader.ReadAllAsync(cancellationToken))
+            {
+                bool shouldFlush;
+                lock (_batchLock)
+                {
+                    _queryLogBatch.Add(log);
+                    shouldFlush = _queryLogBatch.Count >= _options.BatchSize;
+                }
+
+                if (shouldFlush)
+                    _ = FlushQueryLogsAsyncSafe();
+            }
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex) { _logger.LogError(ex, "Error reading query logs"); }
+    }
+
+    private async Task FlushQueryLogsAsyncSafe(CancellationToken cancellationToken = default)
+    {
+        try
+        { await FlushQueryLogsAsync(cancellationToken); }
+        catch (Exception ex) { _logger.LogError(ex, "Error flushing query logs"); }
+    }
+
+    private async Task FlushQueryLogsAsync(CancellationToken cancellationToken = default)
+    {
+        List<QueryLog> batch;
+
+        lock (_batchLock)
+        {
+            if (_queryLogBatch.Count == 0)
+                return;
+            batch = new List<QueryLog>(_queryLogBatch);
+            _queryLogBatch.Clear();
+        }
+
+        using var scope = _scopeFactory.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<LoggingDbContext>();
+
+        try
+        {
+            await dbContext.QueryLogs.AddRangeAsync(batch, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            _logger.LogDebug("Flushed {Count} query logs", batch.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to flush {Count} query logs", batch.Count);
+        }
+    }
+
+    #endregion
+
 }

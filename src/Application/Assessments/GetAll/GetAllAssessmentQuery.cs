@@ -1,5 +1,4 @@
-
-using Application.Common.DTOs;
+using Application.Common.DTOs.Checklists;
 using Application.Common.Messaging;
 
 namespace  Application.Assessments.GetAll;

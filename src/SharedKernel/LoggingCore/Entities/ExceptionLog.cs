@@ -11,10 +11,10 @@ public class ExceptionLog
     public long Id { get; set; }
 
     [Required]
-    [MaxLength(50)]
+    [MaxLength(100)]
     public string TraceId { get; set; } = string.Empty;
 
-    [MaxLength(50)]
+    [MaxLength(100)]
     public string? CorrelationId { get; set; }
 
     [Required]
@@ -38,7 +38,7 @@ public class ExceptionLog
     [MaxLength(2000)]
     public string? RequestPath { get; set; }
 
-    [MaxLength(10)]
+    [MaxLength(100)]
     public string? RequestMethod { get; set; }
 
     [Required]

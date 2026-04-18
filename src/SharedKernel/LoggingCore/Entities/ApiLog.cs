@@ -18,7 +18,7 @@ public class ApiLog
     public string? CorrelationId { get; set; }
 
     [Required]
-    [MaxLength(20)]
+    [MaxLength(100)]
     public string Method { get; set; } = string.Empty;
 
     [Required]
@@ -57,6 +57,6 @@ public class ApiLog
     [MaxLength(500)]
     public string? ExceptionMessage { get; set; }
 
-    [MaxLength(50)]
+    [MaxLength(100)]
     public string? ExceptionType { get; set; }
 }

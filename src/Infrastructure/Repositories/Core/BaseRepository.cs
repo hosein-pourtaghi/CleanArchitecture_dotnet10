@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Application.Common.DTOs.Shared;
-using Application.Common.Interfaces;
+using Application.Common.Interfaces.Core;
 using AutoMapper;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

@@ -1,6 +1,5 @@
-﻿using Application.Common.Data;
-using Application.Common.DTOs.Identities;
-using Application.Common.Interfaces;
+﻿using Application.Common.DTOs.Identities;
+using Application.Common.Interfaces.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;

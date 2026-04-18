@@ -9,7 +9,11 @@ public record RegisterRequest(
     string? LastName
 );
 
-public record LoginRequest(string Email, string Password, string? DeviceInfo = null);
+public record LoginRequest(
+    string Email,
+    string Password, 
+    string? DeviceInfo = null
+);
 
 public record LoginResponse(
     string AccessToken,
@@ -55,9 +59,17 @@ public record RoleDto(
     int UserCount
 );
 
-public record CreateRoleRequest(string Name, string? Description, List<Guid> PermissionIds);
+public record CreateRoleRequest(
+    string Name,
+    string? Description,
+    List<Guid> PermissionIds
+);
 
-public record UpdateRoleRequest(string? Name, string? Description, List<Guid>? PermissionIds);
+public record UpdateRoleRequest(
+    string? Name,
+    string? Description, 
+    List<Guid>? PermissionIds
+);
 
 public record PermissionDto(
     Guid Id,

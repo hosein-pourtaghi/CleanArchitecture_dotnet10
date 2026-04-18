@@ -1,5 +1,4 @@
-﻿using Application.Common.Authentication;
-using Application.Common.Interfaces;
+﻿using Application.Common.Interfaces.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,16 +8,8 @@ namespace WebApi.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class SessionsController : ControllerBase
+public class SessionsController(ISessionService _sessionService, ICurrentUserService _userContext) : ControllerBase
 {
-    private readonly ISessionService _sessionService;
-    private readonly IUserContext _userContext;
-
-    public SessionsController(ISessionService sessionService, IUserContext userContext)
-    {
-        _sessionService = sessionService;
-        _userContext = userContext;
-    }
 
     [HttpGet("online")]
     [Authorize]

@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using Application.Common.Data;
+using Application.Common.Interfaces.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;

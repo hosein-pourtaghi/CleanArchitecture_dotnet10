@@ -1,5 +1,5 @@
-using Application.Common.Data;
 using Application.Common.DTOs;
+using Application.Common.Interfaces.Core;
 using Application.Common.Messaging;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;

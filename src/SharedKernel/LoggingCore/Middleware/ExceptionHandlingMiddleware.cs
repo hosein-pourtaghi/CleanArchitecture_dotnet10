@@ -1,5 +1,7 @@
 ﻿// src/YourApi/Middleware/ExceptionHandlingMiddleware.cs
+using System;
 using System.Diagnostics;
+using LoggingCore.Configuration;
 using LoggingCore.Entities;
 using LoggingCore.Mapping;
 using LoggingCore.Services;
@@ -14,13 +16,13 @@ public class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILoggingService _loggingService;
-    private readonly LoggingCore.Configuration.LoggingOptions _options;
+    private readonly LoggingOptions _options;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
     public ExceptionHandlingMiddleware(
         RequestDelegate next,
         ILoggingService loggingService,
-        IOptions<LoggingCore.Configuration.LoggingOptions> options,
+        IOptions<LoggingOptions> options,
         ILogger<ExceptionHandlingMiddleware> logger)
     {
         _next = next;
@@ -61,11 +63,8 @@ public class ExceptionHandlingMiddleware
 
     private async Task HandleExceptionAsync(HttpContext context, Exception ex, string traceId, string correlationId, long durationMs)
     {
-        var showDetails = _options.ShowDetailsInProduction;//|| context.Request.IsDevelopment();
-
-        if (ex is BaseException baseEx)
-            baseEx.CorrelationId = traceId;
-
+        var showDetails = _options.ShowDetailsInProduction;
+         
         await LogExceptionAsync(context, ex, traceId, correlationId);
 
         var statusCode = ex.GetStatusCode();
@@ -112,7 +111,7 @@ public class ExceptionHandlingMiddleware
     {
         try
         {
-            var log = new LoggingCore.Entities.ExceptionLog
+            var log = new ExceptionLog
             {
                 TraceId = traceId,
                 CorrelationId = correlationId,
@@ -127,7 +126,7 @@ public class ExceptionHandlingMiddleware
                 Timestamp = DateTime.UtcNow,
                 MachineName = Environment.MachineName,
                 IsHandled = true,
-                HandledBy = "ExceptionHandlingMiddleware"
+                HandledBy = "ExceptionHandlingMiddleware" 
             };
 
             await _loggingService.LogExceptionAsync(log);

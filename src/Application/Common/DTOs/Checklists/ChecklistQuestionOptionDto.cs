@@ -1,6 +1,6 @@
 ﻿using Domain.Entities.Checklists;
 
-namespace Application.Common.DTOs;
+namespace Application.Common.DTOs.Checklists;
 
 public class ChecklistQuestionOptionDto
 {

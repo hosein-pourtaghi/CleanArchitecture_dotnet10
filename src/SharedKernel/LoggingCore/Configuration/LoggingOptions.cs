@@ -8,6 +8,8 @@ public class LoggingOptions
     public bool EnableApiLogging { get; set; } = true;
     public bool EnableExceptionLogging { get; set; } = true;
     public bool EnablePerformanceLogging { get; set; } = true;
+    public bool EnableQueryLogging { get; set; } = false;
+    public int SlowQueryThresholdMs { get; set; } = 1000;    
     public bool ShowDetailsInProduction { get; set; } = false;
     public int BatchSize { get; set; } = 100;
     public int BatchIntervalMs { get; set; } = 1000;

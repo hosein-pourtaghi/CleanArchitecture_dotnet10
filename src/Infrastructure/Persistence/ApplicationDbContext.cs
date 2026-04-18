@@ -1,7 +1,6 @@
 ﻿using System.Data;
 using System.Linq.Expressions;
-using Application.Common.Data;
-using Application.Common.Interfaces;
+using Application.Common.Interfaces.Core;
 using Domain.Entities.Assessments;
 using Domain.Entities.Checklists;
 using Domain.Entities.Customers;

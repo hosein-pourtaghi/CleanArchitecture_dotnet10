@@ -1,7 +1,5 @@
-
-using Application.Common.Data;
-using Application.Common.Interfaces;
 using Application.Common.Interfaces.Checklists;
+using Application.Common.Interfaces.Core;
 using Application.Common.Messaging;
 using AutoMapper;
 using Domain.Entities.Checklists;

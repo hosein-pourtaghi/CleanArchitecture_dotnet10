@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Common.Interfaces;
+namespace Application.Common.Interfaces.Core;
  
 
 public interface ICurrentUserService
@@ -12,7 +12,7 @@ public interface ICurrentUserService
     /// <summary>
     /// Current user ID (null if not authenticated)
     /// </summary>
-    string? UserId { get; }
+    Guid UserId { get; }
 
     /// <summary>
     /// Current user email
@@ -23,12 +23,7 @@ public interface ICurrentUserService
     /// Current user roles
     /// </summary>
     IReadOnlyList<string> Roles { get; }
-
-    /// <summary>
-    /// Check if current user is authenticated
-    /// </summary>
-    bool IsAuthenticated { get; }
-
+     
     /// <summary>
     /// Check if current user has specific role
     /// </summary>

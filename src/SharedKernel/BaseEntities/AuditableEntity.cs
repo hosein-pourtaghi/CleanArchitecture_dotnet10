@@ -8,27 +8,27 @@ public abstract class AuditableEntity : Entity
 
     public DateTime CreatedAt { get; protected set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; protected set; }
-    public string? CreatedById { get; protected set; }
-    public string? UpdatedById { get; protected set; }
+    public Guid? CreatedById { get; protected set; }
+    public Guid? UpdatedById { get; protected set; }
      
 
     public bool IsDeleted { get; protected set; }
     public DateTime? DeletedAt { get; protected set; }
-    public string? DeletedById { get; protected set; }
+    public Guid? DeletedById { get; protected set; }
 
 
-    public void SetCreatedBy(string? userId)
+    public void SetCreatedBy(Guid? userId)
     {
         CreatedById = userId;
     }
 
-    public void SetUpdatedBy(string? userId)
+    public void SetUpdatedBy(Guid? userId)
     {
         UpdatedAt = DateTime.UtcNow;
         UpdatedById = userId;
     }
 
-    public void SoftDelete(string? userId)
+    public void SoftDelete(Guid? userId)
     {
         IsDeleted = true;
         DeletedAt = DateTime.UtcNow;

@@ -17,7 +17,7 @@
 		
 		<PackageReference Include="Microsoft.Extensions.Hosting" />  
 		<PackageReference Include="Microsoft.Extensions.Options" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions"  />
+		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" /> 
 	</ItemGroup>
 		
 	<ItemGroup>

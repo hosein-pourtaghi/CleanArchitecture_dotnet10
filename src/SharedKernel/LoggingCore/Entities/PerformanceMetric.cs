@@ -11,7 +11,7 @@ public class PerformanceMetric
     public long Id { get; set; }
 
     [Required]
-    [MaxLength(50)]
+    [MaxLength(100)]
     public string TraceId { get; set; } = string.Empty;
 
     [Required]
@@ -35,7 +35,7 @@ public class PerformanceMetric
 
     public bool IsSlowOperation { get; set; }
 
-    [MaxLength(50)]
+    [MaxLength(100)]
     public string? MachineName { get; set; }
 
     public string? Metadata { get; set; }

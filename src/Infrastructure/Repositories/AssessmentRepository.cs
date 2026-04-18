@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Application.Common.DTOs;
+using Application.Common.DTOs.Checklists;
 using Application.Common.DTOs.Shared;
 using Application.Common.Interfaces.Checklists;
 using AutoMapper;

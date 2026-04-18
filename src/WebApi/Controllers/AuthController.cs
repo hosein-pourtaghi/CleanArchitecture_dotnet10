@@ -1,12 +1,7 @@
-using System.Diagnostics;
-using Application.Common.Authentication;
-using Application.Common.DTOs;
 using Application.Common.DTOs.Identities;
-using Application.Common.Interfaces;
+using Application.Common.Interfaces.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebApi.Extensions;
-using WebApi.Models.Authentication;
 
 namespace WebApi.Controllers;
 
@@ -15,8 +10,12 @@ namespace WebApi.Controllers;
 /// Provides JWT token-based authentication with comprehensive documentation and error handling.
 /// </summary>
 [ApiController]
-[Route("api/[controller]/[action]")] 
-public class AuthController(IAuthService _authService, IUserContext _userContext, ILogger<AuthController> _logger) : ControllerBase
+[Route("api/[controller]/[action]")]
+public class AuthController(
+    IAuthService _authService, 
+    ICurrentUserService _currentUserService, 
+    ILogger<AuthController> _logger
+    ) : ControllerBase
 {
 
     [HttpPost]
@@ -66,7 +65,7 @@ public class AuthController(IAuthService _authService, IUserContext _userContext
     public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
     {
         var tokenId = User.FindFirst("jti")?.Value;
-        var result = await _authService.LogoutAsync(_userContext.UserId, request, tokenId);
+        var result = await _authService.LogoutAsync(_currentUserService.UserId, request, tokenId);
 
         if (result.IsFailure)
             return BadRequest(new { error = result.Error });

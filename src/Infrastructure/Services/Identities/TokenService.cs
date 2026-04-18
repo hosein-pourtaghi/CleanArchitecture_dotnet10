@@ -2,9 +2,8 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Application.Common.Data;
 using Application.Common.DTOs.Identities;
-using Application.Common.Interfaces;
+using Application.Common.Interfaces.Core;
 using Domain.Entities.Identities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

@@ -1,4 +1,4 @@
-using Application.Common.DTOs;
+using Application.Common.DTOs.Checklists;
 using AutoMapper;
 using Domain.Entities.Assessments;
 

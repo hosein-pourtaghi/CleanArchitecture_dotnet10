@@ -7,7 +7,7 @@ using Application.Assessments.Update;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
-using Application.Common.DTOs;
+using Application.Common.DTOs.Checklists;
 
 namespace WebApi.Controllers;
 

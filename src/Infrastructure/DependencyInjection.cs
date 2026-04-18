@@ -1,11 +1,8 @@
 ﻿using System.Security.Claims;
 using System.Text;
-using Application.Common.Authentication;
-using Application.Common.Data;
-using Application.Common.Interfaces;
 using Application.Common.Interfaces.Checklists;
+using Application.Common.Interfaces.Core;
 using Domain.Entities.Identities;
-using Infrastructure.Authentication;
 using Infrastructure.Authorization;
 using Infrastructure.DomainEvents;
 using Infrastructure.Persistence;
@@ -13,9 +10,9 @@ using Infrastructure.Repositories;
 using Infrastructure.Repositories.Core;
 using Infrastructure.Services;
 using Infrastructure.Services.Identities;
+using LoggingCore.Interceptors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -93,11 +90,7 @@ public static class DependencyInjection
                     options.MaxBatchSize(100);
                 });
 
-                //// Add interceptors
-                //var diagnosticsService = serviceProvider.GetRequiredService<IQueryDiagnosticsService>();
-                //var logger = serviceProvider.GetRequiredService<ILogger<QueryLoggingInterceptor>>();
-
-                //options.AddInterceptors(new QueryLoggingInterceptor(diagnosticsService, logger));
+                options.AddInterceptors(serviceProvider.GetRequiredService<QueryLoggingInterceptor>());
 
                 // فقط برای محیط توسعه!
                 options.EnableSensitiveDataLogging();
@@ -106,6 +99,14 @@ public static class DependencyInjection
             });
 
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+
+
+
+        // Todo: Register interceptor do it in Library
+        services.AddScoped<QueryLoggingInterceptor>();
+
+
+
 
         services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
             {
@@ -222,10 +223,6 @@ public static class DependencyInjection
                     }
                 };
             });
-
-        services.AddScoped<IUserContext, UserContext>();
-        services.AddSingleton<IPasswordHasher, PasswordHasher>();
-        services.AddSingleton<ITokenProvider, TokenProvider>();
 
         return services;
     }

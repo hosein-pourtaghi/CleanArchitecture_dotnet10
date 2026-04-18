@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace Application.Common.Data;
+namespace Application.Common.Interfaces.Core;
 
 
 public interface IApplicationDbContext

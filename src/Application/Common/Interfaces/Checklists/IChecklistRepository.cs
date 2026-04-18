@@ -1,4 +1,5 @@
-﻿using Domain.Entities.Checklists;
+﻿using Application.Common.Interfaces.Core;
+using Domain.Entities.Checklists;
 
 namespace Application.Common.Interfaces.Checklists;
 

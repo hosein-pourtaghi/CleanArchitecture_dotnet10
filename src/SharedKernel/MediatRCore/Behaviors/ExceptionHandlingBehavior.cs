@@ -8,10 +8,11 @@ using SharedKernel.Exceptions;
 using Microsoft.AspNetCore.Http;
 
 namespace MediatRCore.Behaviors;
+ 
 
 /// <summary>
 /// MediatR pipeline behavior for handling exceptions from handlers
-/// </summary>
+/// </summary> 
 public sealed class ExceptionHandlingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
