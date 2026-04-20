@@ -1,6 +1,6 @@
 using SharedKernel;
 
-namespace Domain.Entities.Customers;
+namespace Domain.Aggregates.Customers;
 
 /// <summary>
 /// Domain event raised when a customer is created.

@@ -1,7 +1,7 @@
-﻿using Domain.Entities.Checklists;
+﻿using Domain.Aggregates.Checklists;
 using SharedKernel.BaseEntities;
 
-namespace Domain.Entities.Assessments;
+namespace Domain.Aggregates.Assessments;
 
 public class AssessmentAnswer : Entity
 {

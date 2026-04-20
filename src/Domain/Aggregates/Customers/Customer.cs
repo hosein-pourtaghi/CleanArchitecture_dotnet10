@@ -1,6 +1,6 @@
 using SharedKernel.BaseEntities;
 
-namespace Domain.Entities.Customers;
+namespace Domain.Aggregates.Customers;
 
 
 /// <summary>

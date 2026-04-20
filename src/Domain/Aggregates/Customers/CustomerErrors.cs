@@ -1,6 +1,6 @@
 using SharedKernel;
 
-namespace Domain.Entities.Customers;
+namespace Domain.Aggregates.Customers;
 
 /// <summary>
 /// Centralized error definitions for Customer domain operations.

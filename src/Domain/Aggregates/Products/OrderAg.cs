@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SharedKernel.BaseEntities;
 
-namespace Domain.Entities.Products;
+namespace Domain.Aggregates.Products;
 
 
 

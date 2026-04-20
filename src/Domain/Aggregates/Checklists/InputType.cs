@@ -1,4 +1,4 @@
-﻿namespace Domain.Entities.Checklists;
+﻿namespace Domain.Aggregates.Checklists;
 
 public enum InputType
 {

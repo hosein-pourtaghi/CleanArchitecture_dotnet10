@@ -1,6 +1,6 @@
 using SharedKernel;
 
-namespace Domain.Entities.Assessments;
+namespace Domain.Aggregates.Assessments;
 
 /// <summary>
 /// Centralized error definitions for Assessment domain operations.

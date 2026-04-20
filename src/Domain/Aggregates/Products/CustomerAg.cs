@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SharedKernel.BaseEntities;
 
-namespace Domain.Entities.Products;
+namespace Domain.Aggregates.Products;
  
 
 ///// <summary>
@@ -64,7 +64,7 @@ namespace Domain.Entities.Products;
 //}
 
 //// Domain/Entities/Customers/Address.cs
-//namespace YourProject.Domain.Entities;
+//namespace YourProject.Domain.Aggregates;
 
 ///// <summary>
 ///// Represents a customer address (shipping or billing)
@@ -105,7 +105,7 @@ namespace Domain.Entities.Products;
 //}
 
 //// Domain/Entities/Customers/Wishlist.cs
-//namespace YourProject.Domain.Entities;
+//namespace YourProject.Domain.Aggregates;
 
 ///// <summary>
 ///// Customer wishlist for saving products for later
@@ -125,7 +125,7 @@ namespace Domain.Entities.Products;
 //}
 
 //// Domain/Entities/Customers/WishlistItem.cs
-//namespace YourProject.Domain.Entities;
+//namespace YourProject.Domain.Aggregates;
 
 ///// <summary>
 ///// Individual item in a wishlist
@@ -147,7 +147,7 @@ namespace Domain.Entities.Products;
 //}
 
 //// Domain/Entities/Customers/ShoppingCart.cs
-//namespace YourProject.Domain.Entities;
+//namespace YourProject.Domain.Aggregates;
 
 ///// <summary>
 ///// Customer shopping cart
@@ -181,7 +181,7 @@ namespace Domain.Entities.Products;
 //}
 
 //// Domain/Entities/Customers/CartItem.cs
-//namespace YourProject.Domain.Entities;
+//namespace YourProject.Domain.Aggregates;
 
 ///// <summary>
 ///// Individual item in shopping cart

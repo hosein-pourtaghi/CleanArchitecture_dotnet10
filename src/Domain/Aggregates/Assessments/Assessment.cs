@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Domain.Entities.Checklists;
+using Domain.Aggregates.Checklists;
 using SharedKernel.BaseEntities;
 
-namespace Domain.Entities.Assessments;
+namespace Domain.Aggregates.Assessments;
 
 public class Assessment : Entity
 {

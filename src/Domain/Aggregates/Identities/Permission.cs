@@ -1,4 +1,4 @@
-﻿namespace Domain.Entities.Identities;
+﻿namespace Domain.Aggregates.Identities;
 
 public class Permission
 {

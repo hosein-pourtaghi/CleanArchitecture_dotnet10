@@ -1,6 +1,6 @@
 using SharedKernel;
 
-namespace Domain.Entities.Products;
+namespace Domain.Aggregates.Products;
 
 /// <summary>
 /// Centralized error definitions for Product domain operations.

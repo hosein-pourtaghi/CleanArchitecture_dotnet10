@@ -1,6 +1,6 @@
 ﻿using SharedKernel.BaseEntities;
 
-namespace Domain.Entities.Checklists;
+namespace Domain.Aggregates.Checklists;
 
 public class ChecklistQuestionOption : Entity
 {

@@ -1,6 +1,6 @@
 using SharedKernel;
 
-namespace Domain.Entities.Checklists;
+namespace Domain.Aggregates.Checklists;
 
 /// <summary>
 /// Centralized error definitions for Checklist domain operations.

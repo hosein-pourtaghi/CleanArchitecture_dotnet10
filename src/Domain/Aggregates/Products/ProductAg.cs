@@ -1,6 +1,6 @@
 ﻿using SharedKernel.BaseEntities;
 
-namespace Domain.Entities.Products;
+namespace Domain.Aggregates.Products;
  
 
 ///// <summary>

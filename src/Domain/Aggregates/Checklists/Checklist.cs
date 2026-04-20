@@ -1,6 +1,6 @@
 ﻿using SharedKernel.BaseEntities;
 
-namespace Domain.Entities.Checklists;
+namespace Domain.Aggregates.Checklists;
 
 /// <summary>
 /// checklist aggregate root
