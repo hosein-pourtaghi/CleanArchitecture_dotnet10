@@ -1,33 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Reflection;
+﻿using System.Reflection;
+using Application.Common.Interfaces.Core;
+using Application.Common.Models;
 using Domain.Aggregates.Identities;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;   
 using SharedKernel;
+using Infrastructure.Authorization;
 
-namespace Infrastructure.Authorization;
-
-/// <summary>
-/// find policies dynamically 
-/// no need to use [Authorize(policy:"xxx")]
-/// </summary>
-public interface IPolicyDiscoveryService
-{
-    Task<Result<int>> DiscoverAndRegisterPoliciesAsync();
-    List<DiscoveredPolicy> DiscoverPolicies();
-}
-
-public class DiscoveredPolicy
-{
-    public string PolicyName { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string Category { get; set; } = string.Empty;
-    public string Controller { get; set; } = string.Empty;
-    public string Action { get; set; } = string.Empty;
-    public string HttpMethod { get; set; } = string.Empty;
-}
+namespace Infrastructure.Services;
 
 public class PolicyDiscoveryService : IPolicyDiscoveryService
 {
