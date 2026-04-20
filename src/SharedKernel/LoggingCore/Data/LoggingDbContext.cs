@@ -1,8 +1,8 @@
 ﻿// src/LoggingCore/Data/LoggingDbContext.cs
-using LoggingCore.Entities;
+using SharedKernel.LoggingCore.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace LoggingCore.Data;
+namespace SharedKernel.LoggingCore.Data;
 
 public class LoggingDbContext : DbContext
 {

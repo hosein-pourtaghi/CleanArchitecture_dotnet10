@@ -2,7 +2,7 @@
 using HealthChecks.UI.Client;
 using Infrastructure;
 using Infrastructure.Authorization;
-using LoggingCore.DependencyInjection;
+using SharedKernel.LoggingCore.DependencyInjection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -17,7 +17,6 @@ using WebApi.Telemetry;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
-
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -39,6 +38,7 @@ Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
     .Enrich.WithProperty("Application", "MyAspireApp")
+    //.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
     .CreateLogger();
 
 // Configure OpenTelemetry
@@ -116,6 +116,21 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine($"Registered {result.Value} authorization policies");
     }
 }
+
+// Seed admin user AFTER policies are discovered
+using (var scope = app.Services.CreateScope())
+{
+    var identitySeeder = scope.ServiceProvider.GetRequiredService<IIdentitySeeder>();
+    var adminEmail = builder.Configuration["Admin:Email"] ?? "admin@example.com";
+    var adminPassword = builder.Configuration["Admin:Password"] ?? "Admin@123456";
+    var role = builder.Configuration["Admin:Role"] ?? "Admin";
+
+    await identitySeeder.SeedAdminUserAsync(adminEmail, adminPassword, role);
+    Console.WriteLine($"Admin user seeding completed");
+}
+
+
+
 
 // Use CORS (cart matters - should be before MapControllers)
 app.UseCors("AllowAngularApp");

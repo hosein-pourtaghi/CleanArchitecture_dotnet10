@@ -1,14 +1,14 @@
 ﻿// src/LoggingCore/Interceptors/QueryLoggingInterceptor.cs
 using System.Data.Common;
 using System.Diagnostics;
-using LoggingCore.Configuration;
-using LoggingCore.Entities;
-using LoggingCore.Services;
+using SharedKernel.LoggingCore.Configuration;
+using SharedKernel.LoggingCore.Entities;
+using SharedKernel.LoggingCore.Services;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace LoggingCore.Interceptors;
+namespace SharedKernel.LoggingCore.Interceptors;
 
 public class QueryLoggingInterceptor : DbCommandInterceptor
 {

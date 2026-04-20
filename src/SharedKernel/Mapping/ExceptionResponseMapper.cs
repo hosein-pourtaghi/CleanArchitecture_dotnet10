@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using SharedKernel.Exceptions;
 
-namespace LoggingCore.Mapping;
+namespace SharedKernel.LoggingCore.Mapping;
 
 /// <summary>
 /// Maps exceptions to HTTP response format

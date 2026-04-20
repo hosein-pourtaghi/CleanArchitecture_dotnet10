@@ -1,7 +1,7 @@
 ﻿// src/LoggingCore/Services/ILoggingService.cs
-using LoggingCore.Entities;
+using SharedKernel.LoggingCore.Entities;
 
-namespace LoggingCore.Services;
+namespace SharedKernel.LoggingCore.Services;
 
 public interface ILoggingService
 {

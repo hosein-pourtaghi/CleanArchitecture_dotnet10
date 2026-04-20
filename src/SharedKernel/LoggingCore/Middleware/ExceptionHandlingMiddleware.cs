@@ -1,10 +1,10 @@
 ﻿// src/LoggingLibrary/Middleware/ExceptionHandlingMiddleware.cs
 using System.Diagnostics;
 using System.Text.Json;
-using LoggingCore.Configuration;
-using LoggingCore.Entities;
-using LoggingCore.Mapping;
-using LoggingCore.Services;
+using SharedKernel.LoggingCore.Configuration;
+using SharedKernel.LoggingCore.Entities;
+using SharedKernel.LoggingCore.Mapping;
+using SharedKernel.LoggingCore.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

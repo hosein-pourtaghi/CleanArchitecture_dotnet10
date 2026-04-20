@@ -3,7 +3,6 @@ using System.Linq.Expressions;
 using Application.Common.Interfaces.Core;
 using Domain.Aggregates.Assessments;
 using Domain.Aggregates.Checklists;
-using Domain.Aggregates.Customers;
 using Domain.Aggregates.Identities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -76,7 +75,6 @@ ApplicationUserToken>, IApplicationDbContext
 
     #region DbSets  
 
-    public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<Checklist> Checklists => Set<Checklist>();
     public DbSet<Assessment> Assessments => Set<Assessment>();
     #endregion
@@ -176,7 +174,7 @@ ApplicationUserToken>, IApplicationDbContext
 
         foreach (var entityType in entityTypes)
         {
-            if (!typeof(AuditableEntity).IsAssignableFrom(entityType.ClrType))
+            if (!typeof(Entity).IsAssignableFrom(entityType.ClrType))
                 return;
 
             var entityBuilder = modelBuilder.Entity(entityType.ClrType);
@@ -195,7 +193,7 @@ ApplicationUserToken>, IApplicationDbContext
     private static bool IsEntityTypeValid(Type entityType)
     {
         return entityType != typeof(Entity) &&
-               entityType != typeof(AuditableEntity) &&
+               entityType != typeof(Entity) &&
                typeof(Entity).IsAssignableFrom(entityType);
     }
 
@@ -217,21 +215,21 @@ ApplicationUserToken>, IApplicationDbContext
             .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Throw); // READONLY!
 
         // 🔥 SHADOW PROPERTIES: CreatedById
-        entity.Property<string>("CreatedById")
+        entity.Property<Guid?>("CreatedById")
             .HasMaxLength(450)
             .HasColumnName("CreatedById")
-            .HasColumnType("nvarchar(450)")
+            .HasColumnType("uniqueidentifier")
             .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Throw); // READONLY!
 
         // 🔥 SHADOW PROPERTIES: UpdatedById
-        entity.Property<string>("UpdatedById")
+        entity.Property<Guid?>("UpdatedById")
             .HasMaxLength(450)
             .HasColumnName("UpdatedById")
-            .HasColumnType("nvarchar(450)")
+            .HasColumnType("uniqueidentifier")
             .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Throw); // READONLY!
 
-        // 🔥 SHADOW PROPERTIES: Only for AuditableEntity - in case i want to separate soft delete from audit
-        if (typeof(AuditableEntity).IsAssignableFrom(entityType))
+        // 🔥 SHADOW PROPERTIES: Only for Entity - in case i want to separate soft delete from audit
+        if (typeof(Entity).IsAssignableFrom(entityType))
         {
             entity.Property<bool>("IsDeleted")
                 .HasDefaultValue(false)
@@ -244,17 +242,17 @@ ApplicationUserToken>, IApplicationDbContext
                 .HasColumnType("datetime2(3)")
                 .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Throw);
 
-            entity.Property<string>("DeletedById")
+            entity.Property<Guid?>("DeletedById")
                 .HasMaxLength(450)
                 .HasColumnName("DeletedById")
-                .HasColumnType("nvarchar(450)")
+                .HasColumnType("uniqueidentifier")
                 .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Throw);
         }
     }
 
     private static void ConfigureSoftDelete(EntityTypeBuilder entity, Type entityType)
     {
-        if (!typeof(AuditableEntity).IsAssignableFrom(entityType))
+        if (!typeof(Entity).IsAssignableFrom(entityType))
             return;
 
         // 🔥 FIX: Use explicit type parameter for query filter
@@ -335,7 +333,7 @@ ApplicationUserToken>, IApplicationDbContext
         var userId = _currentUserService?.UserId;
 
         // 🔥 AUDIT: Process added/modified entities - EFFICIENT: Process only entities that need tracking
-        var auditableEntries = ChangeTracker.Entries<AuditableEntity>()
+        var auditableEntries = ChangeTracker.Entries<Entity>()
             .Where(e => e.State is EntityState.Added or EntityState.Modified)
             .ToList();
 
@@ -364,7 +362,7 @@ ApplicationUserToken>, IApplicationDbContext
         }
 
         // 🔥 SOFT DELETE: Handle soft delete operations
-        var softDeletableEntries = ChangeTracker.Entries<AuditableEntity>()
+        var softDeletableEntries = ChangeTracker.Entries<Entity>()
             .Where(e => e.State == EntityState.Deleted)
             .ToList();
 

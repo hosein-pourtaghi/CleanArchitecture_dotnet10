@@ -1,14 +1,14 @@
 ﻿// src/LoggingCore/Services/AsyncLoggingService.cs
 using System.Threading.Channels;
-using LoggingCore.Configuration;
-using LoggingCore.Data;
-using LoggingCore.Entities;
+using SharedKernel.LoggingCore.Configuration;
+using SharedKernel.LoggingCore.Data;
+using SharedKernel.LoggingCore.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace LoggingCore.Services;
+namespace SharedKernel.LoggingCore.Services;
 
 public sealed class LoggingService : ILoggingService, IHostedService, IDisposable
 {

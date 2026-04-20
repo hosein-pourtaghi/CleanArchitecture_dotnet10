@@ -1,8 +1,8 @@
 ﻿// src/MediatRCore/Behaviors/PerformanceBehavior.cs
 using MediatR;
 using System.Diagnostics;
-using LoggingCore.Services;
-using LoggingCore.Entities;
+using SharedKernel.LoggingCore.Services;
+using SharedKernel.LoggingCore.Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 

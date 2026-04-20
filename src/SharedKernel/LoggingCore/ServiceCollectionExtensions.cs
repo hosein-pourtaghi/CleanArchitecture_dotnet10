@@ -1,8 +1,8 @@
 ﻿// src/LoggingLibrary/Extensions/ServiceCollectionExtensions.cs
 
-using LoggingCore.Configuration;
-using LoggingCore.DependencyInjection;
-using LoggingCore.Services;
+using SharedKernel.LoggingCore.Configuration;
+using SharedKernel.LoggingCore.DependencyInjection;
+using SharedKernel.LoggingCore.Services;
 using LoggingLibrary.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;

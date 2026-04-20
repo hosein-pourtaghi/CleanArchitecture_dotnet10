@@ -1,5 +1,5 @@
 ﻿// src/LoggingCore/Configuration/LoggingOptions.cs
-namespace LoggingCore.Configuration;
+namespace SharedKernel.LoggingCore.Configuration;
 
 public class LoggingOptions
 {

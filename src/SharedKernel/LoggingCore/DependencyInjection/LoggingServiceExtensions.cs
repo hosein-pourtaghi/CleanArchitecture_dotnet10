@@ -1,12 +1,12 @@
 ﻿// src/LoggingCore/DependencyInjection/LoggingServiceExtensions.cs
-using LoggingCore.Configuration;
-using LoggingCore.Data;
-using LoggingCore.Services;
+using SharedKernel.LoggingCore.Configuration;
+using SharedKernel.LoggingCore.Data;
+using SharedKernel.LoggingCore.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace LoggingCore.DependencyInjection;
+namespace SharedKernel.LoggingCore.DependencyInjection;
 
 public static class LoggingServiceExtensions
 {

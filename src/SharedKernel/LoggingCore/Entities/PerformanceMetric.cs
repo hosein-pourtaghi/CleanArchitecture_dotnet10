@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace LoggingCore.Entities;
+namespace SharedKernel.LoggingCore.Entities;
 
 [Table("PerformanceMetrics", Schema = "Logging")]
 public class PerformanceMetric

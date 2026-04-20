@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LoggingCore.Configuration;
+namespace SharedKernel.LoggingCore.Configuration;
 
 public static class LoggingOptionsSetup
 {

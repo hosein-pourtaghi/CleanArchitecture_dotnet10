@@ -26,7 +26,6 @@ public interface IApplicationDbContext
 
 
     #region DbSets 
-    DbSet<Customer> Customers { get; }
     DbSet<Checklist> Checklists { get; }
     DbSet<Assessment> Assessments { get; }
 

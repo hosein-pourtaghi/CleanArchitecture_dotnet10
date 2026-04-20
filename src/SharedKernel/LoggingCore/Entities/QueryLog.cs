@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace LoggingCore.Entities;
+namespace SharedKernel.LoggingCore.Entities;
 
 [Table("QueryLogs", Schema = "Logging")]
 public class QueryLog

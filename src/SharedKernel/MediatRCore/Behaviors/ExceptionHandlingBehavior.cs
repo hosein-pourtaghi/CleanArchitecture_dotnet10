@@ -1,7 +1,7 @@
 ﻿// src/MediatRCore/Behaviors/ExceptionHandlingBehavior.cs
 using System.Diagnostics;
-using LoggingCore.Entities;
-using LoggingCore.Services;
+using SharedKernel.LoggingCore.Entities;
+using SharedKernel.LoggingCore.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Exceptions;

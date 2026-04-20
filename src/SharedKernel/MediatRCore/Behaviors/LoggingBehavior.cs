@@ -1,8 +1,8 @@
 ﻿// src/MediatRCore/Behaviors/LoggingBehavior.cs
 using System.Diagnostics;
 using System.Text.Json;
-using LoggingCore.Entities;
-using LoggingCore.Services;
+using SharedKernel.LoggingCore.Entities;
+using SharedKernel.LoggingCore.Services;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
