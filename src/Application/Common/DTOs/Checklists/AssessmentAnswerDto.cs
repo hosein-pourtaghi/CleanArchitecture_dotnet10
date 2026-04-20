@@ -1,6 +1,6 @@
 using System;
-using Domain.Entities.Assessments;
-using Domain.Entities.Checklists;
+using Domain.Aggregates.Assessments;
+using Domain.Aggregates.Checklists;
 using SharedKernel;
 
 namespace Application.Common.DTOs.Checklists;

@@ -2,7 +2,7 @@ using Application.Common.DTOs;
 using Application.Common.Interfaces.Core;
 using Application.Common.Messaging;
 using AutoMapper;
-using Domain.Entities.Customers;
+using Domain.Aggregates.Customers;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 

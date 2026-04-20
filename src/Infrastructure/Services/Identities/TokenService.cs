@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Application.Common.DTOs.Identities;
 using Application.Common.Interfaces.Core;
-using Domain.Entities.Identities;
+using Domain.Aggregates.Identities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;

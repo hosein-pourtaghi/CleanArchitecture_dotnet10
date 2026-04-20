@@ -1,4 +1,4 @@
-﻿using Domain.Entities.Checklists;
+﻿using Domain.Aggregates.Checklists;
 
 namespace WebApi.Utilities;
 

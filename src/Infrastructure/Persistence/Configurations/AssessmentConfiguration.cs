@@ -1,4 +1,4 @@
-using Domain.Entities.Assessments;
+using Domain.Aggregates.Assessments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

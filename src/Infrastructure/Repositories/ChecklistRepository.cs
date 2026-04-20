@@ -1,6 +1,6 @@
 ﻿using Application.Common.Interfaces.Checklists;
 using AutoMapper;
-using Domain.Entities.Checklists;
+using Domain.Aggregates.Checklists;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories.Core;
 using Microsoft.EntityFrameworkCore;

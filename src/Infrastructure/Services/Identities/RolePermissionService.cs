@@ -1,6 +1,6 @@
 ﻿using Application.Common.DTOs.Identities;
 using Application.Common.Interfaces.Core;
-using Domain.Entities.Identities;
+using Domain.Aggregates.Identities;
 using Infrastructure.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

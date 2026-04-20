@@ -1,10 +1,10 @@
 ﻿using System.Data;
 using System.Linq.Expressions;
 using Application.Common.Interfaces.Core;
-using Domain.Entities.Assessments;
-using Domain.Entities.Checklists;
-using Domain.Entities.Customers;
-using Domain.Entities.Identities;
+using Domain.Aggregates.Assessments;
+using Domain.Aggregates.Checklists;
+using Domain.Aggregates.Customers;
+using Domain.Aggregates.Identities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

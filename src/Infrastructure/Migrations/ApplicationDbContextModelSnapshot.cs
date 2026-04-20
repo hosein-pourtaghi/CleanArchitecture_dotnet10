@@ -23,7 +23,7 @@ namespace Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Entities.Assessments.Assessment", b =>
+            modelBuilder.Entity("Domain.Aggregates.Assessments.Assessment", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -54,7 +54,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("Assessments", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Assessments.AssessmentAnswer", b =>
+            modelBuilder.Entity("Domain.Aggregates.Assessments.AssessmentAnswer", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -81,7 +81,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("AssessmentAnswer", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Checklists.Checklist", b =>
+            modelBuilder.Entity("Domain.Aggregates.Checklists.Checklist", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -115,7 +115,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("Checklists", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Checklists.ChecklistGroup", b =>
+            modelBuilder.Entity("Domain.Aggregates.Checklists.ChecklistGroup", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -148,7 +148,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("ChecklistGroup", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Checklists.ChecklistQuestion", b =>
+            modelBuilder.Entity("Domain.Aggregates.Checklists.ChecklistQuestion", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -183,7 +183,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("ChecklistQuestion", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Checklists.ChecklistQuestionOption", b =>
+            modelBuilder.Entity("Domain.Aggregates.Checklists.ChecklistQuestionOption", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -214,7 +214,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("ChecklistQuestionOption", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Customers.Customer", b =>
+            modelBuilder.Entity("Domain.Aggregates.Customers.Customer", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -264,7 +264,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("Customers", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.ApplicationRole", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.ApplicationRole", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -301,7 +301,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("Roles", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.ApplicationRoleClaim", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.ApplicationRoleClaim", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -325,7 +325,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetRoleClaims", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.ApplicationUser", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -429,7 +429,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("Users", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.ApplicationUserClaim", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.ApplicationUserClaim", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -453,7 +453,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserClaims", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.ApplicationUserLogin", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.ApplicationUserLogin", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(450)");
@@ -474,7 +474,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserLogins", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.ApplicationUserRole", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.ApplicationUserRole", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -489,7 +489,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserRoles", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.ApplicationUserToken", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.ApplicationUserToken", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -508,7 +508,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.Permission", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.Permission", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -542,7 +542,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("Permissions", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.RolePermission", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.RolePermission", b =>
                 {
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");
@@ -557,7 +557,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("RolePermissions", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.TokenBlacklist", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.TokenBlacklist", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -589,7 +589,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("TokenBlacklist", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.UserSession", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.UserSession", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -749,9 +749,9 @@ namespace Infrastructure.Migrations
                     b.ToTable("UserTokens", "dbo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Assessments.Assessment", b =>
+            modelBuilder.Entity("Domain.Aggregates.Assessments.Assessment", b =>
                 {
-                    b.HasOne("Domain.Entities.Checklists.Checklist", "Checklist")
+                    b.HasOne("Domain.Aggregates.Checklists.Checklist", "Checklist")
                         .WithMany()
                         .HasForeignKey("ChecklistId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -760,15 +760,15 @@ namespace Infrastructure.Migrations
                     b.Navigation("Checklist");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Assessments.AssessmentAnswer", b =>
+            modelBuilder.Entity("Domain.Aggregates.Assessments.AssessmentAnswer", b =>
                 {
-                    b.HasOne("Domain.Entities.Assessments.Assessment", "Assessment")
+                    b.HasOne("Domain.Aggregates.Assessments.Assessment", "Assessment")
                         .WithMany("Answers")
                         .HasForeignKey("AssessmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Checklists.ChecklistQuestion", "Question")
+                    b.HasOne("Domain.Aggregates.Checklists.ChecklistQuestion", "Question")
                         .WithMany()
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -779,15 +779,15 @@ namespace Infrastructure.Migrations
                     b.Navigation("Question");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Checklists.ChecklistGroup", b =>
+            modelBuilder.Entity("Domain.Aggregates.Checklists.ChecklistGroup", b =>
                 {
-                    b.HasOne("Domain.Entities.Checklists.Checklist", "Checklist")
+                    b.HasOne("Domain.Aggregates.Checklists.Checklist", "Checklist")
                         .WithMany("Groups")
                         .HasForeignKey("ChecklistId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Checklists.ChecklistGroup", "Parent")
+                    b.HasOne("Domain.Aggregates.Checklists.ChecklistGroup", "Parent")
                         .WithMany("Children")
                         .HasForeignKey("ParentId");
 
@@ -796,9 +796,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Checklists.ChecklistQuestion", b =>
+            modelBuilder.Entity("Domain.Aggregates.Checklists.ChecklistQuestion", b =>
                 {
-                    b.HasOne("Domain.Entities.Checklists.ChecklistGroup", "Group")
+                    b.HasOne("Domain.Aggregates.Checklists.ChecklistGroup", "Group")
                         .WithMany("Questions")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -807,9 +807,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("Group");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Checklists.ChecklistQuestionOption", b =>
+            modelBuilder.Entity("Domain.Aggregates.Checklists.ChecklistQuestionOption", b =>
                 {
-                    b.HasOne("Domain.Entities.Checklists.ChecklistQuestion", "ChecklistQuestion")
+                    b.HasOne("Domain.Aggregates.Checklists.ChecklistQuestion", "ChecklistQuestion")
                         .WithMany("Options")
                         .HasForeignKey("ChecklistQuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -818,42 +818,42 @@ namespace Infrastructure.Migrations
                     b.Navigation("ChecklistQuestion");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.ApplicationRoleClaim", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.ApplicationRoleClaim", b =>
                 {
-                    b.HasOne("Domain.Entities.Identities.ApplicationRole", null)
+                    b.HasOne("Domain.Aggregates.Identities.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.ApplicationUserClaim", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.ApplicationUserClaim", b =>
                 {
-                    b.HasOne("Domain.Entities.Identities.ApplicationUser", null)
+                    b.HasOne("Domain.Aggregates.Identities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.ApplicationUserLogin", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.ApplicationUserLogin", b =>
                 {
-                    b.HasOne("Domain.Entities.Identities.ApplicationUser", null)
+                    b.HasOne("Domain.Aggregates.Identities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.ApplicationUserRole", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.ApplicationUserRole", b =>
                 {
-                    b.HasOne("Domain.Entities.Identities.ApplicationRole", "Role")
+                    b.HasOne("Domain.Aggregates.Identities.ApplicationRole", "Role")
                         .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Identities.ApplicationUser", "User")
+                    b.HasOne("Domain.Aggregates.Identities.ApplicationUser", "User")
                         .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -864,24 +864,24 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.ApplicationUserToken", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.ApplicationUserToken", b =>
                 {
-                    b.HasOne("Domain.Entities.Identities.ApplicationUser", null)
+                    b.HasOne("Domain.Aggregates.Identities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.RolePermission", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.RolePermission", b =>
                 {
-                    b.HasOne("Domain.Entities.Identities.Permission", "Permission")
+                    b.HasOne("Domain.Aggregates.Identities.Permission", "Permission")
                         .WithMany("RolePermissions")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Identities.ApplicationRole", "Role")
+                    b.HasOne("Domain.Aggregates.Identities.ApplicationRole", "Role")
                         .WithMany("RolePermissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -892,9 +892,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.UserSession", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.UserSession", b =>
                 {
-                    b.HasOne("Domain.Entities.Identities.ApplicationUser", "User")
+                    b.HasOne("Domain.Aggregates.Identities.ApplicationUser", "User")
                         .WithMany("Sessions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -903,43 +903,43 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Assessments.Assessment", b =>
+            modelBuilder.Entity("Domain.Aggregates.Assessments.Assessment", b =>
                 {
                     b.Navigation("Answers");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Checklists.Checklist", b =>
+            modelBuilder.Entity("Domain.Aggregates.Checklists.Checklist", b =>
                 {
                     b.Navigation("Groups");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Checklists.ChecklistGroup", b =>
+            modelBuilder.Entity("Domain.Aggregates.Checklists.ChecklistGroup", b =>
                 {
                     b.Navigation("Children");
 
                     b.Navigation("Questions");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Checklists.ChecklistQuestion", b =>
+            modelBuilder.Entity("Domain.Aggregates.Checklists.ChecklistQuestion", b =>
                 {
                     b.Navigation("Options");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.ApplicationRole", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.ApplicationRole", b =>
                 {
                     b.Navigation("RolePermissions");
 
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.ApplicationUser", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.ApplicationUser", b =>
                 {
                     b.Navigation("Sessions");
 
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Identities.Permission", b =>
+            modelBuilder.Entity("Domain.Aggregates.Identities.Permission", b =>
                 {
                     b.Navigation("RolePermissions");
                 });

@@ -1,8 +1,8 @@
 ﻿using System.Data;
-using Domain.Entities.Assessments;
-using Domain.Entities.Checklists;
-using Domain.Entities.Customers;
-using Domain.Entities.Identities;
+using Domain.Aggregates.Assessments;
+using Domain.Aggregates.Checklists;
+using Domain.Aggregates.Customers;
+using Domain.Aggregates.Identities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;

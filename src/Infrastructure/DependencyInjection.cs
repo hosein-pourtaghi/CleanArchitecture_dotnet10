@@ -2,7 +2,7 @@
 using System.Text;
 using Application.Common.Interfaces.Checklists;
 using Application.Common.Interfaces.Core;
-using Domain.Entities.Identities;
+using Domain.Aggregates.Identities;
 using Infrastructure.Authorization;
 using Infrastructure.DomainEvents;
 using Infrastructure.Persistence;
@@ -63,9 +63,7 @@ public static class DependencyInjection
     }
 
     private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
-    {
-        // Register diagnostic service FIRST (before DbContext)
-        //services.AddSingleton<IQueryDiagnosticsService, QueryDiagnosticsService>();
+    { 
 
         string? connectionString = configuration["ConnectionString"];
 

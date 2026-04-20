@@ -1,6 +1,6 @@
 using Application.Common.DTOs.Checklists;
 using AutoMapper;
-using Domain.Entities.Assessments;
+using Domain.Aggregates.Assessments;
 
 namespace Application.Common.Mappings;
  

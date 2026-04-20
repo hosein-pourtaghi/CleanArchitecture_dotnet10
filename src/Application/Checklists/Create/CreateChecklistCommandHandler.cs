@@ -2,7 +2,7 @@ using Application.Common.Interfaces.Checklists;
 using Application.Common.Interfaces.Core;
 using Application.Common.Messaging;
 using AutoMapper;
-using Domain.Entities.Checklists;
+using Domain.Aggregates.Checklists;
 using SharedKernel;
 
 namespace Application.Checklists.Create;

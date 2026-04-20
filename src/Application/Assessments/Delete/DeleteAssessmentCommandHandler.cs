@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Core;
 using Application.Common.Messaging;
-using Domain.Entities.Assessments;
+using Domain.Aggregates.Assessments;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 

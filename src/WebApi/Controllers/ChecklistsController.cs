@@ -6,7 +6,7 @@ using Application.Checklists.Update;
 using Application.Common.DTOs.Checklists;
 using Application.Common.DTOs.Shared;
 using Application.Common.Interfaces.Checklists;
-using Domain.Entities.Checklists;
+using Domain.Aggregates.Checklists;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -7,7 +7,7 @@ using Application.Common.DTOs.Checklists;
 using Application.Common.DTOs.Shared;
 using Application.Common.Interfaces.Checklists;
 using AutoMapper;
-using Domain.Entities.Assessments;
+using Domain.Aggregates.Assessments;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
