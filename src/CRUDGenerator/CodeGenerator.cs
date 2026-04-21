@@ -1,25 +1,10 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CRUDGenerator.Services;
+﻿namespace CRUDGenerator;
 
 
 // ====================================================================================
 // Code Generator - Generates separate files for each CRUD component
 // ====================================================================================
-
-public class GeneratedFile
-{
-    public string Path { get; set; } = string.Empty;
-    public string RelativePath { get; set; } = string.Empty;
-    public string Content { get; set; } = string.Empty;
-}
-
-public static class CodeGen
+public static class CodeGenerator
 {
     private static readonly HashSet<string> SkipProperties = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -725,3 +710,9 @@ public class {entity.Name}Configuration : IEntityTypeConfiguration<{entity.Name}
 }
 
 
+public class GeneratedFile
+{
+    public string Path { get; set; } = string.Empty;
+    public string RelativePath { get; set; } = string.Empty;
+    public string Content { get; set; } = string.Empty;
+}
