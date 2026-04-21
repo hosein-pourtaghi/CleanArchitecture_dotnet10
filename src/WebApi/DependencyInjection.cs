@@ -77,7 +77,7 @@ public static class DependencyInjection
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Type = SecuritySchemeType.Http,
-                Scheme = "bearer",
+                Scheme = "Bearer",
                 BearerFormat = "JWT",
                 Description = "Enter your JWT token in the text field below.\n\n" +
                               "Example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",

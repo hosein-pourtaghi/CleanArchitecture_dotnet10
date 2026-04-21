@@ -24,34 +24,18 @@ namespace Infrastructure.Migrations
                     Version = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
                     LastModified = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     IsValid = table.Column<bool>(type: "bit", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
+                    Title = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: true),
+                    CreatedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true),
+                    UpdatedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: true),
+                    DeletedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Checklists", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Customers",
-                schema: "dbo",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    Address = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CreatedById = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UpdatedById = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DeletedById = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Customers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -228,7 +212,14 @@ namespace Infrastructure.Migrations
                     ChecklistId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ChecklistVersion = table.Column<int>(type: "int", nullable: false),
                     AssessmentDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    TotalScore = table.Column<float>(type: "real", nullable: false)
+                    TotalScore = table.Column<float>(type: "real", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: true),
+                    CreatedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true),
+                    UpdatedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: true),
+                    DeletedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -253,7 +244,14 @@ namespace Infrastructure.Migrations
                     ChecklistId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ParentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Priority = table.Column<int>(type: "int", nullable: false),
-                    IsShow = table.Column<bool>(type: "bit", nullable: false)
+                    IsShow = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: true),
+                    CreatedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true),
+                    UpdatedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: true),
+                    DeletedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -460,7 +458,14 @@ namespace Infrastructure.Migrations
                     Score = table.Column<float>(type: "real", nullable: true),
                     Priority = table.Column<int>(type: "int", nullable: false),
                     IsRequiredAnswer = table.Column<bool>(type: "bit", nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false)
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: true),
+                    CreatedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true),
+                    UpdatedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: true),
+                    DeletedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -483,7 +488,14 @@ namespace Infrastructure.Migrations
                     AssessmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     QuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AnswerText = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SelectedOptionIds = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    SelectedOptionIds = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: true),
+                    CreatedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true),
+                    UpdatedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: true),
+                    DeletedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -515,7 +527,14 @@ namespace Infrastructure.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Type = table.Column<int>(type: "int", nullable: false),
                     QuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ChecklistQuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    ChecklistQuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: true),
+                    CreatedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true),
+                    UpdatedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2(3)", nullable: true),
+                    DeletedById = table.Column<Guid>(type: "uniqueidentifier", maxLength: 450, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -560,10 +579,28 @@ namespace Infrastructure.Migrations
                 column: "AssessmentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AssessmentAnswer_CreatedAt",
+                schema: "dbo",
+                table: "AssessmentAnswer",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssessmentAnswer_IsDeleted",
+                schema: "dbo",
+                table: "AssessmentAnswer",
+                column: "IsDeleted");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AssessmentAnswer_QuestionId",
                 schema: "dbo",
                 table: "AssessmentAnswer",
                 column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssessmentAnswer_UpdatedAt",
+                schema: "dbo",
+                table: "AssessmentAnswer",
+                column: "UpdatedAt");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Assessments_AssessmentDate",
@@ -584,10 +621,40 @@ namespace Infrastructure.Migrations
                 column: "ChecklistVersion");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Assessments_CreatedAt",
+                schema: "dbo",
+                table: "Assessments",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Assessments_IsDeleted",
+                schema: "dbo",
+                table: "Assessments",
+                column: "IsDeleted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Assessments_UpdatedAt",
+                schema: "dbo",
+                table: "Assessments",
+                column: "UpdatedAt");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ChecklistGroup_ChecklistId",
                 schema: "dbo",
                 table: "ChecklistGroup",
                 column: "ChecklistId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChecklistGroup_CreatedAt",
+                schema: "dbo",
+                table: "ChecklistGroup",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChecklistGroup_IsDeleted",
+                schema: "dbo",
+                table: "ChecklistGroup",
+                column: "IsDeleted");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ChecklistGroup_ParentId",
@@ -596,10 +663,34 @@ namespace Infrastructure.Migrations
                 column: "ParentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ChecklistGroup_UpdatedAt",
+                schema: "dbo",
+                table: "ChecklistGroup",
+                column: "UpdatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChecklistQuestion_CreatedAt",
+                schema: "dbo",
+                table: "ChecklistQuestion",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ChecklistQuestion_GroupId",
                 schema: "dbo",
                 table: "ChecklistQuestion",
                 column: "GroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChecklistQuestion_IsDeleted",
+                schema: "dbo",
+                table: "ChecklistQuestion",
+                column: "IsDeleted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChecklistQuestion_UpdatedAt",
+                schema: "dbo",
+                table: "ChecklistQuestion",
+                column: "UpdatedAt");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ChecklistQuestionOption_ChecklistQuestionId",
@@ -608,10 +699,46 @@ namespace Infrastructure.Migrations
                 column: "ChecklistQuestionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ChecklistQuestionOption_CreatedAt",
+                schema: "dbo",
+                table: "ChecklistQuestionOption",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChecklistQuestionOption_IsDeleted",
+                schema: "dbo",
+                table: "ChecklistQuestionOption",
+                column: "IsDeleted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChecklistQuestionOption_UpdatedAt",
+                schema: "dbo",
+                table: "ChecklistQuestionOption",
+                column: "UpdatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Checklists_CreatedAt",
+                schema: "dbo",
+                table: "Checklists",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Checklists_IsDeleted",
+                schema: "dbo",
+                table: "Checklists",
+                column: "IsDeleted");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Checklists_Title",
                 schema: "dbo",
                 table: "Checklists",
                 column: "Title");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Checklists_UpdatedAt",
+                schema: "dbo",
+                table: "Checklists",
+                column: "UpdatedAt");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Permissions_Category",
@@ -745,10 +872,6 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "ChecklistQuestionOption",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "Customers",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

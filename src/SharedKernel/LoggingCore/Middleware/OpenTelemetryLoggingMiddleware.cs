@@ -1,23 +1,41 @@
-using System.Diagnostics;
-using WebApi.Telemetry;
+// src/LoggingLibrary/Middleware/OpenTelemetryLoggingMiddleware.cs
+// ============================================================
+// PURPOSE: Middleware for OpenTelemetry request/response logging
+// ============================================================
 
-namespace WebApi.Middleware;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using SharedKernel.LoggingCore.Telemetry;
+
+namespace LoggingLibrary.Middleware;
 
 /// <summary>
 /// Middleware for creating spans and logging HTTP request/response details with OpenTelemetry.
 /// Captures timing information, status codes, and errors for better observability.
 /// </summary>
-public class OpenTelemetryLoggingMiddleware(RequestDelegate next, ILogger<OpenTelemetryLoggingMiddleware> logger)
+public class OpenTelemetryLoggingMiddleware
 {
+    private readonly RequestDelegate _next;
+    private readonly ILogger<OpenTelemetryLoggingMiddleware> _logger;
     private const string CorrelationIdHeaderName = "Correlation-Id";
 
-    public async Task Invoke(HttpContext context)
+    public OpenTelemetryLoggingMiddleware(
+        RequestDelegate next,
+        ILogger<OpenTelemetryLoggingMiddleware> logger)
+    {
+        _next = next;
+        _logger = logger;
+    }
+
+    public async Task InvokeAsync(HttpContext context)
     {
         // Extract or create correlation ID
         var correlationId = GetOrCreateCorrelationId(context);
 
         // Create an activity for the HTTP request
-        using (var activity = TelemetryActivitySource.Instance.StartActivity($"{context.Request.Method} {context.Request.Path}"))
+        using (var activity = TelemetryActivitySource.Instance.StartActivity(
+            $"{context.Request.Method} {context.Request.Path}"))
         {
             activity?.SetTag("http.method", context.Request.Method);
             activity?.SetTag("http.url", context.Request.Path);
@@ -31,13 +49,13 @@ public class OpenTelemetryLoggingMiddleware(RequestDelegate next, ILogger<OpenTe
 
             try
             {
-                logger.LogInformation(
+                _logger.LogInformation(
                     "HTTP request started. Method: {Method}, Path: {Path}, CorrelationId: {CorrelationId}",
                     context.Request.Method,
                     context.Request.Path,
                     correlationId);
 
-                await next.Invoke(context);
+                await _next.Invoke(context);
 
                 // Calculate elapsed time
                 var elapsedMs = GetElapsedMilliseconds(startTime);
@@ -45,7 +63,7 @@ public class OpenTelemetryLoggingMiddleware(RequestDelegate next, ILogger<OpenTe
                 activity?.SetTag("http.status_code", context.Response.StatusCode);
                 activity?.SetTag("http.response_time_ms", elapsedMs);
 
-                logger.LogInformation(
+                _logger.LogInformation(
                     "HTTP request completed. Method: {Method}, Path: {Path}, StatusCode: {StatusCode}, ElapsedMs: {ElapsedMs}, CorrelationId: {CorrelationId}",
                     context.Request.Method,
                     context.Request.Path,
@@ -62,7 +80,7 @@ public class OpenTelemetryLoggingMiddleware(RequestDelegate next, ILogger<OpenTe
                 activity?.SetTag("exception.message", ex.Message);
                 activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
 
-                logger.LogError(
+                _logger.LogError(
                     ex,
                     "HTTP request failed. Method: {Method}, Path: {Path}, ElapsedMs: {ElapsedMs}, CorrelationId: {CorrelationId}",
                     context.Request.Method,
@@ -81,7 +99,6 @@ public class OpenTelemetryLoggingMiddleware(RequestDelegate next, ILogger<OpenTe
         {
             return correlationId.FirstOrDefault() ?? context.TraceIdentifier;
         }
-
         return context.TraceIdentifier;
     }
 

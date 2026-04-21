@@ -10,8 +10,6 @@ using HealthChecks.UI.Client;
 using Infrastructure;
 using Infrastructure.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Trace;
 using Serilog;
 using SharedKernel.LoggingCore;
 using SharedKernel.LoggingCore.DependencyInjection;
@@ -25,57 +23,30 @@ using WebApi.Telemetry;
 // ============================================================
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
-
-
+ 
 // ============================================================
-// STEP 3: Configure Serilog
+// STEP 2: Configure Serilog (using library extension)
 // ============================================================
-// Reads Serilog configuration from appsettings.json
 Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .Enrich.FromLogContext()
-    .Enrich.WithProperty("Application", builder.Environment.ApplicationName)
+    .InitializeSerilog(builder.Configuration, builder.Environment.ApplicationName)
     .CreateLogger();
 
 // ============================================================
-// STEP 4: Configure OpenTelemetry for Tracing & Metrics
+// STEP 3: Configure Host with Serilog
 // ============================================================
-builder.Services.AddOpenTelemetry()
-    .WithTracing(tracerProviderBuilder =>
-    {
-        tracerProviderBuilder
-            .AddSource(TelemetryActivitySource.Instance.Name) // Use singleton instance
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation()
-            .AddOtlpExporter();
-    })
-    .WithMetrics(meterProviderBuilder =>
-    {
-        meterProviderBuilder
-            .AddRuntimeInstrumentation()
-            .AddAspNetCoreInstrumentation()
-            .AddOtlpExporter();
-    });
-
+builder.Host.AddSerilogLogging(builder.Configuration, builder.Environment.ApplicationName);
+ 
 // ============================================================
-// STEP 5: Configure Serilog Host
+// STEP 4: Chain all dependency injection extensions
 // ============================================================
-builder.Host.UseSerilog();
-
-
-
-// Chain all dependency injection extensions
 builder.Services
     .AddApplication()      // Application layer (MediatR, AutoMapper, Validators)
     .AddPresentation()     // WebApi layer (Controllers, Swagger, HttpClients)
     .AddInfrastructure(builder.Configuration); // Infrastructure layer (DB, Auth, Repos)
-
+ 
 // ============================================================
-// STEP 7: Configure Logging Services
+// STEP 5: Configure Logging Library (Serilog + OpenTelemetry + Services)
 // ============================================================
-#region Logging Configuration
-
-// Get logging connection string from configuration
 string? loggingConnectionString = builder.Configuration.GetConnectionString("LoggingConnection");
 if (string.IsNullOrEmpty(loggingConnectionString))
 {
@@ -84,20 +55,26 @@ if (string.IsNullOrEmpty(loggingConnectionString))
         "Add 'ConnectionStrings:LoggingConnection' to your configuration.");
 }
 
-// Register logging database context
-builder.Services.AddLoggingDbContext(loggingConnectionString);
-
-// Register logging library services
-builder.Services.AddLoggingLibrary(builder.Configuration);
-
+// Single call to add everything: Serilog, OpenTelemetry, Logging Services, DbContext
+builder.Services.AddLoggingLibrary(
+    builder.Configuration,
+    builder.Environment.ApplicationName,
+    loggingConnectionString,
+    options =>
+    {
+        options.EnableApiLogging = true;
+        options.EnableExceptionLogging = true;
+        options.EnablePerformanceLogging = true;
+        options.EnableQueryLogging = true;
+        options.SlowQueryThresholdMs = 500;
+    });
+ 
 // Register HTTP context accessor for logging
 builder.Services.AddHttpContextAccessor();
 
 // Register Telemetry Activity Source as singleton
 builder.Services.AddSingleton(TelemetryActivitySource.Instance);
-
-#endregion
-
+ 
 // ============================================================
 // STEP 8: Build Application
 // ============================================================
@@ -133,19 +110,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// 9b. Seed admin user AFTER policies are discovered
-using (var scope = app.Services.CreateScope())
-{
-    var identitySeeder = scope.ServiceProvider.GetRequiredService<IIdentitySeeder>();
-
-    var adminEmail = builder.Configuration["Admin:Email"] ?? "admin@example.com";
-    var adminPassword = builder.Configuration["Admin:Password"] ?? "Admin@123456";
-    var adminRole = builder.Configuration["Admin:Role"] ?? "Admin";
-
-    await identitySeeder.SeedAdminUserAsync(adminEmail, adminPassword, adminRole);
-    Log.Information("Admin user seeding completed for {Email}", adminEmail);
-}
-
 // ============================================================
 // STEP 10: Configure Middleware Pipeline
 // ============================================================
@@ -161,13 +125,7 @@ app.MapHealthChecks("health", new HealthCheckOptions
 
 // 10c. Exception Handling - Must be FIRST in the pipeline
 // This middleware handles all exceptions globally
-app.UseLoggingLibrary();
-
-// 10d. OpenTelemetry Logging Middleware
-app.UseMiddleware<OpenTelemetryLoggingMiddleware>();
-
-// 10e. Serilog Request Logging (logs HTTP requests)
-app.UseSerilogRequestLogging();
+app.UseLoggingLibrary(); 
 
 // 10f. Development-specific configuration
 if (app.Environment.IsDevelopment())
@@ -175,6 +133,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerWithUi();
     app.ApplyMigrations();
     app.UseDeveloperExceptionPage();
+}
+
+// 9b. Seed admin user AFTER policies are discovered
+using (var scope = app.Services.CreateScope())
+{
+    var identitySeeder = scope.ServiceProvider.GetRequiredService<IIdentitySeeder>();
+
+    var adminEmail = builder.Configuration["Admin:Email"] ?? "admin@example.com";
+    var adminPassword = builder.Configuration["Admin:Password"] ?? "Admin@123456";
+    var adminRole = builder.Configuration["Admin:Role"] ?? "Admin";
+
+    await identitySeeder.SeedAdminUserAsync(adminEmail, adminPassword, adminRole);
+    Log.Information("Admin user seeding completed for {Email}", adminEmail);
 }
 
 // 10g. Exception Handler (fallback for unhandled exceptions)

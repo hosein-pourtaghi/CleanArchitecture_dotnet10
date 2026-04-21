@@ -40,8 +40,41 @@ namespace Infrastructure.Migrations
                     b.Property<int>("ChecklistVersion")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("CreatedAt")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CreatedById");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("DeletedAt");
+
+                    b.Property<Guid?>("DeletedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("DeletedById");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<float>("TotalScore")
                         .HasColumnType("real");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("UpdatedAt");
+
+                    b.Property<Guid?>("UpdatedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UpdatedById");
 
                     b.HasKey("Id");
 
@@ -50,6 +83,15 @@ namespace Infrastructure.Migrations
                     b.HasIndex("ChecklistId");
 
                     b.HasIndex("ChecklistVersion");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_Assessments_CreatedAt");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_Assessments_IsDeleted");
+
+                    b.HasIndex("UpdatedAt")
+                        .HasDatabaseName("IX_Assessments_UpdatedAt");
 
                     b.ToTable("Assessments", "dbo");
                 });
@@ -66,17 +108,59 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("AssessmentId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("CreatedAt")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CreatedById");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("DeletedAt");
+
+                    b.Property<Guid?>("DeletedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("DeletedById");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("SelectedOptionIds")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("UpdatedAt");
+
+                    b.Property<Guid?>("UpdatedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UpdatedById");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AssessmentId");
 
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_AssessmentAnswer_CreatedAt");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_AssessmentAnswer_IsDeleted");
+
                     b.HasIndex("QuestionId");
+
+                    b.HasIndex("UpdatedAt")
+                        .HasDatabaseName("IX_AssessmentAnswer_UpdatedAt");
 
                     b.ToTable("AssessmentAnswer", "dbo");
                 });
@@ -87,7 +171,30 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("CreatedAt")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CreatedById");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("DeletedAt");
+
+                    b.Property<Guid?>("DeletedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("DeletedById");
+
                     b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsValid")
@@ -103,6 +210,16 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("UpdatedAt");
+
+                    b.Property<Guid?>("UpdatedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UpdatedById");
+
                     b.Property<int>("Version")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
@@ -110,7 +227,16 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_Checklists_CreatedAt");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_Checklists_IsDeleted");
+
                     b.HasIndex("Title");
+
+                    b.HasIndex("UpdatedAt")
+                        .HasDatabaseName("IX_Checklists_UpdatedAt");
 
                     b.ToTable("Checklists", "dbo");
                 });
@@ -124,7 +250,30 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("ChecklistId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("CreatedAt")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CreatedById");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("DeletedAt");
+
+                    b.Property<Guid?>("DeletedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("DeletedById");
+
                     b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsShow")
@@ -139,11 +288,30 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("UpdatedAt");
+
+                    b.Property<Guid?>("UpdatedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UpdatedById");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ChecklistId");
 
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_ChecklistGroup_CreatedAt");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_ChecklistGroup_IsDeleted");
+
                     b.HasIndex("ParentId");
+
+                    b.HasIndex("UpdatedAt")
+                        .HasDatabaseName("IX_ChecklistGroup_UpdatedAt");
 
                     b.ToTable("ChecklistGroup", "dbo");
                 });
@@ -154,10 +322,33 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("CreatedAt")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CreatedById");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("DeletedAt");
+
+                    b.Property<Guid?>("DeletedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("DeletedById");
+
                     b.Property<Guid>("GroupId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsRequiredAnswer")
@@ -176,9 +367,28 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("UpdatedAt");
+
+                    b.Property<Guid?>("UpdatedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UpdatedById");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_ChecklistQuestion_CreatedAt");
+
                     b.HasIndex("GroupId");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_ChecklistQuestion_IsDeleted");
+
+                    b.HasIndex("UpdatedAt")
+                        .HasDatabaseName("IX_ChecklistQuestion_UpdatedAt");
 
                     b.ToTable("ChecklistQuestion", "dbo");
                 });
@@ -192,10 +402,33 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("ChecklistQuestionId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("CreatedAt")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CreatedById");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("DeletedAt");
+
+                    b.Property<Guid?>("DeletedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("DeletedById");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<Guid>("QuestionId")
@@ -207,61 +440,30 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2(3)")
+                        .HasColumnName("UpdatedAt");
+
+                    b.Property<Guid?>("UpdatedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UpdatedById");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ChecklistQuestionId");
 
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_ChecklistQuestionOption_CreatedAt");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_ChecklistQuestionOption_IsDeleted");
+
+                    b.HasIndex("UpdatedAt")
+                        .HasDatabaseName("IX_ChecklistQuestionOption_UpdatedAt");
+
                     b.ToTable("ChecklistQuestionOption", "dbo");
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Customers.Customer", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Address")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeletedById")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Phone")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedById")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Customers", "dbo");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Identities.ApplicationRole", b =>
