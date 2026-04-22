@@ -20,4 +20,12 @@
       <BuildDependency Project="src/SharedKernel/SharedKernel.csproj" />
     </Project>
   </Folder>
+  <Folder Name="/src/FileStorage/">
+    <Project Path="src/FileStorage/FileStorage.Api/FileStorage.Api.csproj" />
+    <Project Path="src/FileStorage/FileStorage.Application/FileStorage.Application.csproj" Id="14b684dc-bccd-4470-be01-3bc50e108a31" />
+    <Project Path="src/FileStorage/FileStorage.Domain/FileStorage.Domain.csproj" Id="eb631dc6-5384-4cfd-8b5c-b76ce69b6765">
+      <BuildDependency Project="src/SharedKernel/SharedKernel.csproj" />
+    </Project>
+    <Project Path="src/FileStorage/FileStorage.Infrastructure/FileStorage.Infrastructure.csproj" Id="b0277c3e-54d3-416c-acae-ea4c533ce0a7" />
+  </Folder>
 </Solution>
