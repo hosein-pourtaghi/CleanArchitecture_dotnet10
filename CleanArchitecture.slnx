@@ -7,7 +7,6 @@
   <Folder Name="/src/">
     <Project Path="src/AppHost/AppHost.csproj" Id="a0e02f59-7c1c-47db-adbb-f4f36389918c" />
     <Project Path="src/Application/Application.csproj" />
-    <Project Path="src/CrudBuilder/CrudBuilder.csproj" Id="ac3447ad-9bda-4e0a-a2a2-3461658a0fae" />
     <Project Path="src/CRUDGenerator/CRUDGenerator.csproj" Id="af4d020c-b797-4fc2-937b-3537d8d4c9f4" />
     <Project Path="src/Domain/Domain.csproj" />
     <Project Path="src/Infrastructure/Infrastructure.csproj" />
