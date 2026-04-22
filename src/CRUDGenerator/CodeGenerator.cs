@@ -24,6 +24,9 @@ public static class CodeGenerator
         // Infrastructure layer files
         files.AddRange(GenerateInfrastructureFiles(entity, options));
 
+        // WebApi layer files (Controller)
+        files.AddRange(GenerateWebApiFiles(entity, options));
+
         return files;
     }
 
@@ -38,7 +41,19 @@ public static class CodeGenerator
             Path = Path.Combine(basePath, "Application", "Common", "DTOs", $"{entity.Name}s", $"{entity.Name}Dto.cs"),
             RelativePath = $"Application/Common/DTOs/{entity.Name}s/{entity.Name}Dto.cs",
             Content = GenerateDto(entity, options)
-        });
+        }); 
+
+        // DTOs for detail entities (navigation properties that are collections)
+        foreach (var navProp in entity.NavigationProperties.Where(n => n.IsCollection))
+        {
+            var detailEntityName = navProp.RelatedEntityName ?? navProp.Name.TrimEnd('s');
+            files.Add(new GeneratedFile
+            {
+                Path = Path.Combine(basePath, "Application", "Common", "DTOs", $"{entity.Name}s", $"{detailEntityName}Dto.cs"),
+                RelativePath = $"Application/Common/DTOs/{entity.Name}s/{detailEntityName}Dto.cs",
+                Content = GenerateDetailDto(entity, navProp, options)
+            });
+        }
 
         // Create Command
         files.Add(new GeneratedFile
@@ -186,14 +201,28 @@ public static class CodeGenerator
     }
 
     // ==================== Individual File Generators ====================
-
+     
     static string GenerateDto(EntityInfo entity, GeneratorOptions options)
     {
-        var props = string.Join("\n    ", entity.Properties
-            .Where(p => !p.IsCollection)
-            .Select(p => $"public {p.Type} {p.Name} {{ get; set; }}"));
+        var props = new List<string>();
+
+        // Add scalar properties
+        foreach (var p in entity.Properties.Where(p => !p.IsCollection && !SkipProperties.Contains(p.Name)))
+        {
+            props.Add($"    public {p.Type} {p.Name} {{ get; set; }}");
+        }
+
+        // Add detail entity DTOs as nested collections
+        foreach (var navProp in entity.NavigationProperties.Where(n => n.IsCollection))
+        {
+            var detailEntityName = navProp.RelatedEntityName ?? navProp.Name.TrimEnd('s');
+            props.Add($"    public List<{detailEntityName}Dto> {navProp.Name} {{ get; set; }} = new();");
+        }
+
+        var propsString = string.Join("\n    ", props);
 
         return $@"using System;
+using System.Collections.Generic;
 
 namespace {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
 
@@ -202,18 +231,48 @@ namespace {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
 /// </summary>
 public class {entity.Name}Dto
 {{
-{props}
+{propsString}
+}}
+";
+    }
+    static string GenerateDetailDto(EntityInfo entity, NavigationProperty navProp, GeneratorOptions options)
+    {
+        var detailEntityName = navProp.RelatedEntityName ?? navProp.Name.TrimEnd('s');
+
+        return $@"using System;
+
+namespace {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
+
+/// <summary>
+/// DTO for {detailEntityName} (detail entity of {entity.Name})
+/// </summary>
+public class {detailEntityName}Dto
+{{
+    public Guid Id {{ get; set; }}
+    // Add other properties as needed - customize based on actual {detailEntityName} entity
 }}
 ";
     }
 
     static string GenerateCreateCommand(EntityInfo entity, GeneratorOptions options)
     {
-        var createProps = entity.Properties.Where(p => !SkipProperties.Contains(p.Name) && p.HasSet).ToList();
-        var params_ = string.Join(",\n    ", createProps.Select(p => $"    {p.Type} {p.Name}"));
+        var createProps = entity.Properties.Where(p => !SkipProperties.Contains(p.Name) && p.HasSet && !p.IsCollection).ToList();
 
-        return $@"using {options.ApplicationNamespace}.Common.Messaging;
-using {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
+        // Add detail entity DTOs for collection navigation properties
+        var detailProps = entity.NavigationProperties
+            .Where(n => n.IsCollection)
+            .Select(n => $"    List<{n.RelatedEntityName ?? n.Name.TrimEnd('s')}Dto> {n.Name}")
+            .ToList();
+
+        var allProps = new List<string>();
+        allProps.AddRange(createProps.Select(p => $"    {p.Type} {p.Name}"));
+        allProps.AddRange(detailProps);
+
+        var params_ = string.Join(",\n    ", allProps);
+
+        return $@"using {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
+using {options.ApplicationNamespace}.Common.Messaging;
+using MediatR;
 
 namespace {options.ApplicationNamespace}.{entity.Name}s.Create;
 
@@ -225,22 +284,31 @@ public sealed record Create{entity.Name}Command(
 ) : ICommand<{entity.IdType}>;
 ";
     }
-
     static string GenerateCreateHandler(EntityInfo entity, GeneratorOptions options)
     {
         var camel = ToCamel(entity.Name);
 
-        return $@"using {options.ApplicationNamespace}.Common.Interfaces.Core;
+        // Generate detail entity mapping
+        var detailMappings = new List<string>();
+        foreach (var navProp in entity.NavigationProperties.Where(n => n.IsCollection))
+        {
+            var detailEntityName = navProp.RelatedEntityName ?? navProp.Name.TrimEnd('s');
+            detailMappings.Add($"        mapper.Map(command.{navProp.Name}, {camel}.{navProp.Name});");
+        }
+        var detailMappingString = detailMappings.Count > 0 ? "\n" + string.Join("\n", detailMappings) : "";
+
+        return $@"using {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
+using {options.ApplicationNamespace}.Common.Interfaces.Core;
 using {options.ApplicationNamespace}.Common.Messaging;
-using AutoMapper;
 using {options.DomainNamespace}.{entity.Name}s;
-using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using MediatR;
 using SharedKernel;
 
 namespace {options.ApplicationNamespace}.{entity.Name}s.Create;
 
 internal sealed class Create{entity.Name}CommandHandler(
-    IApplicationDbContext context,
+    IRepository<{entity.Name}> repository,
     IMapper mapper)
     : ICommandHandler<Create{entity.Name}Command, {entity.IdType}>
 {{
@@ -249,25 +317,35 @@ internal sealed class Create{entity.Name}CommandHandler(
         CancellationToken cancellationToken)
     {{
         var {camel} = mapper.Map<{entity.Name}>(command);
-
+{detailMappingString}
         // {camel}.Raise(new {entity.Name}CreatedEvent({camel}.Id, DateTime.UtcNow));
-
-        context.{entity.Name}s.Add({camel});
-        await context.SaveChangesAsync(cancellationToken);
-
+        
+        await repository.AddAsync({camel}, cancellationToken);
+        
         return {camel}.Id;
     }}
 }}
 ";
     }
-
     static string GenerateUpdateCommand(EntityInfo entity, GeneratorOptions options)
     {
-        var updateProps = entity.Properties.Where(p => p.HasSet).ToList();
-        var params_ = string.Join(",\n    ", updateProps.Select(p => $"    {p.Type} {p.Name}"));
+        var updateProps = entity.Properties.Where(p => p.HasSet && !p.IsCollection).ToList();
 
-        return $@"using {options.ApplicationNamespace}.Common.Messaging;
-using {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
+        // Add detail entity DTOs for collection navigation properties
+        var detailProps = entity.NavigationProperties
+            .Where(n => n.IsCollection)
+            .Select(n => $"    List<{n.RelatedEntityName ?? n.Name.TrimEnd('s')}Dto> {n.Name}")
+            .ToList();
+
+        var allProps = new List<string>();
+        allProps.AddRange(updateProps.Select(p => $"    {p.Type} {p.Name}"));
+        allProps.AddRange(detailProps);
+
+        var params_ = string.Join(",\n    ", allProps);
+
+        return $@"using {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
+using {options.ApplicationNamespace}.Common.Messaging;
+using MediatR;
 
 namespace {options.ApplicationNamespace}.{entity.Name}s.Update;
 
@@ -284,18 +362,28 @@ public sealed record Update{entity.Name}Command(
     {
         var camel = ToCamel(entity.Name);
 
-        return $@"using {options.ApplicationNamespace}.Common.Interfaces.Core;
+        // Generate detail entity mapping
+        var detailMappings = new List<string>();
+        foreach (var navProp in entity.NavigationProperties.Where(n => n.IsCollection))
+        {
+            var detailEntityName = navProp.RelatedEntityName ?? navProp.Name.TrimEnd('s');
+            detailMappings.Add($"        mapper.Map(command.{navProp.Name}, {camel}.{navProp.Name});");
+        }
+        var detailMappingString = detailMappings.Count > 0 ? "\n" + string.Join("\n", detailMappings) : "";
+
+        return $@"using {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
+using {options.ApplicationNamespace}.Common.Interfaces.Core;
 using {options.ApplicationNamespace}.Common.Messaging;
-using {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
-using AutoMapper;
 using {options.DomainNamespace}.{entity.Name}s;
-using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using MediatR;
 using SharedKernel;
 
 namespace {options.ApplicationNamespace}.{entity.Name}s.Update;
 
 internal sealed class Update{entity.Name}CommandHandler(
-    IApplicationDbContext context,
+    IRepository<{entity.Name}> repository,
+    IAdvancedRepository<{entity.Name}> advancedRepository,
     IMapper mapper)
     : ICommandHandler<Update{entity.Name}Command>
 {{
@@ -303,18 +391,17 @@ internal sealed class Update{entity.Name}CommandHandler(
         Update{entity.Name}Command command,
         CancellationToken cancellationToken)
     {{
-        var {camel} = await context.{entity.Name}s
-            .FirstOrDefaultAsync(x => x.Id == command.Id, cancellationToken);
-
+        var {camel} = await repository.FirstOrDefaultAsync(x => x.Id == command.Id, cancellationToken);
+        
         if ({camel} is null)
             return Result.Failure({entity.Name}Errors.NotFound(command.Id));
 
         mapper.Map(command, {camel});
-
+{detailMappingString}
         // {camel}.Raise(new {entity.Name}UpdatedEvent({camel}.Id, DateTime.UtcNow));
-
-        await context.SaveChangesAsync(cancellationToken);
-
+        
+        await repository.UpdateAsync({camel}, cancellationToken);
+        
         return Result.Success();
     }}
 }}
@@ -341,30 +428,28 @@ public sealed record Delete{entity.Name}Command({entity.IdType} Id) : ICommand;
         return $@"using {options.ApplicationNamespace}.Common.Interfaces.Core;
 using {options.ApplicationNamespace}.Common.Messaging;
 using {options.DomainNamespace}.{entity.Name}s;
-using Microsoft.EntityFrameworkCore;
+using MediatR;
 using SharedKernel;
 
 namespace {options.ApplicationNamespace}.{entity.Name}s.Delete;
 
 internal sealed class Delete{entity.Name}CommandHandler(
-    IApplicationDbContext context)
+    IRepository<{entity.Name}> repository)
     : ICommandHandler<Delete{entity.Name}Command>
 {{
     public async Task<Result> Handle(
         Delete{entity.Name}Command command,
         CancellationToken cancellationToken)
     {{
-        var {camel} = await context.{entity.Name}s
-            .FirstOrDefaultAsync(x => x.Id == command.Id, cancellationToken);
-
+        var {camel} = await repository.FirstOrDefaultAsync(x => x.Id == command.Id, cancellationToken);
+        
         if ({camel} is null)
             return Result.Failure({entity.Name}Errors.NotFound(command.Id));
 
         // {camel}.Raise(new {entity.Name}DeletedEvent({camel}.Id, DateTime.UtcNow));
-
-        context.{entity.Name}s.Remove({camel});
-        await context.SaveChangesAsync(cancellationToken);
-
+        
+        await repository.DeleteAsync({camel}, cancellationToken);
+        
         return Result.Success();
     }}
 }}
@@ -373,8 +458,9 @@ internal sealed class Delete{entity.Name}CommandHandler(
 
     static string GenerateGetAllQuery(EntityInfo entity, GeneratorOptions options)
     {
-        return $@"using {options.ApplicationNamespace}.Common.Messaging;
-using {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
+        return $@"using {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
+using {options.ApplicationNamespace}.Common.Messaging;
+using MediatR;
 
 namespace {options.ApplicationNamespace}.{entity.Name}s.GetAll;
 
@@ -395,17 +481,18 @@ public sealed record GetAll{entity.Name}Query(
     {
         var camelPlural = ToCamel(entity.Name) + "s";
 
-        return $@"using {options.ApplicationNamespace}.Common.Interfaces.Core;
+        return $@"using {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
+using {options.ApplicationNamespace}.Common.Interfaces.Core;
 using {options.ApplicationNamespace}.Common.Messaging;
-using {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
 using AutoMapper;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
 namespace {options.ApplicationNamespace}.{entity.Name}s.GetAll;
 
 internal sealed class GetAll{entity.Name}QueryHandler(
-    IApplicationDbContext context,
+    IRepository<{entity.Name}> repository,
     IMapper mapper)
     : IQueryHandler<GetAll{entity.Name}Query, PaginatedResult<{entity.Name}Dto>>
 {{
@@ -413,7 +500,7 @@ internal sealed class GetAll{entity.Name}QueryHandler(
         GetAll{entity.Name}Query query,
         CancellationToken cancellationToken)
     {{
-        var {camelPlural}Query = context.{entity.Name}s.AsNoTracking();
+        var {camelPlural}Query = repository.Query().AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(query.SearchTerm))
         {{
@@ -460,8 +547,9 @@ internal sealed class GetAll{entity.Name}QueryHandler(
 
     static string GenerateGetByIdQuery(EntityInfo entity, GeneratorOptions options)
     {
-        return $@"using {options.ApplicationNamespace}.Common.Messaging;
-using {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
+        return $@"using {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
+using {options.ApplicationNamespace}.Common.Messaging;
+using MediatR;
 
 namespace {options.ApplicationNamespace}.{entity.Name}s.GetById;
 
@@ -476,18 +564,17 @@ public sealed record GetById{entity.Name}Query({entity.IdType} Id) : IQuery<{ent
     {
         var camel = ToCamel(entity.Name);
 
-        return $@"using {options.ApplicationNamespace}.Common.Interfaces.Core;
+        return $@"using {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
+using {options.ApplicationNamespace}.Common.Interfaces.Core;
 using {options.ApplicationNamespace}.Common.Messaging;
-using {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
 using AutoMapper;
-using {options.DomainNamespace}.{entity.Name}s;
-using Microsoft.EntityFrameworkCore;
+using MediatR;
 using SharedKernel;
 
 namespace {options.ApplicationNamespace}.{entity.Name}s.GetById;
 
 internal sealed class GetById{entity.Name}QueryHandler(
-    IApplicationDbContext context,
+    IRepository<{entity.Name}> repository,
     IMapper mapper)
     : IQueryHandler<GetById{entity.Name}Query, {entity.Name}Dto>
 {{
@@ -495,10 +582,8 @@ internal sealed class GetById{entity.Name}QueryHandler(
         GetById{entity.Name}Query query,
         CancellationToken cancellationToken)
     {{
-        var {camel} = await context.{entity.Name}s
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == query.Id, cancellationToken);
-
+        var {camel} = await repository.FirstOrDefaultAsync(x => x.Id == query.Id, cancellationToken);
+        
         if ({camel} is null)
             return Result.Failure<{entity.Name}Dto>({entity.Name}Errors.NotFound(query.Id));
 
@@ -510,9 +595,27 @@ internal sealed class GetById{entity.Name}QueryHandler(
 
     static string GenerateMapperProfile(EntityInfo entity, GeneratorOptions options)
     {
+        var maps = new List<string>
+    {
+        $"        CreateMap<{entity.Name}, {entity.Name}Dto>();",
+        $"        CreateMap<Create{entity.Name}Command, {entity.Name}>();",
+        $"        CreateMap<Update{entity.Name}Command, {entity.Name}>();"
+    };
+
+        // Add maps for detail entities
+        foreach (var navProp in entity.NavigationProperties.Where(n => n.IsCollection))
+        {
+            var detailEntityName = navProp.RelatedEntityName ?? navProp.Name.TrimEnd('s');
+            maps.Add($"        CreateMap<List<{detailEntityName}Dto>, ICollection<{detailEntityName}>>();");
+        }
+
+        var mapsString = string.Join("\n", maps);
+
         return $@"using {options.ApplicationNamespace}.Common.DTOs.{entity.Name}s;
-using AutoMapper;
+using {options.ApplicationNamespace}.{entity.Name}s.Create;
+using {options.ApplicationNamespace}.{entity.Name}s.Update;
 using {options.DomainNamespace}.{entity.Name}s;
+using AutoMapper;
 
 namespace {options.ApplicationNamespace}.Common.Mappings;
 
@@ -523,9 +626,7 @@ public class {entity.Name}Profile : Profile
 {{
     public {entity.Name}Profile()
     {{
-        CreateMap<{entity.Name}, {entity.Name}Dto>();
-        CreateMap<Create{entity.Name}Dto, {entity.Name}>();
-        CreateMap<Update{entity.Name}Dto, {entity.Name}>();
+{mapsString}
     }}
 }}
 ";
@@ -533,7 +634,7 @@ public class {entity.Name}Profile : Profile
 
     static string GenerateValidators(EntityInfo entity, GeneratorOptions options)
     {
-        var createProps = entity.Properties.Where(p => !SkipProperties.Contains(p.Name) && p.HasSet).ToList();
+        var createProps = entity.Properties.Where(p => !SkipProperties.Contains(p.Name) && p.HasSet && !p.IsCollection).ToList();
         var validations = new List<string>();
 
         foreach (var prop in createProps)
@@ -580,7 +681,6 @@ public class Update{entity.Name}CommandValidator : AbstractValidator<Update{enti
 }}
 ";
     }
-
     static string GenerateErrors(EntityInfo entity, GeneratorOptions options)
     {
         return $@"using SharedKernel;
@@ -627,7 +727,6 @@ public record {entity.Name}DeletedEvent(
 ) : INotification;
 ";
     }
-
     static string GenerateEfConfiguration(EntityInfo entity, GeneratorOptions options)
     {
         var propConfigs = new List<string>();
@@ -697,6 +796,112 @@ public class {entity.Name}Configuration : IEntityTypeConfiguration<{entity.Name}
 ";
     }
 
+
+    // ADD THIS NEW METHOD - Controller Generator
+    static List<GeneratedFile> GenerateWebApiFiles(EntityInfo entity, GeneratorOptions options)
+    {
+        var files = new List<GeneratedFile>();
+        var basePath = options.BasePath;
+
+        // Controller
+        files.Add(new GeneratedFile
+        {
+            Path = Path.Combine(basePath, "WebApi", "Controllers", $"{entity.Name}s", $"{entity.Name}sController.cs"),
+            RelativePath = $"WebApi/Controllers/{entity.Name}s/{entity.Name}sController.cs",
+            Content = GenerateController(entity, options)
+        });
+
+        return files;
+    }
+
+    static string GenerateController(EntityInfo entity, GeneratorOptions options)
+    {
+        var pluralName = entity.Name + "s";
+        var controllerName = pluralName + "Controller";
+
+        return $@"using {options.ApplicationNamespace}.{entity.Name}s.Create;
+using {options.ApplicationNamespace}.{entity.Name}s.Delete;
+using {options.ApplicationNamespace}.{entity.Name}s.GetAll;
+using {options.ApplicationNamespace}.{entity.Name}s.GetById;
+using {options.ApplicationNamespace}.{entity.Name}s.Update;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace WebApi.Controllers.{pluralName};
+
+[Route(""api/[controller]/[action]"")]
+[ApiController]
+[Authorize]
+[ResponseCache(Duration = 0, NoStore = true, VaryByHeader = ""*"")]
+public class {controllerName}(IMediator mediator) : ApiController
+{{
+    [HttpGet]
+    [ProducesResponseType(typeof(List<{entity.Name}Dto>), StatusCodes.Status200OK)]
+    [Produces(""application/json"")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetAllError(CancellationToken cancellationToken)
+    {{
+        throw new Exception(""this is a test Exception"");
+    }}
+
+    [HttpGet]
+    [ProducesResponseType(typeof(List<{entity.Name}Dto>), StatusCodes.Status200OK)]
+    [Produces(""application/json"")]
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    {{
+        var result = await mediator.Send(new GetAll{entity.Name}Query(), cancellationToken);
+        return HandleResult(result);
+    }}
+
+    [HttpGet(""{{id:guid}}"")]
+    [ProducesResponseType(typeof({entity.Name}Dto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetById(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {{
+        var result = await mediator.Send(new GetById{entity.Name}Query(id), cancellationToken);
+        return HandleResult(result);
+    }}
+
+    [HttpPost]
+    public async Task<IActionResult> Create(
+        [FromBody] Create{entity.Name}Command command,
+        CancellationToken cancellationToken)
+    {{
+        var result = await mediator.Send(command, cancellationToken);
+        
+        if (result.IsFailure)
+        {{
+            return HandleResult<{entity.IdType}>(result);
+        }}
+        
+        return CreatedAtAction(nameof(GetById), new {{ id = result.Value }}, new {{ id = result.Value }});
+    }}
+
+    [HttpPut(""{{id:guid}}"")]
+    public async Task<IActionResult> Update(
+        [FromRoute] Guid id,
+        [FromBody] Update{entity.Name}Command command,
+        CancellationToken cancellationToken)
+    {{
+        var result = await mediator.Send(command, cancellationToken);
+        return HandleResult(result);
+    }}
+
+    [HttpDelete(""{{id:guid}}"")]
+    public async Task<IActionResult> Delete(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {{
+        var result = await mediator.Send(new Delete{entity.Name}Command(id), cancellationToken);
+        return HandleResult(result);
+    }}
+}}
+";
+    }
+
+
     // Helper
     static string ToCamel(string name) =>
         string.IsNullOrEmpty(name) ? name : char.ToLower(name[0]) + name.Substring(1);
@@ -706,7 +911,8 @@ public class {entity.Name}Configuration : IEntityTypeConfiguration<{entity.Name}
         var clean = type.TrimEnd('?');
         return clean is "int" or "long" or "short" or "byte" or "bool" or "float" or "double" or "decimal"
             or "Guid" or "DateTime" or "DateTimeOffset" or "TimeSpan";
-    }
+    } 
+
 }
 
 
