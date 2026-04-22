@@ -13,7 +13,7 @@ using WebApi.Controllers;
 namespace FileStorage.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/[controller]/[action]")]
 [Authorize]
 public class FilesController : ApiController
 {
