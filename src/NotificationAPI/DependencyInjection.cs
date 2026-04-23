@@ -74,9 +74,7 @@ public static class DependencyInjection
         services.AddControllers();
 
         services.AddProblemDetails();
-
-        // Register ActivitySource for dependency injection if needed
-        //services.AddSingleton(TelemetryActivitySource.Instance);
+         
 
         return services;
     }

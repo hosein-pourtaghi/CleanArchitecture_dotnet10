@@ -7,8 +7,7 @@ using FileStorage.Application.Services;
 using FileStorage.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SharedKernel;
-using WebApi.Controllers;
+using SharedApi.Controllers;
 
 namespace FileStorage.Api.Controllers;
 
@@ -37,6 +36,7 @@ public class FilesController : ApiController
     [RequestSizeLimit(104857600)] // 100MB
     [ProducesResponseType(typeof(FileUploadResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [AllowAnonymous]
     public async Task<IActionResult> Upload(
         [FromForm] UploadFileRequest request,
         CancellationToken cancellationToken)
@@ -50,7 +50,7 @@ public class FilesController : ApiController
     /// <summary>
     /// Upload multiple files as a batch
     /// </summary>
-    [HttpPost("batch")]
+    [HttpPost]
     [RequestSizeLimit(524288000)] // 500MB total
     [ProducesResponseType(typeof(BatchUploadResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -67,7 +67,7 @@ public class FilesController : ApiController
     /// <summary>
     /// Stream upload for large files
     /// </summary>
-    [HttpPost("stream")]
+    [HttpPost]
     [RequestSizeLimit(104857600)]
     [ProducesResponseType(typeof(FileUploadResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> UploadStream(
@@ -338,7 +338,7 @@ public class FilesController : ApiController
         var result = await _fileService.RevokeAccessAsync(id, userId, revokedById, cancellationToken);
         return HandleResult(result, () => NoContent());
     }
-     
+
     /// <summary>
     /// List all permissions for a file
     /// </summary>
@@ -461,7 +461,7 @@ public class FilesController : ApiController
     {
         var userId = GetCurrentUserId();
         var result = await _fileService.EmptyTrashAsync(userId, cancellationToken);
-        
+
         return HandleResult(result, () => NoContent());
     }
 
@@ -479,7 +479,7 @@ public class FilesController : ApiController
         var userId = GetCurrentUserId();
         var result = await _fileService.DeleteAbandonedFilesAsync(
             request, userId, dryRun, cancellationToken);
-        
+
         return HandleResult(result, () => NoContent());
     }
 
@@ -489,12 +489,12 @@ public class FilesController : ApiController
 
     private Guid? GetCurrentUserId()
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                           ?? User.FindFirst("sub")?.Value;
-        
+
         if (Guid.TryParse(userIdClaim, out var userId))
             return userId;
-        
+
         return null;
     }
 

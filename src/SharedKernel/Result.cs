@@ -2,6 +2,15 @@
 
 namespace SharedKernel;
 
+/// <summary>
+/// Base interface for Result types
+/// </summary>
+public interface IResult
+{
+    bool IsSuccess { get; }
+    bool IsFailure { get; }
+    Error Error { get; }
+}
 
 // ==================== Non-Generic Result ====================
 public class Result : IResult
@@ -17,9 +26,9 @@ public class Result : IResult
         Error = error;
     }
 
-    public bool IsSuccess { get; } = false!;
+    public bool IsSuccess { get; }
     public bool IsFailure => !IsSuccess;
-    public Error Error { get; } = Error.None;
+    public Error Error { get; }
 
     // Factory methods
     public static Result Success() => new(true, Error.None);
@@ -27,34 +36,43 @@ public class Result : IResult
     public static Result<TValue> Success<TValue>(TValue value) =>
         new(value, true, Error.None);
 
+    public static Result Failure(string error) => new(false, new Error("", error));
     public static Result Failure(Error error) => new(false, error);
 
     public static Result Failure(string code, string description) =>
         new(false, new Error(code, description));
 
-    public static Result Failure(string description) =>
-        new(false, new Error(string.Empty, description));
-
-    public static Result<TValue> Failure<TValue>(Error error) =>
-        new(default, false, error);
-    public static Result<TValue> Failure<TValue>(string error) =>
-        new(default, false, new Error("",error,ErrorType.Failure));
+    public static Result<TValue> Failure<TValue>(string error) => new(default!, false, new Error("", error));
+    public static Result<TValue> Failure<TValue>(Error error) => new(default!, false, error);
 
     public static Result<TValue> Failure<TValue>(string code, string description) =>
-        new(default, false, new Error(code, description));
+        new(default!, false, new Error(code, description));
 
-    // Extension method instead of implicit operator
-    //public Result<T> ToResult<T>(this Result result)
-    //{
-    //    return result.IsSuccess
-    //        ? Result<T>.Success(default!)
-    //        : Result<T>.Failure(result.Error);
-    //}
+    // Functional methods
+    public TResult Match<TResult>(
+        Func<TResult> onSuccess,
+        Func<Error, TResult> onFailure) =>
+        IsSuccess ? onSuccess() : onFailure(Error);
+
+    public Result Tap(Action onSuccess, Action<Error>? onFailure = null)
+    {
+        if (IsSuccess)
+            onSuccess();
+        else if (onFailure != null)
+            onFailure(Error);
+        return this;
+    }
+
+    public Result Tap(Func<Result> action)
+    {
+        if (IsSuccess)
+            return action();
+        return this;
+    }
 }
 
-
 // ==================== Generic Result<T> ====================
-public class Result<T> : Result
+public class Result<T> : Result, IResult<T>
 {
     private readonly T? _value;
 
@@ -64,13 +82,12 @@ public class Result<T> : Result
         _value = value;
     }
 
-    // Explicitly hide base properties for clarity
     public new bool IsSuccess => base.IsSuccess;
     public new bool IsFailure => base.IsFailure;
     public new Error Error => base.Error;
 
     /// <summary>
-    /// Gets the value or throws if failure. Use ValueOrDefault for safe access.
+    /// Gets the value or throws if failure
     /// </summary>
     [NotNull]
     public T Value => IsSuccess
@@ -79,9 +96,9 @@ public class Result<T> : Result
             $"Cannot access Value of failed result. Error: [{Error.Code}] {Error.Description}");
 
     /// <summary>
-    /// Safe access to value - returns default on failure instead of throwing
+    /// Safe access to value - returns default on failure
     /// </summary>
-    public T ValueOrDefault => _value;
+    public T ValueOrDefault => _value!;
 
     /// <summary>
     /// Implicit conversion from T to Result<T>
@@ -92,15 +109,52 @@ public class Result<T> : Result
     // Factory methods
     public static new Result<T> Success(T value) => new(value, true, Error.None);
 
-    public static new Result<T> Failure(Error error) => new(default, false, error);
+    public static new Result<T> Failure(Error error) => new(default!, false, error);
 
     public static new Result<T> Failure(string code, string description) =>
-        new(default, false, new Error(code, description));
+        new(default!, false, new Error(code, description));
 
     public static Result<T> ValidationFailure(Error error) =>
-        new(default, false, error);
+        new(default!, false, error);
 
     public static Result<T> ValidationFailure(string code, string description) =>
-        new(default, false, new Error(code, description, ErrorType.Validation));
+        new(default!, false, new Error(code, description, ErrorType.Validation));
 
+    // Functional methods
+    public TResult Match<TResult>(
+        Func<T, TResult> onSuccess,
+        Func<Error, TResult> onFailure) =>
+        IsSuccess ? onSuccess(_value!) : onFailure(Error);
+
+    public Result Tap(Action<T> onSuccess, Action<Error>? onFailure = null)
+    {
+        if (IsSuccess)
+            onSuccess(_value!);
+        else if (onFailure != null)
+            onFailure(Error);
+        return this;
+    }
+
+    //public Result<T> Tap(Func<T, Result> action)
+    //{
+    //    if (IsSuccess)
+    //        return action(_value);
+    //    return this;
+    //}
+
+    public Result Map<TOutput>(Func<T, TOutput> mapper) =>
+        IsSuccess ? Result.Success(mapper(_value!)) : Result.Failure<TOutput>(Error);
+
+    public Result<T> Ensure(Func<T, bool> predicate, Error error)
+    {
+        if (IsSuccess && predicate(_value!))
+            return this;
+        return Failure<T>(error);
+    }
+}
+
+public interface IResult<out T> : IResult
+{
+    T Value { get; }
+    T ValueOrDefault { get; }
 }

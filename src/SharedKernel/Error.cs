@@ -2,14 +2,11 @@
 
 public record Error
 {
-    public static readonly Error None = new(string.Empty, string.Empty, ErrorType.Failure);
+    public static readonly Error None = new(string.Empty, string.Empty, ErrorType.None);
 
     public static readonly Error NullValue = new(
         "GENERAL.NULL",
-        "Null value was provided",
-        ErrorType.Failure);
-
-    //public static Error None2 => new(string.Empty, string.Empty, ErrorType.Failure);
+        "Null value was provided");
 
     public Error(string code, string description, ErrorType type = ErrorType.Failure)
     {
@@ -30,7 +27,8 @@ public record Error
         new(code, description, ErrorType.NotFound);
 
     public static Error NotFound(string entityName, Guid? id = null) =>
-        new($"{entityName.ToUpperInvariant()}.NOT_FOUND",
+        new(
+            $"{entityName.ToUpperInvariant()}.NOT_FOUND",
             $"'{entityName}' with id '{id?.ToString() ?? "unknown"}' was not found",
             ErrorType.NotFound);
 
@@ -45,4 +43,7 @@ public record Error
 
     public static Error Unauthorized(string description = "Unauthorized access") =>
         new("AUTH.UNAUTHORIZED", description, ErrorType.Unauthorized);
+
+    public static Error Forbidden(string description = "Access forbidden") =>
+        new("AUTH.FORBIDDEN", description, ErrorType.Forbidden);
 }

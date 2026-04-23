@@ -17,8 +17,9 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\..\WebApi\WebApi.csproj" />
+	<ItemGroup> 
+		<ProjectReference Include="..\..\SharedApi\SharedApi.csproj" /> 
+		<ProjectReference Include="..\..\SharedKernel\SharedKernel.csproj" /> 
 		<ProjectReference Include="..\FileStorage.Infrastructure\FileStorage.Infrastructure.csproj" />
 	</ItemGroup>
 </Project>

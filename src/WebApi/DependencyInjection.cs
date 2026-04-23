@@ -3,15 +3,9 @@
 // PURPOSE: Presentation layer dependency injection configuration
 // ============================================================
 
-using System.Net;
-using System.Net.Http.Headers;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.OpenApi.Models;
-using WebApi.Http;
-using WebApi.Telemetry;
 
 namespace WebApi;
 
@@ -26,7 +20,7 @@ public static class DependencyInjection
     /// <param name="services">The service collection.</param>
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddPresentation(this IServiceCollection services)
-    { 
+    {
         // ============================================================
         // STEP 2: Configure CORS Policy
         // ============================================================
@@ -144,72 +138,10 @@ public static class DependencyInjection
         // Problem Details for standardized error responses
         services.AddProblemDetails();
 
-        // ============================================================
-        // HTTP Client Configuration
-        // ============================================================
-        ConfigureHttpClients(services);
 
         return services;
     }
 
-    /// <summary>
-    /// Configures HTTP clients with optimized settings.
-    /// </summary>
-    private static void ConfigureHttpClients(IServiceCollection services)
-    {
-        // Default max connections per server
-        const int defaultMaxConnectionsPerServer = 100;
-
-        // Alternative: Named HTTP client configuration (uncomment if needed)
-        #region Named HTTP Client Example
-        // services.AddHttpClient("ExternalService")
-        //     .ConfigureHttpClient(client =>
-        //     {
-        //         client.Timeout = TimeSpan.FromSeconds(30);
-        //         client.DefaultRequestHeaders.Accept.Clear();
-        //         client.DefaultRequestHeaders.Accept.Add(
-        //             new MediaTypeWithQualityHeaderValue("application/json"));
-        //     })
-        //     .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
-        //     {
-        //         PooledConnectionLifetime = TimeSpan.FromMinutes(5),
-        //         PooledConnectionIdleTimeout = TimeSpan.FromMinutes(2),
-        //         MaxConnectionsPerServer = defaultMaxConnectionsPerServer,
-        //         AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-        //         EnableMultipleHttp2Connections = true
-        //     });
-        #endregion
-
-        // Typed HTTP client for external API calls
-        // This provides strong typing and better testability
-        services.AddHttpClient<IExternalHttpClient, ExternalHttpClient>()
-            .ConfigureHttpClient(client =>
-            {
-                client.Timeout = TimeSpan.FromSeconds(30);
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(
-                    new MediaTypeWithQualityHeaderValue("application/json"));
-
-                // Add custom headers if needed:
-                // client.DefaultRequestHeaders.Add("X-Api-Key", "your-api-key");
-                // client.BaseAddress = new Uri("https://api.example.com");
-            })
-            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
-            {
-                // Connection pooling settings
-                PooledConnectionLifetime = TimeSpan.FromMinutes(5),
-                PooledConnectionIdleTimeout = TimeSpan.FromMinutes(2),
-                MaxConnectionsPerServer = defaultMaxConnectionsPerServer,
-
-                // Compression for reduced bandwidth
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-
-                // HTTP/2 multiplexing
-                EnableMultipleHttp2Connections = true
-            });
-        // Prevent socket recycling (uncomment if needed)
-        // .SetHandlerLifetime(Timeout.InfiniteTimeSpan);
-    }
 }
 
 // Helper method to get assembly reference

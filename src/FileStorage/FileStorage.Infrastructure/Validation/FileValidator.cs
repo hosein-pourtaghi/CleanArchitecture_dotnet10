@@ -33,11 +33,7 @@ public class FileValidator : IFileValidator
             _options.BlockedExtensions.Select(e => e.ToLowerInvariant()),
             StringComparer.OrdinalIgnoreCase);
     }
-
-    Task<Domain.Interfaces.ValidationResultLib> IFileValidator.ValidateAsync(Stream stream, string fileName, string contentType, long fileSize, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
+     
     public async Task<ValidationResultLib> ValidateAsync(
         Stream stream,
         string fileName,

@@ -52,7 +52,8 @@ public static class ServiceCollectionExtensions
             var logger = sp.GetService<ILogger<LocalStorageProvider>>();
 
             return new LocalStorageProvider(
-                rootPath: Path.Combine(Directory.GetCurrentDirectory(), fileOptions.Value.Storage.Local.RootPath),
+                //rootPath: Path.Combine(Directory.GetCurrentDirectory(), fileOptions.Value.Storage.Local.RootPath),
+                rootPath: Path.Combine(  fileOptions.Value.Storage.Local.RootPath),
                 baseUrl: fileOptions.Value.Storage.BaseUrl,
                 bufferSize: fileOptions.Value.Performance.BufferSize,
                 logger: logger);

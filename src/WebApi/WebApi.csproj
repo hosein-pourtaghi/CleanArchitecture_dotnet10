@@ -38,10 +38,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\ProjectSetup.ServiceDefaults\ProjectSetup.ServiceDefaults.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\" />
+    <ProjectReference Include="..\SharedApi\SharedApi.csproj" />
   </ItemGroup>
  
 </Project>

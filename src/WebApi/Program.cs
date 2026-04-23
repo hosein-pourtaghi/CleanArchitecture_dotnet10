@@ -11,19 +11,17 @@ using Infrastructure;
 using Infrastructure.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
-using SharedKernel.LoggingCore;
 using SharedKernel.LoggingCore.DependencyInjection;
 using WebApi;
 using WebApi.Extensions;
 using WebApi.Middleware;
-using WebApi.Telemetry;
 
 // ============================================================
 // STEP 1: Create WebApplicationBuilder and configure defaults
 // ============================================================
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
- 
+
 // ============================================================
 // STEP 2: Configure Serilog (using library extension)
 // ============================================================
@@ -35,7 +33,7 @@ Log.Logger = new LoggerConfiguration()
 // STEP 3: Configure Host with Serilog
 // ============================================================
 builder.Host.AddSerilogLogging(builder.Configuration, builder.Environment.ApplicationName);
- 
+
 // ============================================================
 // STEP 4: Chain all dependency injection extensions
 // ============================================================
@@ -43,7 +41,7 @@ builder.Services
     .AddApplication()      // Application layer (MediatR, AutoMapper, Validators)
     .AddPresentation()     // WebApi layer (Controllers, Swagger, HttpClients)
     .AddInfrastructure(builder.Configuration); // Infrastructure layer (DB, Auth, Repos)
- 
+
 // ============================================================
 // STEP 5: Configure Logging Library (Serilog + OpenTelemetry + Services)
 // ============================================================
@@ -68,13 +66,11 @@ builder.Services.AddLoggingLibrary(
         options.EnableQueryLogging = true;
         options.SlowQueryThresholdMs = 500;
     });
- 
+
 // Register HTTP context accessor for logging
 builder.Services.AddHttpContextAccessor();
 
-// Register Telemetry Activity Source as singleton
-builder.Services.AddSingleton(TelemetryActivitySource.Instance);
- 
+
 // ============================================================
 // STEP 8: Build Application
 // ============================================================
@@ -125,7 +121,7 @@ app.MapHealthChecks("health", new HealthCheckOptions
 
 // 10c. Exception Handling - Must be FIRST in the pipeline
 // This middleware handles all exceptions globally
-app.UseLoggingLibrary(); 
+app.UseLoggingLibrary();
 
 // 10f. Development-specific configuration
 if (app.Environment.IsDevelopment())
