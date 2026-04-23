@@ -7,6 +7,7 @@ using Application.Common.DTOs.Checklists;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SharedApi.Controllers;
 
 namespace WebApi.Controllers;
 

@@ -10,6 +10,7 @@ using Domain.Aggregates.Checklists;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SharedApi.Controllers;
 using WebApi.Utilities;
 
 namespace WebApi.Controllers;
