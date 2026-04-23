@@ -3,6 +3,7 @@ using Application.Common.DTOs;
 using Infrastructure.Services;
 using NotificationAPI;
 using NotificationAPI.Extensions;
+using SharedApi.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,11 +1,11 @@
+using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.ServiceDiscovery;
- 
-namespace Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting;
+
+namespace SharedApi.Extensions;
 
 // Adds common .NET Aspire services: service discovery, resilience, health checks, and OpenTelemetry.
 // This project should be referenced by each service project in your solution.
@@ -13,9 +13,8 @@ namespace Microsoft.Extensions.Hosting;
 public static class Extensions
 {
     public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
-    { 
-
-        builder.AddDefaultHealthChecks();
+    {
+         
 
         builder.Services.AddServiceDiscovery();
 
@@ -36,15 +35,7 @@ public static class Extensions
 
         return builder;
     }
- 
-    public static TBuilder AddDefaultHealthChecks<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
-    {
-        builder.Services.AddHealthChecks()
-            // Add a default liveness check to ensure app is responsive
-            .AddCheck("self", () => HealthCheckResult.Healthy(), ["live"]);
-
-        return builder;
-    }
+     
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
@@ -60,6 +51,13 @@ public static class Extensions
             {
                 Predicate = r => r.Tags.Contains("live")
             });
+
+            // 10b. Health Checks Endpoint
+            app.MapHealthChecks("health", new HealthCheckOptions
+            {
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
+
         }
 
         return app;

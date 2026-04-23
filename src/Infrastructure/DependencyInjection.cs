@@ -22,6 +22,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using SharedKernel.LoggingCore.Interceptors;
@@ -181,12 +182,16 @@ public static class DependencyInjection
         string? connectionString = configuration["ConnectionString"];
 
         services.AddHealthChecks()
+            // Add a default liveness check to ensure app is responsive
+            .AddCheck("self", () => HealthCheckResult.Healthy(), ["live"])
             // Use SQL Server health check (matches connection string)
             .AddSqlServer(
                 connectionString!,
                 name: "sqlserver",
                 tags: new[] { "db", "sql", "sqlserver" }
-                );
+                )
+            ;
+
 
         // Alternative: PostgreSQL health check (uncomment if using PostgreSQL)
         // .AddNpgSql(configuration["ConnectionString"]!);

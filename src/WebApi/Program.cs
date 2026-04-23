@@ -11,6 +11,7 @@ using Infrastructure;
 using Infrastructure.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
+using SharedApi.Extensions;
 using SharedKernel.LoggingCore.DependencyInjection;
 using WebApi;
 using WebApi.Extensions;
@@ -20,7 +21,6 @@ using WebApi.Middleware;
 // STEP 1: Create WebApplicationBuilder and configure defaults
 // ============================================================
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-builder.AddServiceDefaults();
 
 // ============================================================
 // STEP 2: Configure Serilog (using library extension)
@@ -41,6 +41,8 @@ builder.Services
     .AddApplication()      // Application layer (MediatR, AutoMapper, Validators)
     .AddPresentation()     // WebApi layer (Controllers, Swagger, HttpClients)
     .AddInfrastructure(builder.Configuration); // Infrastructure layer (DB, Auth, Repos)
+
+builder.AddServiceDefaults();
 
 // ============================================================
 // STEP 5: Configure Logging Library (Serilog + OpenTelemetry + Services)
@@ -112,12 +114,6 @@ using (var scope = app.Services.CreateScope())
 
 // 10a. CORS - Must be before routing and endpoints
 app.UseCors("AllowAngularApp");
-
-// 10b. Health Checks Endpoint
-app.MapHealthChecks("health", new HealthCheckOptions
-{
-    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-});
 
 // 10c. Exception Handling - Must be FIRST in the pipeline
 // This middleware handles all exceptions globally

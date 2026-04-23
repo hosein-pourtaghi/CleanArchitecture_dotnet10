@@ -13,7 +13,6 @@
     <Project Path="src/NotificationAPI/NotificationAPI.csproj">
       <BuildDependency Project="src/Infrastructure/Infrastructure.csproj" />
     </Project>
-    <Project Path="src/ProjectSetup.ServiceDefaults/ProjectSetup.ServiceDefaults.csproj" />
     <Project Path="src/SharedApi/SharedApi.csproj" Id="dd61461d-52e1-494f-adc2-c542c08abf4f" />
     <Project Path="src/SharedKernel/SharedKernel.csproj" />
     <Project Path="src/WebApi/WebApi.csproj">
