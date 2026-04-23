@@ -40,64 +40,18 @@ public abstract class ApiController : ControllerBase
         Func<IActionResult> onSuccess) =>
         result.ToActionResult(onSuccess);
 
-
     /// <summary>
-    /// Converts a successful Result<TValue> to Created (201) response.
-    /// </summary>
-    protected IActionResult HandleCreatedResult<TValue>(
-        Result<TValue> result,
-        string routeName,
-        object routeValues) =>
-        result.ToCreatedResult(routeName, routeValues);
-
-    /// <summary>
-    /// Converts a successful Result<TValue> to Created (201) response using action name.
-    /// </summary>
-    protected IActionResult HandleCreatedResult<TValue>(
-        Result<TValue> result,
-        string actionName,
-        string controllerName,
-        object? routeValues = null) =>
-        result.ToCreatedResult(actionName, controllerName, routeValues);
-
-    /// <summary>
-    /// Converts a successful Result to Created (201) with auto-generated route values.
-    /// Usage: HandleCreatedResult(result, "GetById", x => x.Id)
+    /// Converts a successful Result<TValue> to Created (201) response with ID in body.
     /// </summary>
     protected IActionResult HandleCreatedResult<TValue, TId>(
         Result<TValue> result,
-        string actionName,
         Func<TValue, TId> idSelector)
     {
         if (result.IsFailure)
             return result.Error.ToProblemDetails();
 
         var id = idSelector(result.Value);
-        var routeValues = new { id };
-
-        return CreatedAtAction(actionName, routeValues, result.Value);
-    }
-
-    /// <summary>
-    /// Converts a successful Result to Created (201) with controller and id selector.
-    /// Usage: HandleCreatedResult(result, "GetById", "Users", x => x.Id)
-    /// </summary>
-    protected IActionResult HandleCreatedResult<TValue, TId>(
-        Result<TValue> result,
-        string actionName,
-        string controllerName,
-        Func<TValue, TId> idSelector)
-    {
-        if (result.IsFailure)
-            return result.Error.ToProblemDetails();
-
-        var id = idSelector(result.Value);
-
-        return CreatedAtAction(
-            actionName,
-            controllerName,
-            new { id },
-            result.Value);
+        return StatusCode(StatusCodes.Status201Created, new { id });
     }
 
     /// <summary>

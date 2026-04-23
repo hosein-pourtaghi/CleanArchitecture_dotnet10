@@ -44,7 +44,7 @@ public class FilesController : ApiController
         var userId = GetCurrentUserId();
         var result = await _fileService.UploadAsync(request, userId, cancellationToken);
 
-        return HandleCreatedResult(result, "GetById", x => x.Id);
+        return HandleCreatedResult(result, x => x.Id);
     }
 
     /// <summary>
@@ -54,6 +54,7 @@ public class FilesController : ApiController
     [RequestSizeLimit(524288000)] // 500MB total
     [ProducesResponseType(typeof(BatchUploadResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [AllowAnonymous] 
     public async Task<IActionResult> UploadBatch(
         [FromForm] UploadBatchRequest request,
         CancellationToken cancellationToken)
@@ -70,6 +71,7 @@ public class FilesController : ApiController
     [HttpPost]
     [RequestSizeLimit(104857600)]
     [ProducesResponseType(typeof(FileUploadResponse), StatusCodes.Status201Created)]
+    [AllowAnonymous] 
     public async Task<IActionResult> UploadStream(
         [FromBody] UploadFileStreamRequest request,
         CancellationToken cancellationToken)
@@ -77,7 +79,7 @@ public class FilesController : ApiController
         var userId = GetCurrentUserId();
         var result = await _fileService.UploadStreamAsync(request, userId, cancellationToken);
 
-        return HandleCreatedResult(result, "GetById", x => x.Id);
+        return HandleCreatedResult(result, x => x.Id);
     }
 
     #endregion

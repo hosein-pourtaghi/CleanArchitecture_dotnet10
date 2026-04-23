@@ -1103,8 +1103,8 @@ public class FileManagerService : IFileManagerService
             OwnerId = file.OwnerId,
             OwnerType = file.OwnerType,
             OwnerProperty = file.OwnerProperty,
-            ThumbnailUrl = !string.IsNullOrEmpty(file.ThumbnailPath) ? $"/api/files/{file.Id}/thumbnail" : null,
-            DownloadUrl = $"/api/files/{file.Id}",
+            ThumbnailUrl = !string.IsNullOrEmpty(file.ThumbnailPath) ? $"/api/files/GetThumbnail/{file.Id}/thumbnail" : null,
+            DownloadUrl = $"/api/files/Download/{file.Id}",
             CreatedAt = file.CreatedAt
         };
     }
