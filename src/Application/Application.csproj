@@ -16,15 +16,14 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
+    <ProjectReference Include="..\IdentityApi\IdentityApi.csproj" />
     <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
   </ItemGroup>
-
+ 
   <ItemGroup>
-	<InternalsVisibleTo Include="Application.UnitTests" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <Folder Include="Common\Behaviors\" />
     <Folder Include="Common\DTOs\Shared\" />
+    <Folder Include="Common\Models\" />
   </ItemGroup>
  
 </Project>

@@ -1,10 +1,3 @@
-using Domain.Aggregates.Carts;
-using Domain.Aggregates.Orders;
-using Domain.Aggregates.Payments;
-using Domain.Aggregates.Products;
-using SharedKernel;
-using SharedKernel.BaseEntities;
-
 namespace Domain.Aggregates.Customers;
 
 

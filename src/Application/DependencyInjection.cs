@@ -4,10 +4,10 @@
 // ============================================================
 
 using System.Reflection;
-using Application.Common.Behaviors;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel;
+using SharedKernel.MediatRCore.Behaviors;
 
 namespace Application;
 
@@ -36,8 +36,6 @@ public static class DependencyInjection
             // Validation behavior runs before handlers
             config.AddOpenBehavior(typeof(ValidationBehavior<,>));
 
-            // Optional: Logging behavior (uncomment if needed)
-            // config.AddOpenBehavior(typeof(LoggingBehavior<,>));
         });
 
         // Add FluentValidation validators from this assembly

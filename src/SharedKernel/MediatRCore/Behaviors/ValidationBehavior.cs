@@ -5,7 +5,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Exceptions;
 
-namespace MediatRCore.Behaviors;
+namespace SharedKernel.MediatRCore.Behaviors;
 
 /// <summary>
 /// MediatR pipeline behavior for handling FluentValidation

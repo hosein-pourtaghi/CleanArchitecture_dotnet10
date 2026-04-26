@@ -12,15 +12,14 @@
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />
+	<PackageReference Include="AspNetCore.HealthChecks.SqlServer" />
     <PackageReference Include="EFCore.NamingConventions" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="RabbitMQ.Client" />
     <PackageReference Include="StackExchange.Redis" />
-	<PackageReference Include="AspNetCore.HealthChecks.SqlServer" />
   </ItemGroup>
 
   <ItemGroup>

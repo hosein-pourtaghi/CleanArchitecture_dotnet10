@@ -8,14 +8,12 @@ using Application;
 using Application.Common.Interfaces.Core;
 using HealthChecks.UI.Client;
 using Infrastructure;
-using Infrastructure.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
 using SharedApi.Extensions;
 using SharedKernel.LoggingCore.DependencyInjection;
 using WebApi;
 using WebApi.Extensions;
-using WebApi.Middleware;
 
 // ============================================================
 // STEP 1: Create WebApplicationBuilder and configure defaults
@@ -92,21 +90,21 @@ catch (Exception ex)
 // STEP 9: Initialize Services on Startup
 // ============================================================
 
-// 9a. Discover and register authorization policies
-using (var scope = app.Services.CreateScope())
-{
-    var policyService = scope.ServiceProvider.GetRequiredService<IPolicyDiscoveryService>();
-    var result = await policyService.DiscoverAndRegisterPoliciesAsync();
+//// 9a. Discover and register authorization policies
+//using (var scope = app.Services.CreateScope())
+//{
+//    var policyService = scope.ServiceProvider.GetRequiredService<IPolicyDiscoveryService>();
+//    var result = await policyService.DiscoverAndRegisterPoliciesAsync();
 
-    if (result.IsSuccess && result.Value > 0)
-    {
-        Log.Information("Registered {PolicyCount} authorization policies", result.Value);
-    }
-    else if (result.IsFailure)
-    {
-        Log.Warning("Policy discovery failed: {Error}", result.Error.Description);
-    }
-}
+//    if (result.IsSuccess && result.Value > 0)
+//    {
+//        Log.Information("Registered {PolicyCount} authorization policies", result.Value);
+//    }
+//    else if (result.IsFailure)
+//    {
+//        Log.Warning("Policy discovery failed: {Error}", result.Error.Description);
+//    }
+//}
 
 // ============================================================
 // STEP 10: Configure Middleware Pipeline
@@ -126,19 +124,7 @@ if (app.Environment.IsDevelopment())
     app.ApplyMigrations();
     app.UseDeveloperExceptionPage();
 }
-
-// 9b. Seed admin user AFTER policies are discovered
-using (var scope = app.Services.CreateScope())
-{
-    var identitySeeder = scope.ServiceProvider.GetRequiredService<IIdentitySeeder>();
-
-    var adminEmail = builder.Configuration["Admin:Email"] ?? "admin@example.com";
-    var adminPassword = builder.Configuration["Admin:Password"] ?? "Admin@123456";
-    var adminRole = builder.Configuration["Admin:Role"] ?? "Admin";
-
-    await identitySeeder.SeedAdminUserAsync(adminEmail, adminPassword, adminRole);
-    Log.Information("Admin user seeding completed for {Email}", adminEmail);
-}
+ 
 
 // 10g. Exception Handler (fallback for unhandled exceptions)
 app.UseExceptionHandler();
@@ -152,7 +138,7 @@ app.UseAuthorization();
 
 // 10j. Custom Token Validation Middleware
 // NOTE: After authentication but before controllers
-app.UseTokenValidation();
+//app.UseTokenValidation();
 
 // 10k. Map Controllers
 app.MapControllers();

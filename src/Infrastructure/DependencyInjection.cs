@@ -6,15 +6,17 @@
 using System.Security.Claims;
 using System.Text;
 using Application.Common.Interfaces.Checklists;
-using Application.Common.Interfaces.Core;
-using Domain.Aggregates.Identities;
-using Infrastructure.Authorization;
+using Application.Common.Interfaces.Core; 
+using IdentityApi.Application.Interfaces;
+using IdentityApi.Infrastructure.Authorization;
+using IdentityApi.Infrastructure.Services;
+//using Infrastructure.Authorization;
 using Infrastructure.DomainEvents;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.Core;
 using Infrastructure.Services;
-using Infrastructure.Services.Identities;
+//using Infrastructure.Services.Identities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -26,6 +28,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using SharedKernel.LoggingCore.Interceptors;
+using SharedKernel.Shared;
 
 namespace Infrastructure;
 
@@ -47,9 +50,9 @@ public static class DependencyInjection
             .AddServices(configuration)
             .AddDatabase(configuration)
             .AddHealthChecks(configuration)
-            .AddAuthentication(configuration)
-            .AddAuthorization()
-            .AddPolicyDiscovery()
+            //.AddAuthentication(configuration)
+            //.AddAuthorization()
+            //.AddPolicyDiscovery()
             ;
 
     /// <summary>
@@ -59,20 +62,30 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Identity services
-        services.AddScoped<IIdentitySeeder, IdentitySeeder>();
 
         // HTTP context accessor for getting current user info
         services.AddHttpContextAccessor();
+
+
+
+        //// Identity services
+        //services.AddScoped<IIdentitySeeder, IdentitySeeder>();
+
+        //// HTTP context accessor for getting current user info
+        //services.AddHttpContextAccessor();
+
+        //// Memory cache for performance optimization
+        //services.AddMemoryCache();
+
+        //// Current user service for accessing authenticated user info
+        //services.AddScoped<ICurrentUserService, CurrentUserService>();
+ 
 
         // Memory cache for performance optimization
         services.AddMemoryCache();
 
         // Base repository implementation
-        services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
-
-        // Current user service for accessing authenticated user info
-        services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>)); 
 
         // Advanced repository (commented out - uncomment if needed)
         #region Advanced Repository Injection
@@ -151,23 +164,10 @@ public static class DependencyInjection
         // Register query logging interceptor
         services.AddScoped<QueryLoggingInterceptor>();
 
-        // Configure ASP.NET Core Identity
-        services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
-        {
-            // User settings
-            options.User.RequireUniqueEmail = true;
-
-            // Password settings (OWASP compliant)
-            options.Password.RequireDigit = true;
-            options.Password.RequireLowercase = true;
-            options.Password.RequireUppercase = true;
-            options.Password.RequireNonAlphanumeric = true;
-            options.Password.RequiredLength = 8;
-        })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders()
-            .AddRoleManager<RoleManager<ApplicationRole>>();
-
+        //services.AddIdentityDatabase(configuration);
+        
+        //services.AddIdentityHealthChecks();
+        
         return services;
     }
 
@@ -202,139 +202,140 @@ public static class DependencyInjection
     /// <summary>
     /// Adds authentication services.
     /// </summary>
-    private static IServiceCollection AddAuthentication(
-        this IServiceCollection services,
-        IConfiguration configuration)
-    {
-        services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(o =>
-        {
-            o.RequireHttpsMetadata = false; // Set to true in production
-            o.SaveToken = true;
-            o.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
-                ValidIssuer = configuration["Jwt:Issuer"],
-                ValidAudience = configuration["Jwt:Audience"],
-                ClockSkew = TimeSpan.Zero,
-                NameClaimType = ClaimTypes.NameIdentifier,
-                RoleClaimType = ClaimTypes.Role
-            };
+    //private static IServiceCollection AddAuthentication(
+    //    this IServiceCollection services,
+    //    IConfiguration configuration)
+    //{
+         
+        //services.AddAuthentication(options =>
+        //{
+        //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        //})
+        //.AddJwtBearer(o =>
+        //{
+        //    o.RequireHttpsMetadata = false; // Set to true in production
+        //    o.SaveToken = true;
+        //    o.TokenValidationParameters = new TokenValidationParameters
+        //    {
+        //        ValidateIssuer = true,
+        //        ValidateAudience = true,
+        //        ValidateLifetime = true,
+        //        ValidateIssuerSigningKey = true,
+        //        IssuerSigningKey = new SymmetricSecurityKey(
+        //            Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
+        //        ValidIssuer = configuration["Jwt:Issuer"],
+        //        ValidAudience = configuration["Jwt:Audience"],
+        //        ClockSkew = TimeSpan.Zero,
+        //        NameClaimType = ClaimTypes.NameIdentifier,
+        //        RoleClaimType = ClaimTypes.Role
+        //    };
 
-            o.Events = new JwtBearerEvents
-            {
-                #region Token Validation (if custom middleware not enabled)
-                // OnTokenValidated = async context =>
-                // {
-                //     var services = context.HttpContext.RequestServices;
-                //     
-                //     // 1. Check if token is blacklisted
-                //     var tokenId = context.Principal?.FindFirst("jti")?.Value;
-                //     if (!string.IsNullOrEmpty(tokenId))
-                //     {
-                //         using var scope = services.CreateScope();
-                //         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                //         var isBlacklisted = await dbContext.TokenBlacklist
-                //             .AnyAsync(t => t.TokenId == tokenId && t.ExpiresAt > DateTime.UtcNow);
-                //         if (isBlacklisted)
-                //         {
-                //             context.Fail("Token has been revoked");
-                //             return;
-                //         }
-                //     }
-                //     
-                //     // 2. Check token version
-                //     var userIdClaim = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                //     var tokenVersionClaim = context.Principal?.FindFirst("token_version")?.Value;
-                //     if (!string.IsNullOrEmpty(userIdClaim) && !string.IsNullOrEmpty(tokenVersionClaim))
-                //     {
-                //         using var scope = services.CreateScope();
-                //         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                //         var user = await dbContext.Users.FindAsync(Guid.Parse(userIdClaim));
-                //         if (user != null && user.TokenVersion != int.Parse(tokenVersionClaim))
-                //         {
-                //             context.Fail("Token has been revoked");
-                //             return;
-                //         }
-                //     }
-                // },
-                #endregion
+        //    o.Events = new JwtBearerEvents
+        //    {
+        //        #region Token Validation (if custom middleware not enabled)
+        //        // OnTokenValidated = async context =>
+        //        // {
+        //        //     var services = context.HttpContext.RequestServices;
+        //        //     
+        //        //     // 1. Check if token is blacklisted
+        //        //     var tokenId = context.Principal?.FindFirst("jti")?.Value;
+        //        //     if (!string.IsNullOrEmpty(tokenId))
+        //        //     {
+        //        //         using var scope = services.CreateScope();
+        //        //         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        //        //         var isBlacklisted = await dbContext.TokenBlacklist
+        //        //             .AnyAsync(t => t.TokenId == tokenId && t.ExpiresAt > DateTime.UtcNow);
+        //        //         if (isBlacklisted)
+        //        //         {
+        //        //             context.Fail("Token has been revoked");
+        //        //             return;
+        //        //         }
+        //        //     }
+        //        //     
+        //        //     // 2. Check token version
+        //        //     var userIdClaim = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //        //     var tokenVersionClaim = context.Principal?.FindFirst("token_version")?.Value;
+        //        //     if (!string.IsNullOrEmpty(userIdClaim) && !string.IsNullOrEmpty(tokenVersionClaim))
+        //        //     {
+        //        //         using var scope = services.CreateScope();
+        //        //         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        //        //         var user = await dbContext.Users.FindAsync(Guid.Parse(userIdClaim));
+        //        //         if (user != null && user.TokenVersion != int.Parse(tokenVersionClaim))
+        //        //         {
+        //        //             context.Fail("Token has been revoked");
+        //        //             return;
+        //        //         }
+        //        //     }
+        //        // },
+        //        #endregion
 
-                OnAuthenticationFailed = ctx =>
-                {
-                    if (ctx.Exception.GetType() == typeof(SecurityTokenExpiredException))
-                    {
-                        ctx.Response.Headers.Add("Token-Expired", "true");
-                    }
+        //        OnAuthenticationFailed = ctx =>
+        //        {
+        //            if (ctx.Exception.GetType() == typeof(SecurityTokenExpiredException))
+        //            {
+        //                ctx.Response.Headers.Add("Token-Expired", "true");
+        //            }
 
-                    Log.Error(ctx.Exception, "JWT Authentication Failed: {Message}",
-                        ctx.Exception.Message);
+        //            Log.Error(ctx.Exception, "JWT Authentication Failed: {Message}",
+        //                ctx.Exception.Message);
 
-                    return Task.CompletedTask;
-                },
+        //            return Task.CompletedTask;
+        //        },
 
-                OnChallenge = ctx =>
-                {
-                    Log.Warning("JWT Challenge issued: {Error} - {ErrorDescription}",
-                        ctx.Error,
-                        ctx.ErrorDescription);
+        //        OnChallenge = ctx =>
+        //        {
+        //            Log.Warning("JWT Challenge issued: {Error} - {ErrorDescription}",
+        //                ctx.Error,
+        //                ctx.ErrorDescription);
 
-                    return Task.CompletedTask;
-                }
-            };
-        });
+        //            return Task.CompletedTask;
+        //        }
+        //    };
+        //});
 
-        return services;
-    }
+    //    return services;
+    //}
 
     /// <summary>
     /// Adds authorization services with permission-based access control.
     /// </summary>
-    private static IServiceCollection AddAuthorization(this IServiceCollection services)
-    {
-        services.AddAuthorization(options =>
-        {
-            // Default policy - requires authenticated user
-            // This makes [Authorize] attribute work by default
-            options.DefaultPolicy = new AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser()
-                .AddRequirements(new PermissionRequirement("__default__"))
-                .Build();
+    //private static IServiceCollection AddAuthorization(this IServiceCollection services)
+    //{
+    //    services.AddAuthorization(options =>
+    //    {
+    //        // Default policy - requires authenticated user
+    //        // This makes [Authorize] attribute work by default
+    //        options.DefaultPolicy = new AuthorizationPolicyBuilder()
+    //            .RequireAuthenticatedUser()
+    //            .AddRequirements(new PermissionRequirement("__default__"))
+    //            .Build();
 
-            // Additional policies are auto-discovered by PolicyDiscoveryService on startup
-        });
+    //        // Additional policies are auto-discovered by PolicyDiscoveryService on startup
+    //    });
 
-        // Auth & Token Services
-        services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<ISessionService, SessionService>();
-        services.AddScoped<IRolePermissionService, RolePermissionService>();
+    //    // Auth & Token Services
+    //    services.AddScoped<ITokenService, TokenService>();
+    //    services.AddScoped<IAuthService, AuthService>();
+    //    services.AddScoped<ISessionService, SessionService>();
+    //    services.AddScoped<IRolePermissionService, RolePermissionService>();
 
-        // Authorization infrastructure
-        services.AddScoped<PermissionProvider>();
-        services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
-        services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+    //    // Authorization infrastructure
+    //    services.AddScoped<PermissionProvider>();
+    //    services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+    //    services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 
-        return services;
-    }
-    private static IServiceCollection AddPolicyDiscovery(this IServiceCollection services)
-    {
-        // Policy Discovery Service - scans controllers for authorization policies
-        // Must be registered AFTER AddDatabase() and AddAuthorization() 
-        // because it depends on ApplicationDbContext and AuthorizationOptions
-        services.AddScoped<IPolicyDiscoveryService, PolicyDiscoveryService>();
+    //    return services;
+    //}
+    //private static IServiceCollection AddPolicyDiscovery(this IServiceCollection services)
+    //{
+    //    // Policy Discovery Service - scans controllers for authorization policies
+    //    // Must be registered AFTER AddDatabase() and AddAuthorization() 
+    //    // because it depends on ApplicationDbContext and AuthorizationOptions
+    //    services.AddScoped<IPolicyDiscoveryService, PolicyDiscoveryService>();
 
-        return services;
-    }
+    //    return services;
+    //}
 
 
 }

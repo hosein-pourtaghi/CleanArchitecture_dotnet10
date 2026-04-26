@@ -1,0 +1,391 @@
+using IdentityApi.Application.DTOs;
+using IdentityApi.Application.Interfaces;
+using IdentityApi.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using SharedKernel;
+
+
+namespace IdentityApi.Infrastructure.Services;
+
+
+
+public class AuthService : IAuthService
+{
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<ApplicationRole> _roleManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly ITokenService _tokenService;
+    private readonly ISessionService _sessionService;
+    private readonly IRolePermissionService _rolePermissionService;
+    private readonly IMyIdentityDbContext _context;
+
+    public AuthService(
+        UserManager<ApplicationUser> userManager,
+        RoleManager<ApplicationRole> roleManager,
+        SignInManager<ApplicationUser> signInManager,
+        ITokenService tokenService,
+        ISessionService sessionService,
+        IRolePermissionService rolePermissionService,
+        IMyIdentityDbContext context
+        )
+    {
+        _userManager = userManager;
+        _roleManager = roleManager;
+        _signInManager = signInManager;
+        _tokenService = tokenService;
+        _sessionService = sessionService;
+        _rolePermissionService = rolePermissionService;
+        _context = context;
+    }
+
+
+    public async Task<Result<LoginResponse>> RegisterAsync(RegisterRequest request, string ipAddress, string? userAgent)
+    {
+        // Validate password match
+        if (request.Password != request.ConfirmPassword)
+            return Result.Failure<LoginResponse>("Passwords do not match");
+
+        // Check if email exists
+        var existingUser = await _userManager.FindByEmailAsync(request.Email);
+        if (existingUser != null)
+            return Result.Failure<LoginResponse>("Email is already registered");
+
+        // Create new user
+        var user = new ApplicationUser
+        {
+            Email = request.Email,
+            UserName = request.Email,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            IsActive = true,
+            TokenVersion = 1,
+            RefreshTokenVersion = 1,
+            AllowMultipleSessions = true,
+            MaxConcurrentSessions = 5
+        };
+
+        var result = await _userManager.CreateAsync(user, request.Password);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            return Result.Failure<LoginResponse>($"Failed to create user: {errors}");
+        }
+
+        // Assign default role (User)
+        var defaultRole = await _roleManager.FindByNameAsync("User");
+        if (defaultRole != null)
+        {
+            await _userManager.AddToRoleAsync(user, "User");
+        }
+
+        // Get user roles and permissions
+        var rolesResult = await _rolePermissionService.GetUserRolesAsync(user.Id);
+        var permissionsResult = await _rolePermissionService.GetUserPermissionsAsync(user.Id);
+
+        var roles = rolesResult.IsSuccess ? rolesResult.Value.Select(r => r.Name).ToList() : new List<string>();
+        var permissions = permissionsResult.IsSuccess ? permissionsResult.Value.Select(p => p.Name).ToList() : new List<string>();
+
+        // Generate tokens
+        var tokens = _tokenService.GenerateTokens(
+            user.Id,
+            user.TokenVersion,
+            user.RefreshTokenVersion,
+            permissions,
+            roles
+        );
+
+        // Create session
+        var session = new UserSession
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            TokenVersion = tokens.TokenVersion.ToString(),
+            RefreshTokenVersion = tokens.RefreshTokenVersion.ToString(),
+            DeviceInfo = "Registration",
+            IpAddress = ipAddress,
+            UserAgent = userAgent,
+            LoginTime = DateTime.UtcNow,
+            LastActivityTime = DateTime.UtcNow,
+            ExpiresAt = tokens.RefreshTokenExpiresAt,
+            IsActive = true
+        };
+
+        _context.UserSessions.Add(session);
+
+        user.LastLoginAt = DateTime.UtcNow;
+        user.LastActivityAt = DateTime.UtcNow;
+        user.IsOnline = true;
+
+        await _context.SaveChangesAsync();
+
+        var userDto = new UserDto(
+            user.Id,
+            user.Email!,
+            user.FirstName,
+            user.LastName,
+            user.DisplayName,
+            user.IsOnline,
+            user.LastLoginAt,
+            roles,
+            permissions
+        );
+
+        return Result.Success(new LoginResponse(
+            tokens.AccessToken,
+            tokens.RefreshToken,
+            tokens.ExpiresAt,
+            tokens.RefreshTokenExpiresAt,
+            userDto
+        ));
+    }
+
+    public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, string ipAddress, string? userAgent)
+    {
+        var user = await _userManager.FindByEmailAsync(request.Email);
+
+        if (user == null)
+            return Result.Failure<LoginResponse>("Invalid email or password");
+
+        if (!user.IsActive)
+            return Result.Failure<LoginResponse>("User account is disabled");
+
+        var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+        if (!passwordValid)
+            return Result.Failure<LoginResponse>("Invalid email or password");
+
+        // Check for multiple sessions
+        if (!user.AllowMultipleSessions)
+        {
+            var activeSessions = await _context.UserSessions
+                .Where(s => s.UserId == user.Id && s.IsActive && !s.IsTerminated)
+                .ToListAsync();
+
+            if (activeSessions.Count >= user.MaxConcurrentSessions)
+            {
+                // Terminate oldest session
+                var oldestSession = activeSessions.OrderBy(s => s.LoginTime).First();
+                await _sessionService.TerminateSessionAsync(user.Id, oldestSession.Id);
+            }
+        }
+
+        // Get user roles and permissions
+        var rolesResult = await _rolePermissionService.GetUserRolesAsync(user.Id);
+        var permissionsResult = await _rolePermissionService.GetUserPermissionsAsync(user.Id);
+
+        if (!rolesResult.IsSuccess || !permissionsResult.IsSuccess)
+            return Result.Failure<LoginResponse>("Failed to get user roles/permissions");
+
+        var roles = rolesResult.Value.Select(r => r.Name).ToList();
+        var permissions = permissionsResult.Value.Select(p => p.Name).ToList();
+
+        // Generate tokens
+        var tokens = _tokenService.GenerateTokens(
+            user.Id,
+            user.TokenVersion,
+            user.RefreshTokenVersion,
+            permissions,
+            roles
+        );
+
+        // Create session
+        var session = new UserSession
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            TokenVersion = tokens.TokenVersion.ToString(),
+            RefreshTokenVersion = tokens.RefreshTokenVersion.ToString(),
+            DeviceInfo = request.DeviceInfo ?? "Unknown",
+            IpAddress = ipAddress,
+            UserAgent = userAgent,
+            LoginTime = DateTime.UtcNow,
+            LastActivityTime = DateTime.UtcNow,
+            ExpiresAt = tokens.RefreshTokenExpiresAt,
+            IsActive = true
+        };
+
+        _context.UserSessions.Add(session);
+
+        // Update user activity
+        user.LastLoginAt = DateTime.UtcNow;
+        user.LastActivityAt = DateTime.UtcNow;
+        user.IsOnline = true;
+
+        await _context.SaveChangesAsync();
+
+        var userDto = new UserDto(
+            user.Id,
+            user.Email!,
+            user.FirstName,
+            user.LastName,
+            user.DisplayName,
+            user.IsOnline,
+            user.LastLoginAt,
+            roles,
+            permissions
+        );
+
+        return Result.Success(new LoginResponse(
+            tokens.AccessToken,
+            tokens.RefreshToken,
+            tokens.ExpiresAt,
+            tokens.RefreshTokenExpiresAt,
+            userDto
+        ));
+    }
+
+    public async Task<Result<LoginResponse>> RefreshTokenAsync(RefreshTokenRequest request)
+    {
+        var (userId, tokenId, refreshTokenVersion) = _tokenService.ValidateRefreshToken(request.RefreshToken);
+
+        if (userId == null || refreshTokenVersion == null)
+            return Result.Failure<LoginResponse>("Invalid refresh token");
+
+        var user = await _context.Users.FindAsync(userId.Value);
+        if (user == null)
+            return Result.Failure<LoginResponse>("User not found");
+
+        if (!user.IsActive)
+            return Result.Failure<LoginResponse>("User account is disabled");
+
+        if (user.RefreshTokenVersion != refreshTokenVersion)
+            return Result.Failure<LoginResponse>("Refresh token has been revoked");
+
+        // Check if token is blacklisted
+        if (await _tokenService.IsTokenBlacklistedAsync(tokenId!))
+            return Result.Failure<LoginResponse>("Token has been invalidated");
+
+        // Get user roles and permissions
+        var rolesResult = await _rolePermissionService.GetUserRolesAsync(user.Id);
+        var permissionsResult = await _rolePermissionService.GetUserPermissionsAsync(user.Id);
+
+        if (!rolesResult.IsSuccess || !permissionsResult.IsSuccess)
+            return Result.Failure<LoginResponse>("Failed to get user roles/permissions");
+
+        var roles = rolesResult.Value.Select(r => r.Name).ToList();
+        var permissions = permissionsResult.Value.Select(p => p.Name).ToList();
+
+        // Generate new tokens (sliding window - 10 min to 8 hours)
+        var tokens = _tokenService.GenerateTokens(
+            user.Id,
+            user.TokenVersion,
+            user.RefreshTokenVersion,
+            permissions,
+            roles
+        );
+
+        // Update session
+        var session = await _context.UserSessions
+            .Where(s => s.UserId == user.Id && s.IsActive && !s.IsTerminated)
+            .OrderByDescending(s => s.LoginTime)
+            .FirstOrDefaultAsync();
+
+        if (session != null)
+        {
+            session.TokenVersion = tokens.TokenVersion.ToString();
+            session.RefreshTokenVersion = tokens.RefreshTokenVersion.ToString();
+            session.LastActivityTime = DateTime.UtcNow;
+            session.ExpiresAt = tokens.RefreshTokenExpiresAt;
+        }
+
+        user.LastActivityAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        var userDto = new UserDto(
+            user.Id,
+            user.Email!,
+            user.FirstName,
+            user.LastName,
+            user.DisplayName,
+            user.IsOnline,
+            user.LastLoginAt,
+            roles,
+            permissions
+        );
+
+        return Result.Success(new LoginResponse(
+            tokens.AccessToken,
+            tokens.RefreshToken,
+            tokens.ExpiresAt,
+            tokens.RefreshTokenExpiresAt,
+            userDto
+        ));
+    }
+
+    public async Task<Result> LogoutAsync(Guid userId, LogoutRequest request, string? tokenId)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+            return Result.Failure("User not found");
+
+        if (request.TerminateAllSessions)
+        {
+            // Increment token version to invalidate all tokens
+            user.TokenVersion++;
+            user.RefreshTokenVersion++;
+
+            var sessions = await _context.UserSessions
+                .Where(s => s.UserId == userId && s.IsActive && !s.IsTerminated)
+                .ToListAsync();
+
+            foreach (var session in sessions)
+            {
+                session.IsActive = false;
+                session.IsTerminated = true;
+                session.TerminationReason = "User logged out from all sessions";
+            }
+        }
+        else if (!string.IsNullOrEmpty(tokenId))
+        {
+            // Blacklist current token
+            await _tokenService.InvalidateTokenAsync(tokenId, userId, "User logged out");
+
+            // Terminate current session
+            var session = await _context.UserSessions
+                .Where(s => s.UserId == userId && s.TokenVersion == user.TokenVersion.ToString())
+                .FirstOrDefaultAsync();
+
+            if (session != null)
+            {
+                session.IsActive = false;
+                session.IsTerminated = true;
+                session.TerminationReason = "User logged out";
+            }
+        }
+
+        // Check if user has any active sessions
+        var hasActiveSessions = await _context.UserSessions
+            .AnyAsync(s => s.UserId == userId && s.IsActive && !s.IsTerminated);
+
+        user.IsOnline = hasActiveSessions;
+
+        await _context.SaveChangesAsync();
+
+        return Result.Success();
+    }
+
+    public async Task<Result> ValidateTokenAsync(string token)
+    {
+        var (userId, tokenId, tokenVersion) = _tokenService.ValidateAccessToken(token);
+
+        if (userId == null || tokenId == null || tokenVersion == null)
+            return Result.Failure("Invalid token");
+
+        if (await _tokenService.IsTokenBlacklistedAsync(tokenId))
+            return Result.Failure("Token has been invalidated");
+
+        var user = await _context.Users.FindAsync(userId.Value);
+        if (user == null)
+            return Result.Failure("User not found");
+
+        if (!user.IsActive)
+            return Result.Failure("User account is disabled");
+
+        if (user.TokenVersion != tokenVersion)
+            return Result.Failure("Token has been revoked");
+
+        return Result.Success();
+    }
+}

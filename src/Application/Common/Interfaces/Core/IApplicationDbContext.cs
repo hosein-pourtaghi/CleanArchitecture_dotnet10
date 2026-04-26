@@ -1,8 +1,6 @@
 ﻿using System.Data;
 using Domain.Aggregates.Assessments;
 using Domain.Aggregates.Checklists;
-using Domain.Aggregates.Customers;
-using Domain.Aggregates.Identities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -12,18 +10,6 @@ namespace Application.Common.Interfaces.Core;
 
 public interface IApplicationDbContext
 {
-
-
-    #region Identity
-    DbSet<ApplicationUser> Users { get; }
-    DbSet<ApplicationRole> Roles { get; }
-    DbSet<ApplicationUserRole> UserRoles { get; }
-    DbSet<Permission> Permissions { get; }
-    DbSet<RolePermission> RolePermissions { get; }
-    DbSet<UserSession> UserSessions { get; }
-    DbSet<TokenBlacklist> TokenBlacklist { get; }
-    #endregion
-
 
     #region DbSets 
     DbSet<Checklist> Checklists { get; }

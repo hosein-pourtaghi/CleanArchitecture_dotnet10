@@ -6,7 +6,7 @@ using SharedKernel.LoggingCore.Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 
-namespace MediatRCore.Behaviors;
+namespace SharedKernel.MediatRCore.Behaviors;
 
 /// <summary>
 /// MediatR pipeline behavior for tracking performance metrics

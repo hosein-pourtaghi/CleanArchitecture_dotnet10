@@ -3,15 +3,14 @@ using System.Linq.Expressions;
 using Application.Common.Interfaces.Core;
 using Domain.Aggregates.Assessments;
 using Domain.Aggregates.Checklists;
-using Domain.Aggregates.Identities;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using IdentityApi.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage;
 using SharedKernel;
 using SharedKernel.BaseEntities;
+using SharedKernel.Shared;
 
 namespace Infrastructure.Persistence;
 
@@ -28,15 +27,17 @@ namespace Infrastructure.Persistence;
 
 
 //public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, IApplicationDbContext
-public sealed class ApplicationDbContext : IdentityDbContext<
-ApplicationUser,
-ApplicationRole,
-Guid,
-ApplicationUserClaim,
-ApplicationUserRole,
-ApplicationUserLogin,
-ApplicationRoleClaim,
-ApplicationUserToken>, IApplicationDbContext
+public sealed class ApplicationDbContext : DbContext,
+//    IdentityDbContext<
+//ApplicationUser,
+//ApplicationRole,
+//Guid,
+//ApplicationUserClaim,
+//ApplicationUserRole,
+//ApplicationUserLogin,
+//ApplicationRoleClaim,
+//ApplicationUserToken>, 
+    IApplicationDbContext
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IDomainEventsDispatcher _domainEventsDispatcher;
@@ -62,19 +63,7 @@ ApplicationUserToken>, IApplicationDbContext
     }
 
 
-    #region Identity
-    public DbSet<ApplicationUser> Users => Set<ApplicationUser>();
-    public DbSet<ApplicationRole> Roles => Set<ApplicationRole>();
-    public DbSet<ApplicationUserRole> UserRoles => Set<ApplicationUserRole>();
-    public DbSet<Permission> Permissions => Set<Permission>();
-    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
-    public DbSet<UserSession> UserSessions => Set<UserSession>();
-    public DbSet<TokenBlacklist> TokenBlacklist => Set<TokenBlacklist>();
-    #endregion
-
-
     #region DbSets  
-
     public DbSet<Checklist> Checklists => Set<Checklist>();
     public DbSet<Assessment> Assessments => Set<Assessment>();
     #endregion
@@ -89,9 +78,6 @@ ApplicationUserToken>, IApplicationDbContext
         // 🔥 SCHEMA
         modelBuilder.HasDefaultSchema(Schemas.Default);
 
-        // 🔥 CONFIGURE IDENTITY ENTITIES
-        ConfigureIdentityEntities(modelBuilder);
-
         // 🔥 AUTO-CONFIGURE: All entities automatically
         ConfigureAllEntitiesAutomatically(modelBuilder);
 
@@ -101,68 +87,6 @@ ApplicationUserToken>, IApplicationDbContext
         // optional: additional configuration can be placed here
 
     }
-
-
-    #region 🔥 IDENTITY CONFIGURATION
-
-    private static void ConfigureIdentityEntities(ModelBuilder modelBuilder)
-    {
-        // 🔥 Configure ApplicationUser
-        modelBuilder.Entity<ApplicationUser>(entity =>
-        {
-            entity.ToTable("Users", Schemas.Default);
-
-            // Indexes for performance
-            entity.HasIndex(e => e.NormalizedEmail).HasDatabaseName("IX_Users_Email");
-            entity.HasIndex(e => e.NormalizedUserName).HasDatabaseName("IX_Users_UserName").IsUnique();
-        });
-
-        // 🔥 Configure ApplicationRole
-        modelBuilder.Entity<ApplicationRole>(entity =>
-        {
-            entity.ToTable("Roles", Schemas.Default);
-            entity.HasIndex(e => e.NormalizedName).HasDatabaseName("IX_Roles_Name").IsUnique();
-        });
-
-        // 🔥 Configure IdentityUserLogin
-        modelBuilder.Entity<IdentityUserLogin<Guid>>(entity =>
-        {
-            entity.ToTable("UserLogins", Schemas.Default);
-            entity.HasKey(e => new { e.LoginProvider, e.ProviderKey });
-        });
-
-        // 🔥 Configure IdentityUserToken
-        modelBuilder.Entity<IdentityUserToken<Guid>>(entity =>
-        {
-            entity.ToTable("UserTokens", Schemas.Default);
-            entity.HasKey(e => new { e.UserId, e.LoginProvider, e.Name });
-        });
-
-        // 🔥 Configure IdentityRoleClaim
-        modelBuilder.Entity<IdentityRoleClaim<Guid>>(entity =>
-        {
-            entity.ToTable("RoleClaims", Schemas.Default);
-            entity.HasIndex(e => e.RoleId);
-        });
-
-        // 🔥 Configure IdentityUserClaim
-        modelBuilder.Entity<IdentityUserClaim<Guid>>(entity =>
-        {
-            entity.ToTable("UserClaims", Schemas.Default);
-            entity.HasIndex(e => e.UserId);
-        });
-
-        // 🔥 Configure IdentityUserRole
-        modelBuilder.Entity<IdentityUserRole<Guid>>(entity =>
-        {
-            entity.ToTable("UserRoles", Schemas.Default);
-            entity.HasKey(e => new { e.UserId, e.RoleId });
-            entity.HasIndex(e => e.RoleId);
-        });
-    }
-
-    #endregion
-
 
     #region 🔥 AUTOMATIC CONFIGURATION - NO MANUAL WORK NEEDED!
 

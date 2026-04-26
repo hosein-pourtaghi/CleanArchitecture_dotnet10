@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using SharedKernel.Exceptions;
 using Microsoft.AspNetCore.Http;
 
-namespace MediatRCore.Behaviors;
+namespace SharedKernel.MediatRCore.Behaviors;
  
 
 /// <summary>

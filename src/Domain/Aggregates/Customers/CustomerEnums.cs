@@ -1,6 +1,4 @@
-﻿using SharedKernel.BaseEntities;
-
-namespace Domain.Aggregates.Customers;
+﻿namespace Domain.Aggregates.Customers;
 
 ///// <summary>
 ///// Shopping Cart Aggregate Root
