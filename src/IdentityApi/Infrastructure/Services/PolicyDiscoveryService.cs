@@ -1,14 +1,13 @@
-﻿using System.Reflection; 
+﻿using System.Reflection;
+using IdentityApi.Application.DTOs;
+using IdentityApi.Domain.Entities;
+using IdentityApi.Infrastructure.Authorization;
+using IdentityApi.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;   
+using Microsoft.Extensions.Options;
 using SharedKernel;
-using IdentityApi.Application.DTOs;
-using IdentityApi.Infrastructure.Persistence;
-using IdentityApi.Domain.Entities;
-using IdentityApi.Infrastructure.Authorization;
 
 namespace IdentityApi.Application.Interfaces;
 
@@ -92,7 +91,7 @@ public class PolicyDiscoveryService : IPolicyDiscoveryService
             var context = services.GetRequiredService<MyIdentityDbContext>();
 
             // Get AuthorizationOptions
-            var authorizationOptions = services.GetRequiredService<Microsoft.Extensions.Options.IOptions<AuthorizationOptions>>();
+            var authorizationOptions = services.GetRequiredService<IOptions<AuthorizationOptions>>();
             var options = authorizationOptions.Value;
 
             var registeredCount = 0;
@@ -103,8 +102,7 @@ public class PolicyDiscoveryService : IPolicyDiscoveryService
                 var policyKey = $"permission:{policy.PolicyName}";
 
                 // ✅ 1. Save permission to database if not exists
-                var existingPermission = await context.Permissions
-                    .FirstOrDefaultAsync(p => p.Name == policy.PolicyName);
+                var existingPermission = await context.Permissions.FirstOrDefaultAsync(p => p.Name == policy.PolicyName);
                 if (existingPermission == null)
                 {
                     var newPermission = new Permission

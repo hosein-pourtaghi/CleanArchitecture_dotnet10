@@ -36,6 +36,7 @@
  
 	
   <ItemGroup>
+    <ProjectReference Include="..\IdentityApi\IdentityApi.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\SharedApi\SharedApi.csproj" />
   </ItemGroup>

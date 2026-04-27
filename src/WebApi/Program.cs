@@ -5,10 +5,7 @@
 // ============================================================
 
 using Application;
-using Application.Common.Interfaces.Core;
-using HealthChecks.UI.Client;
 using Infrastructure;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
 using SharedApi.Extensions;
 using SharedKernel.LoggingCore.DependencyInjection;
@@ -31,6 +28,12 @@ Log.Logger = new LoggerConfiguration()
 // STEP 3: Configure Host with Serilog
 // ============================================================
 builder.Host.AddSerilogLogging(builder.Configuration, builder.Environment.ApplicationName);
+
+
+// ============================================
+// 2. Add Identity Infrastructure (all in one call)
+// ============================================
+builder.Services.AddIdentityInfrastructure(builder.Configuration);
 
 // ============================================================
 // STEP 4: Chain all dependency injection extensions
@@ -90,6 +93,8 @@ catch (Exception ex)
 // STEP 9: Initialize Services on Startup
 // ============================================================
 
+await app.RegisterAuthorizationPolicies();
+
 //// 9a. Discover and register authorization policies
 //using (var scope = app.Services.CreateScope())
 //{
@@ -124,7 +129,7 @@ if (app.Environment.IsDevelopment())
     app.ApplyMigrations();
     app.UseDeveloperExceptionPage();
 }
- 
+
 
 // 10g. Exception Handler (fallback for unhandled exceptions)
 app.UseExceptionHandler();
@@ -147,6 +152,8 @@ app.MapControllers();
 // STEP 11: Initialize Logging Database
 // ============================================================
 await app.Services.InitializeLoggingDatabaseAsync();
+
+await app.InitializeDatabaseSeedData(builder);
 
 // ============================================================
 // STEP 12: Run Application
