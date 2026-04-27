@@ -6,31 +6,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SharedKernel.Shared;
 
 namespace IdentityApi.Infrastructure.Persistence.Configurations;
-
-//public static class IdentityConfiguration
-//{
-//    /// <summary>
-//    /// Applies all identity-related entity configurations
-//    /// </summary>
-//    public static void ApplyConfigurations(this ModelBuilder modelBuilder)
-//    {
-//        // Apply custom entity configurations
-//        modelBuilder.ApplyConfiguration(new ApplicationUserConfiguration());
-//        modelBuilder.ApplyConfiguration(new ApplicationRoleConfiguration());
-//        modelBuilder.ApplyConfiguration(new ApplicationUserRoleConfiguration());
-//        modelBuilder.ApplyConfiguration(new PermissionConfiguration());
-//        modelBuilder.ApplyConfiguration(new RolePermissionConfiguration());
-//        modelBuilder.ApplyConfiguration(new UserSessionConfiguration());
-//        modelBuilder.ApplyConfiguration(new TokenBlacklistConfiguration());
-
-//        // Apply ASP.NET Identity entity configurations
-//        modelBuilder.ApplyConfiguration(new IdentityUserLoginConfiguration());
-//        modelBuilder.ApplyConfiguration(new IdentityUserTokenConfiguration());
-//        modelBuilder.ApplyConfiguration(new IdentityRoleClaimConfiguration());
-//        modelBuilder.ApplyConfiguration(new IdentityUserClaimConfiguration());
-//        modelBuilder.ApplyConfiguration(new IdentityUserRoleConfiguration());
-//    }
-//}
+ 
 
 #region Custom Entity Configurations
 
@@ -59,7 +35,7 @@ public class ApplicationRoleConfiguration : IEntityTypeConfiguration<Application
 public class ApplicationUserRoleConfiguration : IEntityTypeConfiguration<ApplicationUserRole>
 {
     public void Configure(EntityTypeBuilder<ApplicationUserRole> builder)
-    {
+    { 
         builder.ToTable("UserRoles", Schemas.Identity);
 
         builder.HasKey(ur => new { ur.UserId, ur.RoleId });
@@ -180,15 +156,6 @@ public class IdentityUserClaimConfiguration : IEntityTypeConfiguration<IdentityU
         builder.HasIndex(e => e.UserId).HasDatabaseName("IX_UserClaims_UserId");
     }
 }
-
-public class IdentityUserRoleConfiguration : IEntityTypeConfiguration<IdentityUserRole<Guid>>
-{
-    public void Configure(EntityTypeBuilder<IdentityUserRole<Guid>> builder)
-    {
-        builder.ToTable("UserRoles", Schemas.Identity);
-        builder.HasKey(e => new { e.UserId, e.RoleId });
-        builder.HasIndex(e => e.RoleId).HasDatabaseName("IX_UserRoles_RoleId");
-    }
-}
+ 
 
 #endregion
