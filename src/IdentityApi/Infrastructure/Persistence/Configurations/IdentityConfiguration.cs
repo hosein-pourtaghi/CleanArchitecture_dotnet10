@@ -1,6 +1,7 @@
 using IdentityApi.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using SharedKernel.Shared;
 
 namespace IdentityApi.Infrastructure.Persistence.Configurations;
 
@@ -8,6 +9,9 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
 {
     public void Configure(EntityTypeBuilder<ApplicationUser> builder)
     {
+        builder.ToTable("Users", Schemas.Identity);
+
+        // Indexes for performance
         builder.HasIndex(e => e.NormalizedEmail);
         builder.HasIndex(e => e.NormalizedUserName);
         builder.HasIndex(e => e.IsOnline);
@@ -19,6 +23,8 @@ public class ApplicationRoleConfiguration : IEntityTypeConfiguration<Application
 {
     public void Configure(EntityTypeBuilder<ApplicationRole> builder)
     {
+        builder.ToTable("Roles", Schemas.Identity);
+
         builder.HasIndex(e => e.NormalizedName).IsUnique();
     }
 }

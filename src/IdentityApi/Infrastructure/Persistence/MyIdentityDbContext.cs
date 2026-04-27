@@ -19,21 +19,14 @@ ApplicationRoleClaim,
 ApplicationUserToken>, IMyIdentityDbContext
 {
     private readonly ICurrentUserService _currentUserService;
-    //private readonly IDomainEventsDispatcher _domainEventsDispatcher;
 
     public MyIdentityDbContext(
         DbContextOptions<MyIdentityDbContext> options,
         ICurrentUserService currentUserService
-    //,
-    //IDomainEventsDispatcher domainEventsDispatcher
     ) : base(options)
     {
 
         _currentUserService = currentUserService;
-        //_domainEventsDispatcher = domainEventsDispatcher;
-
-        // 🔥 PERFORMANCE: Disable auto-detect changes for bulk operations
-        //ChangeTracker.AutoDetectChangesEnabled = false;
 
         // 🔥 PERFORMANCE: Enable detailed errors in development
         if (Database.IsSqlServer())
@@ -57,20 +50,19 @@ ApplicationUserToken>, IMyIdentityDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // it should be placed here, otherwise it will rewrite the following settings!
-        base.OnModelCreating(modelBuilder);
+        // ✅ CORRECT ORDER:
 
-        // 🔥 SCHEMA
+        // 1. Set schema first
         modelBuilder.HasDefaultSchema(Schemas.Identity);
 
-        // 🔥 CONFIGURE IDENTITY ENTITIES
-        ConfigureIdentityEntities(modelBuilder);
-
-        // 🔥 APPLY CONFIGURATIONS
+        // 2. Apply your custom configurations FIRST
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(MyIdentityDbContext).Assembly);
 
-        // optional: additional configuration can be placed here
+        // 3. Configure Identity entities with custom table names
+        ConfigureIdentityEntities(modelBuilder);
 
+        // 4. Call base LAST - it won't override your custom names
+        base.OnModelCreating(modelBuilder);
     }
 
 
