@@ -1,3 +1,4 @@
+using IdentityApi.Application.Interfaces;
 using IdentityApi.Infrastructure.Authorization;
 using IdentityApi.Infrastructure.Persistence;
 using Infrastructure;
@@ -88,15 +89,24 @@ builder.Services.AddSwaggerGen(options =>
 // ============================================
 // 7. Add CORS (if needed)
 // ============================================
-// builder.Services.AddCors(options =>
-// {
-//     options.AddPolicy("AllowFrontend", policy =>
-//     {
-//         policy.WithOrigins("https://your-frontend.com")
-//               .AllowAnyHeader()
-//               .AllowAnyMethod();
-//     });
-// });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp", policy =>
+    {
+        // For development - allows any origin
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+
+        // For production with specific origins:
+        // policy.WithOrigins("https://yourdomain.com")
+        //       .AllowAnyHeader()
+        //       .AllowAnyMethod();
+
+        // For credentials-based auth (uncomment if needed):
+        // policy.AllowCredentials(); // Cannot be used with AllowAnyOrigin()
+    });
+});
 
 var app = builder.Build();
 
@@ -118,8 +128,36 @@ if (app.Environment.IsDevelopment())
 // HTTPS redirection
 app.UseHttpsRedirection();
 
+
+
+
+
+// ============================================================
+// STEP 9: Initialize Services on Startup
+// ============================================================
+
+//// 9a. Discover and register authorization policies
+using (var scope = app.Services.CreateScope())
+{
+    var policyService = scope.ServiceProvider.GetRequiredService<IPolicyDiscoveryService>();
+    var result = await policyService.DiscoverAndRegisterPoliciesAsync();
+
+    if (result.IsSuccess && result.Value > 0)
+    {
+        Log.Information("Registered {PolicyCount} authorization policies", result.Value);
+    }
+    else if (result.IsFailure)
+    {
+        Log.Warning("Policy discovery failed: {Error}", result.Error.Description);
+    }
+}
+
+
+
+
+
 // CORS (if enabled)
-// app.UseCors("AllowFrontend");
+app.UseCors("AllowAngularApp");
 
 // Authentication & Authorization (order matters!)
 app.UseAuthentication();
