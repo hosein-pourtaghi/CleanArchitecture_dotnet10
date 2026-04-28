@@ -14,30 +14,7 @@ using SharedKernel.Shared;
 
 namespace Infrastructure.Persistence;
 
-
-//public sealed class ApplicationDbContext : IdentityDbContext<
-//    ApplicationUser,
-//    ApplicationRole,
-//    Guid,
-//    ApplicationUserClaim,
-//    ApplicationUserRole,
-//    ApplicationUserLogin,
-//    ApplicationRoleClaim,
-//    ApplicationUserToken>
-
-
-//public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, IApplicationDbContext
-public sealed class ApplicationDbContext : DbContext,
-//    IdentityDbContext<
-//ApplicationUser,
-//ApplicationRole,
-//Guid,
-//ApplicationUserClaim,
-//ApplicationUserRole,
-//ApplicationUserLogin,
-//ApplicationRoleClaim,
-//ApplicationUserToken>, 
-    IApplicationDbContext
+public sealed class ApplicationDbContext : DbContext, IApplicationDbContext
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IDomainEventsDispatcher _domainEventsDispatcher;
@@ -76,7 +53,7 @@ public sealed class ApplicationDbContext : DbContext,
         base.OnModelCreating(modelBuilder);
 
         // 🔥 SCHEMA
-        modelBuilder.HasDefaultSchema(Schemas.Default);
+        modelBuilder.HasDefaultSchema(Schemas.Checklist);
 
         // 🔥 AUTO-CONFIGURE: All entities automatically
         ConfigureAllEntitiesAutomatically(modelBuilder);

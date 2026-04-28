@@ -29,7 +29,6 @@ Log.Logger = new LoggerConfiguration()
 // ============================================================
 builder.Host.AddSerilogLogging(builder.Configuration, builder.Environment.ApplicationName);
 
-
 // ============================================
 // 2. Add Identity Infrastructure (all in one call)
 // ============================================
@@ -70,9 +69,6 @@ builder.Services.AddLoggingLibrary(
         options.SlowQueryThresholdMs = 500;
     });
 
-// Register HTTP context accessor for logging
-builder.Services.AddHttpContextAccessor();
-
 
 // ============================================================
 // STEP 8: Build Application
@@ -92,24 +88,8 @@ catch (Exception ex)
 // ============================================================
 // STEP 9: Initialize Services on Startup
 // ============================================================
-
 await app.RegisterAuthorizationPolicies();
-
-//// 9a. Discover and register authorization policies
-//using (var scope = app.Services.CreateScope())
-//{
-//    var policyService = scope.ServiceProvider.GetRequiredService<IPolicyDiscoveryService>();
-//    var result = await policyService.DiscoverAndRegisterPoliciesAsync();
-
-//    if (result.IsSuccess && result.Value > 0)
-//    {
-//        Log.Information("Registered {PolicyCount} authorization policies", result.Value);
-//    }
-//    else if (result.IsFailure)
-//    {
-//        Log.Warning("Policy discovery failed: {Error}", result.Error.Description);
-//    }
-//}
+ 
 
 // ============================================================
 // STEP 10: Configure Middleware Pipeline

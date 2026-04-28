@@ -68,10 +68,6 @@ public static class DependencyInjection
                 options.EnableQueryLogging = true;
                 options.SlowQueryThresholdMs = 500;
             });
-
-        // Register HTTP context accessor for logging
-        services.AddHttpContextAccessor();
-
     }
 
 
@@ -159,9 +155,6 @@ public static class DependencyInjection
         // Identity services
         services.AddScoped<IIdentitySeeder, IdentitySeeder>();
 
-        // HTTP context accessor for getting current user info
-        services.AddHttpContextAccessor();
-
         // Memory cache for performance optimization
         services.AddMemoryCache();
 
@@ -170,36 +163,7 @@ public static class DependencyInjection
 
         return services;
     }
-
-
-    /// <summary>
-    /// Adds health check services.
-    /// </summary>
-    //private static IServiceCollection AddIdentityHealthChecks(
-    //    this IServiceCollection services,
-    //    IConfiguration configuration)
-    //{
-    //    // Get the appropriate connection string based on database type
-    //    string? connectionString = configuration["ConnectionString"];
-
-    //    services.AddHealthChecks()
-    //        // Add a default liveness check to ensure app is responsive
-    //        .AddCheck("self", () => HealthCheckResult.Healthy(), ["live"])
-    //        // Use SQL Server health check (matches connection string)
-    //        .AddSqlServer(
-    //            connectionString!,
-    //            name: "sqlserver",
-    //            tags: new[] { "db", "sql", "sqlserver" }
-    //            )
-    //        ;
-
-
-    //    // Alternative: PostgreSQL health check (uncomment if using PostgreSQL)
-    //    // .AddNpgSql(configuration["ConnectionString"]!);
-
-    //    return services;
-    //}
-
+     
     /// <summary>
     /// Adds authentication services.
     /// </summary>
@@ -299,13 +263,12 @@ public static class DependencyInjection
 
         return services;
     }
-
-
-    //**************************************************
-    //**************************************************
-    //**************************************************
-    //**************************************************
-
+     
+    /// <summary>
+    /// Discover and register authorization policies
+    /// </summary>
+    /// <param name="app"></param>
+    /// <returns></returns>
     public static async Task RegisterAuthorizationPolicies(this WebApplication app)
     {
         using (var scope = app.Services.CreateScope())
@@ -323,8 +286,6 @@ public static class DependencyInjection
             }
         }
     }
-
-
 
     public static async Task InitializeDatabaseSeedData(this WebApplication app, WebApplicationBuilder builder)
     {

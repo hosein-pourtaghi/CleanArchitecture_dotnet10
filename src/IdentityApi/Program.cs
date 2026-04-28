@@ -78,12 +78,7 @@ builder.Services.AddSwaggerGen(options =>
             Array.Empty<string>()
         }
     });
-});
-
-// ============================================
-// 6. Add Health Checks (optional)
-// ============================================
-// builder.Services.AddHealthChecks();
+}); 
 
 // ============================================
 // 7. Add CORS (if needed)
