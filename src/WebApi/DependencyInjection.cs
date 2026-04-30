@@ -3,6 +3,7 @@
 // PURPOSE: Presentation layer dependency injection configuration
 // ============================================================
 
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
@@ -125,10 +126,14 @@ public static class DependencyInjection
         {
             // Serialize enums as strings for better readability
             options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+             
+            // Convert property names to camelCase
+            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            // Also convert dictionary keys
+            options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
 
-            // Configure JSON serialization options
-            options.JsonSerializerOptions.PropertyNamingPolicy = null; // Use property names as-is
             options.JsonSerializerOptions.WriteIndented = false;
+
         })
         .AddControllersAsServices();
 
