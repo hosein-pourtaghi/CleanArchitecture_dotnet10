@@ -33,8 +33,4 @@
     <ProjectReference Include="..\SharedApi\SharedApi.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Dtos\" />
-  </ItemGroup>
-
 </Project>

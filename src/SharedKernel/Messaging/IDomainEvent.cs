@@ -1,5 +1,5 @@
-﻿namespace SharedKernel;
- 
+﻿namespace SharedKernel.Messaging;
+
 /// <summary>
 /// Interface for domain events
 /// </summary>

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Application.Common.Interfaces.Core;
+using Application.Common.Messaging;
 using Microsoft.Extensions.DependencyInjection;
-using SharedKernel;
 
 namespace Infrastructure.DomainEvents;
 
@@ -59,7 +59,7 @@ internal sealed class DomainEventsDispatcher(IServiceProvider serviceProvider) :
 
         public override async Task Handle(IDomainEvent domainEvent, CancellationToken cancellationToken)
         {
-            await _handler.Handle((T)domainEvent, cancellationToken);
+            await _handler.HandleAsync((T)domainEvent, cancellationToken);
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿namespace SharedKernel.BaseEntities;
+﻿using SharedKernel.Messaging;
+
+namespace SharedKernel.BaseEntities;
+
 
 public abstract class Entity
 {
@@ -40,7 +43,7 @@ public abstract class Entity
         DeletedById = null;
     }
 
-    protected void AddDomainEvent(IDomainEvent eventItem)
+    public void AddDomainEvent(IDomainEvent eventItem)
     {
         _domainEvents.Add(eventItem);
     }
