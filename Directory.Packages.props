@@ -89,7 +89,6 @@
     <!-- ========================= -->
     <!-- OpenTelemetry Prometheus Exporter - LoadSimulator (.NET 8 compatible) -->
     <!-- ========================= -->
-    <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.8.0-rc.1" />
     <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.8.1" />
     <!-- ========================= -->
     <!-- Static Code Analysis -->

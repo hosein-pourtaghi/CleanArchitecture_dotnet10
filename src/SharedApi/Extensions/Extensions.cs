@@ -50,12 +50,11 @@ public static class Extensions
                 Predicate = r => r.Tags.Contains("live")
             });
 
-            // 10b. Health Checks Endpoint
-            app.MapHealthChecks("health", new HealthCheckOptions
+            // Detailed health check endpoint (UI-friendly response)
+            app.MapHealthChecks("/health-ui", new HealthCheckOptions
             {
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
-
         }
 
         return app;
