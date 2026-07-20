@@ -6,6 +6,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace WebApi;
 
@@ -50,65 +52,13 @@ public static class DependencyInjection
         // ============================================================
         services.AddSwaggerGen(options =>
         {
-            // Use full type name for schema IDs to avoid conflicts
-            options.CustomSchemaIds(id => id.FullName!.Replace('+', '-'));
-
-            //options.SwaggerDoc("v1", new OpenApiInfo
-            //{
-            //    Version = "v1",
-            //    Title = "WebApi",
-            //    Description = "My Project API",
-            //    // TermsOfService = new Uri("https://example.com/terms"),
-            //    // Contact = new OpenApiContact
-            //    // {
-            //    //     Name = "Development Team",
-            //    //     Url = new Uri("https://example.com")
-            //    // }
-            //});
-
-            //// Bearer Token Security Scheme
-            //// Allows entering JWT token in Swagger UI
-            //options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            //{
-            //    Type = SecuritySchemeType.Http,
-            //    Scheme = "Bearer",
-            //    BearerFormat = "JWT",
-            //    Description = "Enter your JWT token in the text field below.\n\n" +
-            //                  "Example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-            //    Name = "Authorization",
-            //    In = ParameterLocation.Header
-            //});
-
-            //// Apply Bearer security globally to all endpoints
-            //options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            //{
-            //    {
-            //        new OpenApiSecurityScheme
-            //        {
-            //            Reference = new OpenApiReference
-            //            {
-            //                Type = ReferenceType.SecurityScheme,
-            //                Id = "Bearer"
-            //            }
-            //        },
-            //        Array.Empty<string>()
-            //    }
-            //});
-
-            // Include XML documentation comments
-            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-            if (File.Exists(xmlPath))
-            {
-                options.IncludeXmlComments(xmlPath);
-            }
-
-            // Document all endpoints
-            options.DocInclusionPredicate((_, _) => true);
-
-            // Sort endpoints by route
-            options.OrderActionsBy(api => api.RelativePath);
+            ConfigureSwaggerDocument(options);
+            ConfigureSchemaIds(options);
+            ConfigureJwtAuthentication(options);
+            ConfigureXmlComments(options);
+            ConfigureOrdering(options);
         });
+
 
         // ============================================================
         // Controllers Configuration
@@ -145,6 +95,115 @@ public static class DependencyInjection
 
         return services;
     }
+
+
+
+
+
+    #region Swagger functions
+
+    private static void ConfigureSwaggerDocument(SwaggerGenOptions options)
+    {
+        options.SwaggerDoc("v1", new OpenApiInfo
+        {
+            Title = "Clean Architecture API",
+            Version = "v1",
+            Description =
+                "Enterprise-grade ASP.NET Core Web API built with Clean Architecture",
+            Contact = new OpenApiContact
+            {
+                Name = "Development Team"
+            }
+        });
+    }
+
+
+    private static void ConfigureSchemaIds(SwaggerGenOptions options)
+    {
+        // Prevent duplicate schema names:
+        // Example:
+        // User.Application.DTO.UserDto
+        // User.Domain.Entities.User
+
+        options.CustomSchemaIds(type =>
+        {
+            return type.FullName?
+                .Replace("+", ".")
+                .Replace("`1", "")
+                ??
+                type.Name;
+        });
+    }
+
+    private static void ConfigureJwtAuthentication(
+    SwaggerGenOptions options)
+    {
+        options.AddSecurityDefinition(
+            "Bearer",
+            new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description =
+                    """
+                JWT Authorization header.
+
+                Enter:
+                Bearer {your_token}
+                """
+            });
+
+
+        options.AddSecurityRequirement(document =>
+        new OpenApiSecurityRequirement
+        {
+          {
+              new OpenApiSecuritySchemeReference(
+                  "Bearer",
+                  document
+              ),
+              new List<string>()
+          }
+        });
+
+    }
+
+    private static void ConfigureXmlComments(
+        SwaggerGenOptions options)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+
+        var xmlFile =
+            $"{assembly.GetName().Name}.xml";
+
+        var xmlPath =
+            Path.Combine(
+                AppContext.BaseDirectory,
+                xmlFile);
+
+
+        if (File.Exists(xmlPath))
+        {
+            options.IncludeXmlComments(xmlPath);
+        }
+    }
+
+
+    private static void ConfigureOrdering(
+        SwaggerGenOptions options)
+    {
+        options.DocInclusionPredicate(
+            (_, _) => true);
+
+        options.OrderActionsBy(api =>
+            api.RelativePath ?? string.Empty);
+    }
+    #endregion
+
+
 
 }
 

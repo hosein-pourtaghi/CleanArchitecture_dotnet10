@@ -52,12 +52,7 @@ builder.Services.AddSignalR(options =>
     options.PayloadSerializerOptions.WriteIndented = builder.Environment.IsDevelopment();
 });
 
-
-
-
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-//builder.Services.AddOpenApi();
-
+ 
 // تنظیم Channel (محدود به 100 اعلان)
 builder.Services.AddSingleton<Channel<Notification>>(sp => Channel.CreateUnbounded<Notification>());
 

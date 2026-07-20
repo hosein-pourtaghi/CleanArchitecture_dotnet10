@@ -56,9 +56,9 @@
     <!-- ================================================= -->
     <!-- Swagger -->
     <!-- ================================================= -->
-    <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.6" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.10.0" />
-    <PackageVersion Include="Microsoft.OpenApi" Version="2.0.0" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.0.1" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.10.0" /> 
+	  
     <!-- ================================================= -->
     <!-- Logging -->
     <!-- ================================================= -->
