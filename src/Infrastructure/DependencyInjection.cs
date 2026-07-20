@@ -14,7 +14,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using SharedKernel.LoggingCore.Interceptors;
 using SharedKernel.Shared;
 
 namespace Infrastructure;
@@ -55,7 +54,7 @@ public static class DependencyInjection
 
         // Base repository implementation
         services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
-         
+
         // Domain events dispatcher
         services.AddScoped<IDomainEventsDispatcher, DomainEventsDispatcher>();
 
@@ -105,8 +104,8 @@ public static class DependencyInjection
                 });
 
                 // Add query logging interceptor
-                options.AddInterceptors(
-                    serviceProvider.GetRequiredService<QueryLoggingInterceptor>());
+                //options.AddInterceptors(
+                //    serviceProvider.GetRequiredService<QueryLoggingInterceptor>());
 
                 // Development-only options (remove in production)
                 options.EnableSensitiveDataLogging();
@@ -118,7 +117,7 @@ public static class DependencyInjection
             sp => sp.GetRequiredService<ApplicationDbContext>());
 
         // Register query logging interceptor
-        services.AddScoped<QueryLoggingInterceptor>();
+        //services.AddScoped<QueryLoggingInterceptor>();
 
         return services;
     }

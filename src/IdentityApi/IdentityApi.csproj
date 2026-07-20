@@ -24,6 +24,9 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
 	  
+	  <PackageVersion Include="Serilog"  />
+	  <PackageVersion Include="Serilog.Sinks.Console" />
+	  
   </ItemGroup>
 
   <ItemGroup>
