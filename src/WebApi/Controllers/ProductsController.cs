@@ -1,11 +1,11 @@
-﻿using Application.Common.DTOs;
-using Application.Common.DTOs.Shared;
-using Application.Common.Messaging;
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿//using Application.Common.DTOs;
+//using Application.Common.DTOs.Shared;
+//using Application.Common.Messaging;
+//using MediatR;
+//using Microsoft.AspNetCore.Authorization;
+//using Microsoft.AspNetCore.Mvc;
 
-namespace WebApi.Controllers;
+//namespace WebApi.Controllers;
 
 //[Area("Product")]
 //[Route("api/[controller]")]

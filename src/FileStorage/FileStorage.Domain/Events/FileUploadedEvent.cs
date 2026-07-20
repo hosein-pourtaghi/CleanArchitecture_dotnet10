@@ -1,5 +1,6 @@
 ﻿// FileStorage.Domain/Events/FileUploadedEvent.cs
 using SharedKernel;
+using SharedKernel.Messaging;
 
 namespace FileStorage.Domain.Events;
 

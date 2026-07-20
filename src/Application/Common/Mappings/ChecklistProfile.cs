@@ -1,40 +1,40 @@
-using Application.Checklists.Create;
-using Application.Checklists.Update;
-using AutoMapper;
-using Domain.Aggregates.Checklists;
-using Application.Common.DTOs.Checklists;
+//using Application.Checklists.Create;
+//using Application.Checklists.Update;
+//using AutoMapper;
+//using Domain.Aggregates.Checklists;
+//using Application.Common.DTOs.Checklists;
 
-namespace Application.Common.Mappings;
+//namespace Application.Common.Mappings;
 
-public class ChecklistProfile : Profile
-{
-    public ChecklistProfile()
-    {
+//public class ChecklistProfile : Profile
+//{
+//    public ChecklistProfile()
+//    {
 
-        CreateMap<Checklist, ChecklistDto>()
-            ;
-        CreateMap<CreateChecklistCommand, Checklist>()
-            ;
-        CreateMap<UpdateChecklistCommand, Checklist>()
-            .ForMember(dest => dest.IsActive, opt => opt.Ignore())
-            .ForMember(dest => dest.Version, opt => opt.Ignore())
-            .ForMember(dest => dest.LastModified, opt => opt.Ignore())
-            .ForMember(dest => dest.IsValid, opt => opt.Ignore())
-            ;
+//        CreateMap<Checklist, ChecklistDto>()
+//            ;
+//        CreateMap<CreateChecklistCommand, Checklist>()
+//            ;
+//        CreateMap<UpdateChecklistCommand, Checklist>()
+//            .ForMember(dest => dest.IsActive, opt => opt.Ignore())
+//            .ForMember(dest => dest.Version, opt => opt.Ignore())
+//            .ForMember(dest => dest.LastModified, opt => opt.Ignore())
+//            .ForMember(dest => dest.IsValid, opt => opt.Ignore())
+//            ;
 
-        CreateMap<ChecklistGroupDto, ChecklistGroup>()
-            .ForMember(dest => dest.Checklist, opt => opt.Ignore())
-            .ForMember(dest => dest.Parent, opt => opt.Ignore())
-            .ReverseMap()
-            ;
-        CreateMap<ChecklistQuestionDto, ChecklistQuestion>()
-            .ForMember(dest => dest.Group, opt => opt.Ignore())
-            .ReverseMap()
-            ;
-        CreateMap<ChecklistQuestionOption, ChecklistQuestionOptionDto>()
-            .ReverseMap()
-            ; 
+//        CreateMap<ChecklistGroupDto, ChecklistGroup>()
+//            .ForMember(dest => dest.Checklist, opt => opt.Ignore())
+//            .ForMember(dest => dest.Parent, opt => opt.Ignore())
+//            .ReverseMap()
+//            ;
+//        CreateMap<ChecklistQuestionDto, ChecklistQuestion>()
+//            .ForMember(dest => dest.Group, opt => opt.Ignore())
+//            .ReverseMap()
+//            ;
+//        CreateMap<ChecklistQuestionOption, ChecklistQuestionOptionDto>()
+//            .ReverseMap()
+//            ; 
 
-    }
-}
+//    }
+//}
 

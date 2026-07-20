@@ -6,7 +6,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 
 namespace WebApi;
 
@@ -126,7 +125,7 @@ public static class DependencyInjection
         {
             // Serialize enums as strings for better readability
             options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-             
+
             // Convert property names to camelCase
             options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             // Also convert dictionary keys
