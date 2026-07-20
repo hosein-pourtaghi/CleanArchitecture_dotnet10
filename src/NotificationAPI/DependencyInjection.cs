@@ -1,7 +1,4 @@
-﻿using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.SwaggerGen;
-
-namespace NotificationAPI;
+﻿namespace NotificationAPI;
 
 public static class DependencyInjection
 {
@@ -74,7 +71,7 @@ public static class DependencyInjection
         services.AddControllers();
 
         services.AddProblemDetails();
-         
+
 
         return services;
     }

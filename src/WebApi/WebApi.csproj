@@ -16,9 +16,8 @@
 	  
 	  <!-- API Documentation -->
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
-    <PackageReference Include="Scrutor" />
 	<PackageReference Include="Swashbuckle.AspNetCore" />
-
+    <PackageReference Include="Scrutor" /> 
 
 	  <!-- EF Core Tools (for migrations) -->
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
