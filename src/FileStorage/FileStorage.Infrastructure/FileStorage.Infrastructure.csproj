@@ -8,8 +8,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" /> 
 		<PackageReference Include="SixLabors.ImageSharp" /> 
 	</ItemGroup>
 
