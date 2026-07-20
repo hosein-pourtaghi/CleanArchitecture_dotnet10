@@ -1,8 +1,6 @@
 ﻿using System.Data;
 using System.Linq.Expressions;
 using Application.Common.Interfaces.Core;
-using Domain.Aggregates.Assessments;
-using Domain.Aggregates.Checklists;
 using IdentityApi.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -11,6 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using SharedKernel;
 using SharedKernel.BaseEntities;
 using SharedKernel.Shared;
+using SharedKernel.Messaging;
 
 namespace Infrastructure.Persistence;
 
@@ -41,8 +40,8 @@ public sealed class ApplicationDbContext : DbContext, IApplicationDbContext
 
 
     #region DbSets  
-    public DbSet<Checklist> Checklists => Set<Checklist>();
-    public DbSet<Assessment> Assessments => Set<Assessment>();
+    //public DbSet<Checklist> Checklists => Set<Checklist>();
+    //public DbSet<Assessment> Assessments => Set<Assessment>();
     #endregion
 
 

@@ -8,6 +8,7 @@ using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel;
 using SharedKernel.MediatRCore.Behaviors;
+using SharedKernel.Messaging;
 
 namespace Application;
 

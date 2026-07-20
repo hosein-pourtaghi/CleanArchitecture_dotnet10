@@ -1,6 +1,9 @@
 ﻿// Infrastructure/Messaging/DomainEventChannel.cs
 using System.Threading.Channels;
 using Microsoft.Extensions.Logging;
+using Application.Common.Interfaces;
+using Application.Common.DTOs.Notifications;
+
 
 namespace Infrastructure.Messaging;
 /// <summary>

@@ -24,6 +24,7 @@
   <ItemGroup>
     <Folder Include="Common\Behaviors\" />
     <Folder Include="Common\DTOs\Shared\" />
+    <Folder Include="Common\Interfaces\Checklists\" />
     <Folder Include="Common\Models\" />
   </ItemGroup>
  

@@ -1,8 +1,5 @@
-using IdentityApi.Infrastructure.Authorization;
-using IdentityApi.Infrastructure.Persistence;
 using Infrastructure;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Serilog;
 using SharedKernel.LoggingCore.DependencyInjection;
 
@@ -46,39 +43,39 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "Identity API",
-        Version = "v1",
-        Description = "Authentication & Authorization API"
-    });
+    //options.SwaggerDoc("v1", new OpenApiInfo
+    //{
+    //    Title = "Identity API",
+    //    Version = "v1",
+    //    Description = "Authentication & Authorization API"
+    //});
 
-    // JWT Bearer authentication in Swagger
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Enter your JWT token"
-    });
+    //// JWT Bearer authentication in Swagger
+    //options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    //{
+    //    Name = "Authorization",
+    //    Type = SecuritySchemeType.Http,
+    //    Scheme = "bearer",
+    //    BearerFormat = "JWT",
+    //    In = ParameterLocation.Header,
+    //    Description = "Enter your JWT token"
+    //});
 
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-}); 
+    //options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    //{
+    //    {
+    //        new OpenApiSecurityScheme
+    //        {
+    //            Reference = new OpenApiReference
+    //            {
+    //                Type = ReferenceType.SecurityScheme,
+    //                Id = "Bearer"
+    //            }
+    //        },
+    //        Array.Empty<string>()
+    //    }
+    //});
+});
 
 // ============================================
 // 7. Add CORS (if needed)
@@ -123,10 +120,10 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 
- 
+
 // Discover and register authorization policies
 await app.RegisterAuthorizationPolicies();
- 
+
 
 // CORS (if enabled)
 app.UseCors("AllowAngularApp");

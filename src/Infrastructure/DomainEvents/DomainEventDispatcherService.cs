@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Application.Common.DTOs.Notifications;
 using Application.Common.Interfaces;
+using Infrastructure.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

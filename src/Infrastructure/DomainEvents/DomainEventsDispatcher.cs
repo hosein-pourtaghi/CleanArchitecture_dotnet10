@@ -2,6 +2,7 @@
 using Application.Common.Interfaces.Core;
 using Application.Common.Messaging;
 using Microsoft.Extensions.DependencyInjection;
+using SharedKernel.Messaging;
 
 namespace Infrastructure.DomainEvents;
 

@@ -1,7 +1,8 @@
 ﻿// NotificationApi.Api/Hubs/NotificationHub.cs
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
- 
+using NotificationAPI.Services;
+
 namespace NotificationAPI.Hubs;
 
 /// <summary>

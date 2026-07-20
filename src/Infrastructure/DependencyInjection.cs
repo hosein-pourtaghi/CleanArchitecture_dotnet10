@@ -3,12 +3,10 @@
 // PURPOSE: Infrastructure layer dependency injection configuration
 // ============================================================
 
-using Application.Common.Interfaces.Checklists;
 using Application.Common.Interfaces.Core;
 //using Infrastructure.Authorization;
 using Infrastructure.DomainEvents;
 using Infrastructure.Persistence;
-using Infrastructure.Repositories;
 using Infrastructure.Repositories.Core;
 //using Infrastructure.Services.Identities;
 using Microsoft.EntityFrameworkCore;
@@ -38,7 +36,7 @@ public static class DependencyInjection
         services
             .AddServices(configuration)
             .AddDatabase(configuration)
-            .AddHealthChecks(configuration) 
+            .AddHealthChecks(configuration)
             ;
 
     /// <summary>
@@ -57,10 +55,7 @@ public static class DependencyInjection
 
         // Base repository implementation
         services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
-
-        // Checklist repository
-        services.AddScoped<IChecklistRepository, ChecklistRepository>();
-
+         
         // Domain events dispatcher
         services.AddScoped<IDomainEventsDispatcher, DomainEventsDispatcher>();
 
@@ -124,7 +119,7 @@ public static class DependencyInjection
 
         // Register query logging interceptor
         services.AddScoped<QueryLoggingInterceptor>();
-         
+
         return services;
     }
 
@@ -155,6 +150,6 @@ public static class DependencyInjection
 
         return services;
     }
-     
+
 
 }

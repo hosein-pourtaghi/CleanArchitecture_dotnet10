@@ -8,29 +8,29 @@ public static class DependencyInjection
         services.AddSwaggerGen(options =>
        {
            options.CustomSchemaIds(id => id.FullName!.Replace('+', '-'));
-           options.SwaggerDoc("v1", new OpenApiInfo
-           {
-               Version = "v1",
-               Title = "WebApi",
-               Description = "HSE project",
-               //    TermsOfService = new Uri("https://my.msc.com"),
-               //    Contact = new OpenApiContact
-               //    {
-               //        Name = "MSC TEAM",
-               //        Url = new Uri("https://msc.com/")
-               //    }
-           });
+           //options.SwaggerDoc("v1", new OpenApiInfo
+           //{
+           //    Version = "v1",
+           //    Title = "WebApi",
+           //    Description = "HSE project",
+           //    //    TermsOfService = new Uri("https://my.msc.com"),
+           //    //    Contact = new OpenApiContact
+           //    //    {
+           //    //        Name = "MSC TEAM",
+           //    //        Url = new Uri("https://msc.com/")
+           //    //    }
+           //});
 
-           options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-           {
-               Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
-                      Enter 'Bearer' [space] and then your token in the text input below.
-                      \r\n\r\nExample: 'Bearer 12345abcdef'",
-               Name = "Authorization",
-               In = ParameterLocation.Header,
-               Type = SecuritySchemeType.Http,
-               Scheme = "Bearer"
-           });
+           //options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+           //{
+           //    Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
+           //           Enter 'Bearer' [space] and then your token in the text input below.
+           //           \r\n\r\nExample: 'Bearer 12345abcdef'",
+           //    Name = "Authorization",
+           //    In = ParameterLocation.Header,
+           //    Type = SecuritySchemeType.Http,
+           //    Scheme = "Bearer"
+           //});
 
            //options.AddSecurityRequirement(new OpenApiSecurityRequirement()
            //{     

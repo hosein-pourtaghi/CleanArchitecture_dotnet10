@@ -1,8 +1,6 @@
 // FileStorage.Api/Program.cs
 using FileStorage.Api.Extensions;
 using FileStorage.Api.Middleware;
-using Microsoft.AspNetCore.ResponseCompression;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,12 +9,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "File Storage API",
-        Version = "v1",
-        Description = "Comprehensive file storage and management API"
-    });
+    //c.SwaggerDoc("v1", new OpenApiInfo
+    //{
+    //    Title = "File Storage API",
+    //    Version = "v1",
+    //    Description = "Comprehensive file storage and management API"
+    //});
 });
 
 // Add HTTP context accessor
@@ -29,8 +27,8 @@ builder.Services.AddFileStorageServices(builder.Configuration);
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
-    options.Providers.Add<GzipCompressionProvider>();
-    options.Providers.Add<BrotliCompressionProvider>();
+    //options.Providers.Add<GzipCompressionProvider>();
+    //options.Providers.Add<BrotliCompressionProvider>();
 });
 
 // Add caching

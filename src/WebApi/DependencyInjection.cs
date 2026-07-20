@@ -53,47 +53,47 @@ public static class DependencyInjection
             // Use full type name for schema IDs to avoid conflicts
             options.CustomSchemaIds(id => id.FullName!.Replace('+', '-'));
 
-            options.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Version = "v1",
-                Title = "WebApi",
-                Description = "My Project API",
-                // TermsOfService = new Uri("https://example.com/terms"),
-                // Contact = new OpenApiContact
-                // {
-                //     Name = "Development Team",
-                //     Url = new Uri("https://example.com")
-                // }
-            });
+            //options.SwaggerDoc("v1", new OpenApiInfo
+            //{
+            //    Version = "v1",
+            //    Title = "WebApi",
+            //    Description = "My Project API",
+            //    // TermsOfService = new Uri("https://example.com/terms"),
+            //    // Contact = new OpenApiContact
+            //    // {
+            //    //     Name = "Development Team",
+            //    //     Url = new Uri("https://example.com")
+            //    // }
+            //});
 
-            // Bearer Token Security Scheme
-            // Allows entering JWT token in Swagger UI
-            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Type = SecuritySchemeType.Http,
-                Scheme = "Bearer",
-                BearerFormat = "JWT",
-                Description = "Enter your JWT token in the text field below.\n\n" +
-                              "Example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                Name = "Authorization",
-                In = ParameterLocation.Header
-            });
+            //// Bearer Token Security Scheme
+            //// Allows entering JWT token in Swagger UI
+            //options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            //{
+            //    Type = SecuritySchemeType.Http,
+            //    Scheme = "Bearer",
+            //    BearerFormat = "JWT",
+            //    Description = "Enter your JWT token in the text field below.\n\n" +
+            //                  "Example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            //    Name = "Authorization",
+            //    In = ParameterLocation.Header
+            //});
 
-            // Apply Bearer security globally to all endpoints
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
-                }
-            });
+            //// Apply Bearer security globally to all endpoints
+            //options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            //{
+            //    {
+            //        new OpenApiSecurityScheme
+            //        {
+            //            Reference = new OpenApiReference
+            //            {
+            //                Type = ReferenceType.SecurityScheme,
+            //                Id = "Bearer"
+            //            }
+            //        },
+            //        Array.Empty<string>()
+            //    }
+            //});
 
             // Include XML documentation comments
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";

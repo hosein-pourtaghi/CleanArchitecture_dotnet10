@@ -1,5 +1,7 @@
 ﻿// NotificationApi.Api/Services/NotificationService.cs
 using Microsoft.AspNetCore.SignalR;
+using NotificationAPI.Dtos;
+using NotificationAPI.Hubs;
 
 namespace NotificationAPI.Services;
 

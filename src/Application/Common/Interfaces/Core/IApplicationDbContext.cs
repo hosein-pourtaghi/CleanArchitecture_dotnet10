@@ -1,6 +1,4 @@
 ﻿using System.Data;
-using Domain.Aggregates.Assessments;
-using Domain.Aggregates.Checklists;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -12,8 +10,8 @@ public interface IApplicationDbContext
 {
 
     #region DbSets 
-    DbSet<Checklist> Checklists { get; }
-    DbSet<Assessment> Assessments { get; }
+    //DbSet<Checklist> Checklists { get; }
+    //DbSet<Assessment> Assessments { get; }
 
 
     // Add other DbSets here
@@ -26,6 +24,7 @@ public interface IApplicationDbContext
     /// </summary>
     DatabaseFacade Database { get; }
     #endregion
+
 
     #region Save Changes
     /// <summary>
