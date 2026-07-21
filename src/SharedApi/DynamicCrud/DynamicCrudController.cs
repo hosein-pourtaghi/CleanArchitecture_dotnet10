@@ -3,10 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SharedKernel.DynamicCrud;
 using Application.Common.DynamicCrud.Commands;
 using Application.Common.DynamicCrud.Queries;
-using SharedApi.Controllers;
-
-
-namespace SharedApi.DynamicCrud;
+namespace SharedApi.Controllers;
 
 
 [Route("[controller]")]

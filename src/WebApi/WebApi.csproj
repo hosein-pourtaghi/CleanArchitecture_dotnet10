@@ -24,13 +24,11 @@
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <!-- Docker Support -->
-	  <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
+	<!-- Docker Support (removed to avoid Aspire/VS targets issues) -->
 
-
-	  <!-- Aspire -->
-	  <PackageReference Include="Aspire.Hosting" />
-	  <PackageReference Include="Aspire.Hosting.AppHost" />
+  <!-- Serilog (used directly in Program.cs) -->
+  <PackageReference Include="Serilog" />
+  <PackageReference Include="Serilog.AspNetCore" />
 	  
   </ItemGroup>
  
@@ -39,6 +37,8 @@
     <ProjectReference Include="..\IdentityApi\IdentityApi.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\SharedApi\SharedApi.csproj" />
+	  <ProjectReference Include="..\Application\Application.csproj" />
+	<ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
   </ItemGroup>
  
 </Project>
