@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Reflection.Emit;
 using Microsoft.Extensions.DependencyInjection;
+using Application.Common.Messaging;
 
 
 namespace Application.Common.DynamicCrud;
@@ -30,7 +31,7 @@ internal static class DynamicCrudRequestGenerator
     {
 
         CreateCommand(entityType);
-        GetQuery(entityType);
+        //GetQuery(entityType);
 
     }
 
