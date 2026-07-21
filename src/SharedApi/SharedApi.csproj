@@ -6,6 +6,15 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Filters\**" />
+    <Compile Remove="Middleware\**" />
+    <EmbeddedResource Remove="Filters\**" />
+    <EmbeddedResource Remove="Middleware\**" />
+    <None Remove="Filters\**" />
+    <None Remove="Middleware\**" />
+  </ItemGroup>
+
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 
@@ -20,11 +29,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
 	</ItemGroup>
-
-	<ItemGroup>
-    <Folder Include="Filters\" />
-    <Folder Include="Middleware\" />
-  </ItemGroup>
 
 </Project>
 

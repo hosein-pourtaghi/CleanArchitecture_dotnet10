@@ -6,8 +6,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using SharedApi.DynamicCrud;
 
 namespace WebApi;
 
@@ -84,7 +83,11 @@ public static class DependencyInjection
             options.JsonSerializerOptions.WriteIndented = false;
 
         })
-        .AddControllersAsServices();
+        .AddControllersAsServices() 
+        ;
+
+
+        services.AddDynamicCrud();
 
         // Custom model binders (commented out - uncomment if needed)
         // services.AddSingleton<IModelBinderProvider, GenericFilterModelBinderProvider>();
