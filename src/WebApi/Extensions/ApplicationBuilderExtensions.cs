@@ -13,6 +13,8 @@ public static class ApplicationBuilderExtensions
     /// <returns>The application builder instance for chaining.</returns>
     public static IApplicationBuilder UseSwaggerWithUi(this WebApplication app)
     {
+        app.UseStaticFiles();
+
         // Enable Swagger middleware
         app.UseSwagger(options =>
         {
