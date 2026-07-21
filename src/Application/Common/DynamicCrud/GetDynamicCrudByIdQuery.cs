@@ -1,10 +1,10 @@
 ﻿using MediatR;
 using SharedKernel;
 
-namespace Application.Common.DynamicCrud;
+namespace Application.Common.DynamicCrud.Queries;
 
 
-public sealed record DynamicGetByIdQuery<TEntity>(
+public sealed record GetDynamicCrudByIdQuery<TEntity>(
     Guid Id
 )
     : IRequest<Result<TEntity>>

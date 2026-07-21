@@ -1,10 +1,9 @@
 ﻿using MediatR;
 using SharedKernel;
 
-namespace Application.Common.DynamicCrud;
+namespace Application.Common.DynamicCrud.Commands;
 
-
-public sealed record DynamicUpdateCommand<TEntity>(
+public sealed record UpdateDynamicCrudCommand<TEntity>(
     Guid Id,
     TEntity Entity
 )

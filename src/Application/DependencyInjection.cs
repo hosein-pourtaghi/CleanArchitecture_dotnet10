@@ -4,9 +4,9 @@
 // ============================================================
 
 using System.Reflection;
+using Application.Common.DynamicCrud;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using SharedKernel;
 using SharedKernel.MediatRCore.Behaviors;
 using SharedKernel.Messaging;
 
@@ -38,6 +38,9 @@ public static class DependencyInjection
             config.AddOpenBehavior(typeof(ValidationBehavior<,>));
 
         });
+
+        services.AddDynamicCrudApplication(typeof(Domain.AssemblyReference).Assembly);
+
 
         // Add FluentValidation validators from this assembly
         // includeInternalTypes: true - includes internal validators

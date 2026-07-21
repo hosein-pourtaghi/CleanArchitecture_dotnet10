@@ -1,10 +1,9 @@
 ﻿using MediatR;
 using SharedKernel;
 
-namespace Application.Common.DynamicCrud;
+namespace Application.Common.DynamicCrud.Commands;
 
-
-public sealed record DynamicCreateCommand<TEntity>(
+public sealed record CreateDynamicCrudCommand<TEntity>(
     TEntity Entity
 )
     : IRequest<Result<TEntity>>

@@ -1,10 +1,12 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SharedKernel.DynamicCrud;
-using Application.Common.DynamicCrud;
+using Application.Common.DynamicCrud.Commands;
+using Application.Common.DynamicCrud.Queries;
+using SharedApi.Controllers;
 
 
-namespace SharedApi.Controllers;
+namespace SharedApi.DynamicCrud;
 
 
 [Route("[controller]")]
@@ -24,6 +26,10 @@ public abstract class DynamicCrudController<TEntity>
 
 
 
+    // ============================================================
+    // GET ALL
+    // ============================================================
+
     [HttpGet]
     public async Task<IActionResult> GetAll(
         CancellationToken cancellationToken)
@@ -31,7 +37,7 @@ public abstract class DynamicCrudController<TEntity>
 
         var result =
             await _mediator.Send(
-                new DynamicGetAllQuery<TEntity>(),
+                new GetDynamicCrudListQuery<TEntity>(),
                 cancellationToken);
 
 
@@ -39,6 +45,10 @@ public abstract class DynamicCrudController<TEntity>
     }
 
 
+
+    // ============================================================
+    // GET BY ID
+    // ============================================================
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(
@@ -48,7 +58,7 @@ public abstract class DynamicCrudController<TEntity>
 
         var result =
             await _mediator.Send(
-                new DynamicGetByIdQuery<TEntity>(id),
+                new GetDynamicCrudByIdQuery<TEntity>(id),
                 cancellationToken);
 
 
@@ -56,6 +66,10 @@ public abstract class DynamicCrudController<TEntity>
     }
 
 
+
+    // ============================================================
+    // CREATE
+    // ============================================================
 
     [HttpPost]
     public async Task<IActionResult> Create(
@@ -65,7 +79,8 @@ public abstract class DynamicCrudController<TEntity>
 
         var result =
             await _mediator.Send(
-                new DynamicCreateCommand<TEntity>(entity),
+                new CreateDynamicCrudCommand<TEntity>(
+                    entity),
                 cancellationToken);
 
 
@@ -76,6 +91,10 @@ public abstract class DynamicCrudController<TEntity>
 
 
 
+    // ============================================================
+    // UPDATE
+    // ============================================================
+
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(
         Guid id,
@@ -85,7 +104,7 @@ public abstract class DynamicCrudController<TEntity>
 
         var result =
             await _mediator.Send(
-                new DynamicUpdateCommand<TEntity>(
+                new UpdateDynamicCrudCommand<TEntity>(
                     id,
                     entity),
                 cancellationToken);
@@ -96,6 +115,10 @@ public abstract class DynamicCrudController<TEntity>
 
 
 
+    // ============================================================
+    // DELETE
+    // ============================================================
+
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(
         Guid id,
@@ -104,7 +127,8 @@ public abstract class DynamicCrudController<TEntity>
 
         var result =
             await _mediator.Send(
-                new DynamicDeleteCommand<TEntity>(id),
+                new DeleteDynamicCrudCommand<TEntity>(
+                    id),
                 cancellationToken);
 
 

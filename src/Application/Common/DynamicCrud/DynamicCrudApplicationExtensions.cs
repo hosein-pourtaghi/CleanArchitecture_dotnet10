@@ -1,38 +1,64 @@
 ﻿using System.Reflection;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel.DynamicCrud;
+using Application.Common.DynamicCrud.Handlers;
+
 
 namespace Application.Common.DynamicCrud;
 
 
 public static class DynamicCrudApplicationExtensions
 {
+
     public static IServiceCollection AddDynamicCrudApplication(
         this IServiceCollection services,
-        params Assembly[] assemblies)
+        Assembly domainAssembly)
     {
 
-        var entities = assemblies
-            .SelectMany(x => x.GetTypes())
+        var entities =
+            domainAssembly.GetTypes()
             .Where(x =>
                 typeof(IDynamicCrudEntity)
-                    .IsAssignableFrom(x)
+                .IsAssignableFrom(x)
                 &&
                 x.IsClass
                 &&
-                !x.IsAbstract)
-            .ToList();
+                !x.IsAbstract);
 
 
 
         foreach (var entity in entities)
         {
-            DynamicCrudRequestGenerator
-                .Register(entity, services);
+
+            services.AddTransient(
+                typeof(IRequestHandler<,>),
+                typeof(CreateDynamicCrudCommandHandler<>)
+                    .MakeGenericType(entity));
 
 
-            DynamicCrudHandlerGenerator
-                .Register(entity, services);
+            services.AddTransient(
+                typeof(IRequestHandler<,>),
+                typeof(UpdateDynamicCrudCommandHandler<>)
+                    .MakeGenericType(entity));
+
+
+            services.AddTransient(
+                typeof(IRequestHandler<,>),
+                typeof(DeleteDynamicCrudCommandHandler<>)
+                    .MakeGenericType(entity));
+
+
+            services.AddTransient(
+                typeof(IRequestHandler<,>),
+                typeof(GetDynamicCrudByIdQueryHandler<>)
+                    .MakeGenericType(entity));
+
+
+            services.AddTransient(
+                typeof(IRequestHandler<,>),
+                typeof(GetDynamicCrudListQueryHandler<>)
+                    .MakeGenericType(entity));
         }
 
 
