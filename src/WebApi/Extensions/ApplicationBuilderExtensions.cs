@@ -22,6 +22,9 @@ public static class ApplicationBuilderExtensions
         // Enable Swagger UI
         app.UseSwaggerUI(options =>
         {
+            // dark theme
+            options.InjectStylesheet("/swagger-ui/dark.css");
+
             options.SwaggerEndpoint("/swagger/v1/swagger.json", "CleanArchitecture API v1");
             options.RoutePrefix = "swagger";
             

@@ -12,8 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using SharedKernel.LoggingCore.DependencyInjection;
-using SharedKernel.LoggingCore.Interceptors;
+using SharedKernel.LoggingCore.DependencyInjection; 
 using SharedKernel.Shared;
 
 namespace Infrastructure;
@@ -113,8 +112,7 @@ public static class DependencyInjection
                 });
 
                 // Add query logging interceptor
-                options.AddInterceptors(
-                    serviceProvider.GetRequiredService<QueryLoggingInterceptor>());
+                //options.AddInterceptors(serviceProvider.GetRequiredService<QueryLoggingInterceptor>());
 
                 // Development-only options (remove in production)
                 options.EnableSensitiveDataLogging();
@@ -125,8 +123,8 @@ public static class DependencyInjection
         services.AddScoped<IMyIdentityDbContext>(
             sp => sp.GetRequiredService<MyIdentityDbContext>());
 
-        // Register query logging interceptor
-        services.AddScoped<QueryLoggingInterceptor>();
+        //// Register query logging interceptor
+        //services.AddScoped<QueryLoggingInterceptor>();
 
         // Configure ASP.NET Core Identity
         services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
