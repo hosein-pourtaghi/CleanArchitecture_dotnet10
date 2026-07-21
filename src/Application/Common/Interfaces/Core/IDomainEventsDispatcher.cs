@@ -1,5 +1,4 @@
-﻿using Application.Common.Messaging;
-using SharedKernel.Messaging;
+﻿using SharedKernel.Messaging;
 
 namespace Application.Common.Interfaces.Core;
 

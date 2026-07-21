@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Reflection.Emit;
 using Microsoft.Extensions.DependencyInjection;
-using Application.Common.Messaging;
 
 
 namespace Application.Common.DynamicCrud;
@@ -55,7 +54,7 @@ internal static class DynamicCrudRequestGenerator
 
         typeBuilder
             .AddInterfaceImplementation(
-                typeof(IRequest<>)
+                typeof(MediatR.IRequest<>)
                 .MakeGenericType(entityType));
 
 

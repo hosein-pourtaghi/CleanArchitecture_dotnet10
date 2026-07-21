@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 using Application.Common.DynamicCrud.Commands;
+using Application.Common.Interfaces.Core;
 
 namespace Application.Common.DynamicCrud.Handlers;
 
@@ -14,11 +15,11 @@ public sealed class CreateDynamicCrudCommandHandler<TEntity>
     where TEntity : class
 {
 
-    private readonly DbContext _db;
+    private readonly IApplicationDbContext _db;
 
 
     public CreateDynamicCrudCommandHandler(
-        DbContext db)
+        IApplicationDbContext db)
     {
         _db = db;
     }

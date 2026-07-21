@@ -1,7 +1,8 @@
-﻿using MediatR;
+﻿using Application.Common.DynamicCrud.Queries;
+using Application.Common.Interfaces.Core;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
-using Application.Common.DynamicCrud.Queries;
 
 
 namespace Application.Common.DynamicCrud.Handlers;
@@ -15,11 +16,11 @@ IRequestHandler<
 where TEntity : class
 {
 
-    private readonly DbContext _db;
+    private readonly IApplicationDbContext _db;
 
 
     public GetDynamicCrudByIdQueryHandler(
-        DbContext db)
+        IApplicationDbContext db)
     {
         _db = db;
     }
