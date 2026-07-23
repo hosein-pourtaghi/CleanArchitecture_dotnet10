@@ -6,7 +6,9 @@ using Application.Common.DynamicCrud.Queries;
 namespace SharedApi.Controllers;
 
 
-[Route("[controller]")]
+//[Route("[controller]")]
+//[ApiController]
+[Route("api/[controller]")]
 public abstract class DynamicCrudController<TEntity>
     : ApiController
     where TEntity : class, IDynamicCrudEntity

@@ -46,7 +46,7 @@ where TEntity : class
                     "Entity not found"));
 
 
-        _db.Remove(entity);
+        //_db.Remove(entity);
 
 
         await _db.SaveChangesAsync(
